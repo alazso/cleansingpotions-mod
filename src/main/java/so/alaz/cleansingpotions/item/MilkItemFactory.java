@@ -25,7 +25,7 @@ public final class MilkItemFactory {
         stack.set(DataComponents.CUSTOM_NAME, name(variant, mode));
         stack.set(DataComponents.LORE, lore(mode));
         stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(
-            List.of(), List.of(), List.of(), List.of(CleansingConfig.get().color(mode))));
+            List.of(), List.of(), List.of(), List.of(0xFF000000 | CleansingConfig.get().color(mode))));
         return stack;
     }
 

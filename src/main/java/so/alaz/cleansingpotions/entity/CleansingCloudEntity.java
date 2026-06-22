@@ -41,7 +41,8 @@ public class CleansingCloudEntity extends AreaEffectCloud {
         setRadiusPerTick(-radius / (float) DURATION_TICKS);
         // A harmless water potion keeps the base cloud alive while it applies nothing of its own.
         setPotionContents(new PotionContents(Potions.WATER));
-        setCustomParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, color));
+        // Entity-effect particles need an opaque color, or they render fully transparent.
+        setCustomParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color));
     }
 
     @Override

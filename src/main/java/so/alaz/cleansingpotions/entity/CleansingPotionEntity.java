@@ -56,7 +56,7 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
                 spawnCloud(server, mode, color);
             } else {
                 applySplash(mode);
-                server.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, color),
+                server.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color),
                     getX(), getY(), getZ(), 30, 0.3, 0.3, 0.3, 0.0);
             }
         }
