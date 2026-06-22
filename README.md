@@ -1,12 +1,17 @@
 # Cleansing Potions
 
-Milk already cures every status effect. It is just clumsy: you have to drink it, it wipes your buffs
-along with everything else, and you can never hand it to someone across a fight. Cleansing Potions
-takes that bucket and turns it into something you can brew, bottle, throw, and aim.
+We already know Milk cures all when you drink it. But while you're in a fight, you can use a Splash Bottle of Purging on an enemy to remove all of their good effects, like regeneration or strength. Want to remove only good effects? Drink a Potion of Soothing. And for both, you can simply use a Potion of Cleansing which removes everything. This gives you the ability midfight to handle status effects and get back in.
+
+[![Build](https://img.shields.io/github/actions/workflow/status/alazso/cleansingpotions-mod/ci.yml?branch=main&style=for-the-badge&label=build)](https://github.com/alazso/cleansingpotions-mod/actions)
+[![Total downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Ffaststats.dev%2Fapi%2Fshields%2Fcleansingpotions-mod%3Fmetric%3Ddownloads&style=for-the-badge)](https://faststats.dev/project/cleansingpotions-mod)
+[![License](https://img.shields.io/badge/license-MIT-2b2d31?style=for-the-badge)](https://github.com/alazso/cleansingpotions-mod/blob/main/LICENSE)
+
+[![Source](https://img.shields.io/badge/Source-0f0f0f?style=for-the-badge&logo=github&logoColor=white)](https://github.com/alazso/cleansingpotions-mod)
+[![Support Discord](https://img.shields.io/discord/1510890328943628350?style=for-the-badge&logo=discord&logoColor=white&label=discord&color=5865F2)](https://discord.gg/m3AKQfrMS5)
 
 ![Minecraft](https://img.shields.io/badge/Minecraft-1.21.9%20–%2026.2-blue)
 ![Loaders](https://img.shields.io/badge/loader-Fabric%20%7C%20NeoForge-green)
-![Downloads](https://img.shields.io/modrinth/dt/gZfP9OGb?label=downloads&color=00AF5C)
+[![Total downloads](https://img.shields.io/endpoint?url=https%3A%2F%2Ffaststats.dev%2Fapi%2Fshields%2Fcleansingpotions-mod%3Fmetric%3Ddownloads%26icon%3D1&style=for-the-badge)](https://faststats.dev/project/cleansingpotions-mod)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 ## The potions
