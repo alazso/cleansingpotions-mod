@@ -88,7 +88,7 @@ publishMods {
     displayName = "CleansingPotions ${property("version")} (Fabric 1.21.9-1.21.11)"
     version = project.version.toString()
     changelog = providers.environmentVariable("RELEASE_CHANGELOG")
-        .orElse("See https://github.com/alazso/cleansingpotions/blob/main/CHANGELOG.md")
+        .orElse("See https://github.com/alazso/cleansingpotions-mod/blob/main/CHANGELOG.md")
     // Publishes for real only when tokens are present (CI); a local run is a dry run.
     dryRun = providers.environmentVariable("MODRINTH_TOKEN").getOrNull() == null
 
