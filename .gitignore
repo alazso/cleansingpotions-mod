@@ -1,0 +1,32 @@
+# eclipse
+bin
+*.launch
+.settings
+.metadata
+.classpath
+.project
+
+# idea
+out
+*.ipr
+*.iws
+*.iml
+.idea/*
+!.idea/scopes
+
+# vscode (local launch configs contain machine-specific paths)
+.vscode/launch.json
+
+# gradle
+build
+.gradle
+
+# secrets (local token files; never commit)
+*.env
+.modrinth.env
+
+# other
+eclipse
+run
+runs
+*.log

@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "cleansingpotions",
+  "version": "${version}",
+  "name": "CleansingPotions",
+  "description": "Milk-brewed potions that cleanse status effects: drink, splash, or lingering.",
+  "authors": ["Alazso"],
+  "contact": {
+    "sources": "https://github.com/alazso/cleansingpotions"
+  },
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "so.alaz.cleansingpotions.CleansingPotionsFabric"
+    ],
+    "client": [
+      "so.alaz.cleansingpotions.CleansingPotionsFabricClient"
+    ],
+    "modmenu": [
+      "so.alaz.cleansingpotions.config.ModMenuIntegration"
+    ]
+  },
+  "depends": {
+    "fabricloader": ">=${fabric_loader_version}",
+    "fabric-api": "*",
+    "minecraft": "${fabric_minecraft_version_range}"
+  },
+  "mixins": [
+    "cleansingpotions.mixins.json"
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "item.cleansingpotions.cleansing_potion": "Cleansing Potion",
+  "item.cleansingpotions.cleansing_splash_potion": "Splash Cleansing Potion",
+  "item.cleansingpotions.cleansing_lingering_potion": "Lingering Cleansing Potion",
+
+  "potion.cleansingpotions.cleansing": "Potion of Cleansing",
+  "potion.cleansingpotions.soothing": "Potion of Soothing",
+  "potion.cleansingpotions.purging": "Potion of Purging",
+
+  "command.cleansingpotions.reloaded": "Configuration reloaded.",
+  "command.cleansingpotions.given": "Gave a %s to %s.",
+  "command.cleansingpotions.given_many": "Gave a %s to %s players.",
+  "command.cleansingpotions.unknown_potion": "Unknown potion '%s'. Use cleansing, soothing, or purging.",
+  "command.cleansingpotions.unknown_variant": "Unknown variant '%s'. Use regular, splash, or lingering.",
+
+  "message.cleansingpotions.no_use": "You can't use cleansing potions!"
+}

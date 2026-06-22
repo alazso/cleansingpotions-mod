@@ -1,0 +1,156 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: Build artifacts only; do not publish a release
+        type: boolean
+        default: false
+      force_publish:
+        description: Re-publish to Modrinth and CurseForge even if the GitHub release already exists
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Resolve version
+        id: version
+        run: |
+          set -euo pipefail
+          GRADLE_VERSION="$(sed -n 's/^version=//p' gradle.properties | tr -d '[:space:]')"
+          if [ -z "$GRADLE_VERSION" ]; then
+            echo "Could not read version from gradle.properties" >&2
+            exit 1
+          fi
+          if [ "${{ github.event_name }}" = "push" ]; then
+            TAG="${GITHUB_REF_NAME}"
+            TAG_VERSION="${TAG#v}"
+            if [ "$TAG_VERSION" != "$GRADLE_VERSION" ]; then
+              echo "Tag $TAG (${TAG_VERSION}) does not match gradle.properties (${GRADLE_VERSION})" >&2
+              exit 1
+            fi
+          else
+            TAG="v${GRADLE_VERSION}"
+          fi
+          echo "version=${GRADLE_VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+
+      - name: Skip if release already fully published
+        id: published
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.force_publish }}" = "true" ]; then
+            echo "force_publish requested; not skipping."
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          TAG="${{ steps.version.outputs.tag }}"
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          ASSET_COUNT="$(gh release view "$TAG" --json assets -q '.assets | length')"
+          # Five jars: two Fabric (1.21.9-1.21.11, 26.1.2-26.2) and three NeoForge
+          # (1.21.9-1.21.10, 1.21.11, 26.1.2-26.2).
+          if [ "$ASSET_COUNT" -ge 5 ]; then
+            echo "Release $TAG already published; skipping."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set up JDK 21 and 25
+        if: steps.published.outputs.skip != 'true'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: |
+            21
+            25
+
+      - name: Set up Gradle
+        if: steps.published.outputs.skip != 'true'
+        uses: gradle/actions/setup-gradle@v6
+
+      - name: Build every version and loader
+        if: steps.published.outputs.skip != 'true'
+        run: ./gradlew chiseledBuild --stacktrace
+
+      - name: Stage release artifacts
+        if: steps.published.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          STAGING="release-artifacts"
+          mkdir -p "$STAGING"
+          find versions -path '*/build/libs/*.jar' ! -name '*-sources.jar' -exec cp {} "$STAGING/" \;
+          ls -lh "$STAGING"
+
+      - name: Extract changelog notes
+        if: steps.published.outputs.skip != 'true'
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\]" {f=1; next}
+            /^## \[/ {f=0}
+            f
+          ' CHANGELOG.md > release-notes.md || true
+          {
+            echo "RELEASE_CHANGELOG<<__EOF__"
+            cat release-notes.md
+            echo "__EOF__"
+          } >> "$GITHUB_ENV"
+
+      - name: Upload artifact bundle
+        if: steps.published.outputs.skip != 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-${{ steps.version.outputs.tag }}
+          path: release-artifacts/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: steps.published.outputs.skip != 'true' && (github.event_name == 'push' || inputs.dry_run != true)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          VERSION="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          STAGING="release-artifacts"
+
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$STAGING"/* --clobber
+          elif [ -s release-notes.md ]; then
+            gh release create "$TAG" --title "v${VERSION}" --notes-file release-notes.md "$STAGING"/*
+          else
+            gh release create "$TAG" --title "v${VERSION}" --generate-notes "$STAGING"/*
+          fi
+
+      - name: Publish to Modrinth & CurseForge
+        if: steps.published.outputs.skip != 'true' && (github.event_name == 'push' || inputs.dry_run != true)
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+        run: ./gradlew chiseledPublish --stacktrace

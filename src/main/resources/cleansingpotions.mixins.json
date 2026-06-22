@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "so.alaz.cleansingpotions.mixin",
+  "compatibilityLevel": "${mixin_compat_level}",
+  "mixins": [
+    "PotionBrewingMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
