@@ -1,10 +1,10 @@
 package so.alaz.cleansingpotions.brew;
 
+import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.item.MilkItemFactory;
@@ -54,7 +54,12 @@ public final class CleansingBrewing {
             return false;
         }
         PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
-        return contents != null && contents.is(Potions.WATER);
+        // Compare by registry name rather than Potions.WATER: that field's type differs between
+        // 26.1.2 and 26.2, so a direct reference crashes with NoSuchFieldError on the other patch.
+        return contents != null && contents.potion()
+            .map(Holder::getRegisteredName)
+            .map("minecraft:water"::equals)
+            .orElse(false);
     }
 
     private static boolean isPlainCleansing(ItemStack stack) {

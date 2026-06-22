@@ -5,8 +5,6 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.alchemy.PotionContents;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import so.alaz.cleansingpotions.CleansingPotions;
@@ -39,8 +37,6 @@ public class CleansingCloudEntity extends AreaEffectCloud {
         setDuration(DURATION_TICKS);
         setWaitTime(WAIT_TICKS);
         setRadiusPerTick(-radius / (float) DURATION_TICKS);
-        // A harmless water potion keeps the base cloud alive while it applies nothing of its own.
-        setPotionContents(new PotionContents(Potions.WATER));
         // Entity-effect particles need an opaque color, or they render fully transparent.
         setCustomParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color));
     }

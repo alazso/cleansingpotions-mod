@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 semantic versioning.
 
+## [0.1.3]
+
+- Fixed a crash on Minecraft 26.2 when a thrown lingering potion lands, and when brewing. A vanilla potion field changed type between 26.1.2 and 26.2, so the mod no longer references it directly.
+
 ## [0.1.2]
 
 - Fixed the lingering cloud rendering as invisible (and potion liquids showing untinted). Particle and tint colors are now opaque, so the cloud is visible and cleanses anyone standing in it.
