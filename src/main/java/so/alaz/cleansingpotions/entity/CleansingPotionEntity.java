@@ -56,13 +56,19 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
                 spawnCloud(server, mode, color);
             } else {
                 applySplash(mode);
-                server.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color),
-                    getX(), getY(), getZ(), 30, 0.3, 0.3, 0.3, 0.0);
+            }
+            if (CleansingConfig.get().impactParticles) {
+                shatter(server, color);
             }
         }
         server.playSound(null, getX(), getY(), getZ(), SoundEvents.SPLASH_POTION_BREAK,
             SoundSource.NEUTRAL, 1.0F, level().getRandom().nextFloat() * 0.1F + 0.9F);
         discard();
+    }
+
+    private void shatter(ServerLevel server, int color) {
+        server.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color),
+            getX(), getY(), getZ(), 40, 0.3, 0.3, 0.3, 0.0);
     }
 
     private void applySplash(CleanseMode mode) {

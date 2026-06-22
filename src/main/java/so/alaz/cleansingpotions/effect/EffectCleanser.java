@@ -1,7 +1,12 @@
 package so.alaz.cleansingpotions.effect;
 
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.core.CleansePolicy;
 
@@ -27,6 +32,13 @@ public final class EffectCleanser {
                 && entity.removeEffect(holder)) {
                 removed++;
             }
+        }
+        if (removed > 0 && CleansingConfig.get().cleanseFeedback && entity.level() instanceof ServerLevel server) {
+            server.sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(),
+                8, 0.35, 0.4, 0.35, 0.0);
+            server.playSound(null, entity.getX(), entity.getY(), entity.getZ(),
+                SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7F, 1.4F);
         }
         return removed;
     }

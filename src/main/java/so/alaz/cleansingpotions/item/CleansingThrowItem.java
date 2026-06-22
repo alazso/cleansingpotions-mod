@@ -35,6 +35,10 @@ public class CleansingThrowItem extends Item {
             return InteractionResult.FAIL;
         }
         if (cfg.cooldownEnabled && CleansingPotions.cooldowns().isCooling(player.getUUID())) {
+            if (player instanceof ServerPlayer serverPlayer) {
+                serverPlayer.sendSystemMessage(Component.translatable("message.cleansingpotions.cooldown",
+                    CleansingPotions.cooldowns().remainingSeconds(player.getUUID())).withStyle(ChatFormatting.RED));
+            }
             return InteractionResult.FAIL;
         }
         level.playSound(null, player.getX(), player.getY(), player.getZ(),

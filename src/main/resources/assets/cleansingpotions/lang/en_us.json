@@ -13,5 +13,6 @@
   "command.cleansingpotions.unknown_potion": "Unknown potion '%s'. Use cleansing, soothing, or purging.",
   "command.cleansingpotions.unknown_variant": "Unknown variant '%s'. Use regular, splash, or lingering.",
 
-  "message.cleansingpotions.no_use": "You can't use cleansing potions!"
+  "message.cleansingpotions.no_use": "You can't use cleansing potions!",
+  "message.cleansingpotions.cooldown": "You can't do that for %s more seconds!"
 }
