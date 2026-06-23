@@ -59,6 +59,8 @@ public final class CleansingConfig {
     public boolean cleanseFeedback = true;
     public boolean impactParticles = true;
 
+    public boolean checkForUpdates = true;
+
     public boolean metrics = true;
 
     public CleansePolicy policy(CleanseMode mode) {

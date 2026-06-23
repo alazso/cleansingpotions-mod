@@ -14,5 +14,9 @@
   "command.cleansingpotions.unknown_variant": "Unknown variant '%s'. Use regular, splash, or lingering.",
 
   "message.cleansingpotions.no_use": "You can't use cleansing potions!",
-  "message.cleansingpotions.cooldown": "You can't do that for %s more seconds!"
+  "message.cleansingpotions.cooldown": "You can't do that for %s more seconds!",
+
+  "toast.cleansingpotions.update.title": "CleansingPotions",
+  "toast.cleansingpotions.update.normal": "Version %s is available",
+  "toast.cleansingpotions.update.bug": "v%s available: fixes a %s bug"
 }

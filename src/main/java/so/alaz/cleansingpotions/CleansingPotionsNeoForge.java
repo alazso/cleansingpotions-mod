@@ -35,9 +35,14 @@ public class CleansingPotionsNeoForge {
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
         CleansingPotions.init();
 
-        if (dist.isClient() && ModList.get().isLoaded("cloth_config")) {
-            container.registerExtensionPoint(IConfigScreenFactory.class,
-                (mc, parent) -> CleansingConfigScreen.create(parent));
+        if (dist.isClient()) {
+            if (ModList.get().isLoaded("cloth_config")) {
+                container.registerExtensionPoint(IConfigScreenFactory.class,
+                    (mc, parent) -> CleansingConfigScreen.create(parent));
+            }
+            NeoForge.EVENT_BUS.addListener(
+                (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingIn event) ->
+                    so.alaz.cleansingpotions.update.UpdateNotifier.onJoin());
         }
 
         //? if >=26.1.2 {

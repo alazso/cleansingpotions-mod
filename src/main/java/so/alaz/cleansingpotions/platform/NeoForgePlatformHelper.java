@@ -4,6 +4,7 @@ package so.alaz.cleansingpotions.platform;
 /*import net.minecraft.world.entity.Entity;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
+import so.alaz.cleansingpotions.Constants;
 import so.alaz.cleansingpotions.platform.services.IPlatformHelper;
 
 import java.nio.file.Path;
@@ -12,6 +13,13 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     @Override
     public String getPlatformName() {
         return "NeoForge";
+    }
+
+    @Override
+    public String getModVersion() {
+        return ModList.get().getModContainerById(Constants.MOD_ID)
+            .map(container -> container.getModInfo().getVersion().toString())
+            .orElse("0.0.0");
     }
 
     @Override

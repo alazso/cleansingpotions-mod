@@ -52,6 +52,9 @@ public final class CleansingConfigScreen {
         misc.addEntry(entry.startBooleanToggle(Component.literal("Permissions Enabled"), cfg.permissionsEnabled)
             .setTooltip(Component.literal("Server-only gate; never affects singleplayer."))
             .setSaveConsumer(v -> cfg.permissionsEnabled = v).build());
+        misc.addEntry(entry.startBooleanToggle(Component.literal("Check For Updates"), cfg.checkForUpdates)
+            .setTooltip(Component.literal("Toast on join when a newer version is available (anonymous Modrinth check)."))
+            .setSaveConsumer(v -> cfg.checkForUpdates = v).build());
         misc.addEntry(entry.startBooleanToggle(Component.literal("Metrics"), cfg.metrics)
             .setTooltip(Component.literal("Anonymous usage metrics via FastStats (26.x only)."))
             .setSaveConsumer(v -> cfg.metrics = v).build());
