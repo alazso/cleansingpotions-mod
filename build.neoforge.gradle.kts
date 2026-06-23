@@ -7,16 +7,18 @@ val mcVersion = project.name.substringBeforeLast("-")
 fun dep(key: String): String = property("${key}_$mcVersion") as String
 
 // NeoForge has no intermediary cushion, so the 1.21.11 ResourceLocation->Identifier rename
-// splits the 1.21.x line (1.21.9-1.21.10 vs 1.21.11). Unobfuscated 26.x is its own jar
-// (the 26.2 node covers 26.1.2-26.2).
+// splits the 1.21.x line (1.21.9-1.21.10 vs 1.21.11). Unobfuscated 26.x splits per patch too,
+// because 26.1.2 -> 26.2 has breaking ABI changes.
 val is26 = mcVersion.substringBefore(".").toInt() >= 26
 val neoMcRange = when {
-    is26 -> "[26.1.2,26.3)"
+    mcVersion == "26.2" -> "[26.2,26.3)"
+    is26 -> "[26.1.2,26.2)"
     mcVersion == "1.21.11" -> "[1.21.11,1.22)"
     else -> "[1.21.9,1.21.11)"
 }
 val neoGameVersions = when {
-    is26 -> listOf("26.1.2", "26.2")
+    mcVersion == "26.2" -> listOf("26.2")
+    is26 -> listOf("26.1.2")
     mcVersion == "1.21.11" -> listOf("1.21.11")
     else -> listOf("1.21.9", "1.21.10")
 }
@@ -33,6 +35,10 @@ stonecutter {
         replace("ResourceLocation", "Identifier")
         replace("location()", "identifier()")
         replace("projectile.ThrowableItemProjectile", "projectile.throwableitemprojectile.ThrowableItemProjectile")
+    }
+    // 26.2 moved the toast manager off Minecraft onto Gui: getToastManager() -> gui.toastManager().
+    replacements.string(current.parsed >= "26.2") {
+        replace("getToastManager()", "gui.toastManager()")
     }
     // Minecraft 26.x (unobfuscated) API renames are added here as the compiler flags them.
 }

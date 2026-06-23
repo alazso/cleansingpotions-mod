@@ -26,10 +26,12 @@ stonecutter {
         // one jar for 1.21.9-1.21.10, one for 1.21.11.
         version("1.21.9-neoforge", "1.21.9").buildscript = "build.neoforge.gradle.kts"
         version("1.21.11-neoforge", "1.21.11").buildscript = "build.neoforge.gradle.kts"
-        // Minecraft 26.x is unobfuscated (Java 25). Build against the era's lowest version, 26.1.2, so
-        // one jar runs across 26.1.2-26.2 (compiling against the lowest keeps it forward-compatible).
+        // Minecraft 26.x is unobfuscated (Java 25). 26.1.2 -> 26.2 has breaking ABI changes
+        // (Potions.WATER, Minecraft.getToastManager), so each patch compiles against itself.
         version("26.1.2-fabric", "26.1.2").buildscript = "build.fabric-m.gradle.kts"
         version("26.1.2-neoforge", "26.1.2").buildscript = "build.neoforge.gradle.kts"
+        version("26.2-fabric", "26.2").buildscript = "build.fabric-m.gradle.kts"
+        version("26.2-neoforge", "26.2").buildscript = "build.neoforge.gradle.kts"
 
         vcsVersion = "1.21.9-fabric"
     }
