@@ -58,7 +58,8 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
                 applySplash(mode);
             }
             if (CleansingConfig.get().impactParticles) {
-                shatter(server, color);
+                double area = (!lingering && CleansingConfig.get().onlyThrower) ? 1.0 : CleansingConfig.get().radius;
+                shatter(server, color, area);
             }
         }
         server.playSound(null, getX(), getY(), getZ(), SoundEvents.SPLASH_POTION_BREAK,
@@ -66,9 +67,12 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
         discard();
     }
 
-    private void shatter(ServerLevel server, int color) {
+    private void shatter(ServerLevel server, int color, double radius) {
+        // Spread the burst across the cleanse radius so the splash reads as big as the area it
+        // affects, instead of a tight puff at the point of impact.
+        int count = (int) Math.min(200, Math.max(50, radius * radius * 5));
         server.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color),
-            getX(), getY(), getZ(), 40, 0.3, 0.3, 0.3, 0.0);
+            getX(), getY() + 0.1, getZ(), count, radius * 0.5, 0.25, radius * 0.5, 0.0);
     }
 
     private void applySplash(CleanseMode mode) {
