@@ -14,8 +14,6 @@ semantic versioning.
 
 ## [0.1.3]
 
-> [@bug:critical]
-
 - Fixed a crash on Minecraft 26.2 when a thrown lingering potion lands, and when brewing (a vanilla potion field changed type between 26.1.2 and 26.2).
 
 ## [0.1.2]
