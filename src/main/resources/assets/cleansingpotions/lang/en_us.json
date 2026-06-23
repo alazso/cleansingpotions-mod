@@ -16,7 +16,7 @@
   "message.cleansingpotions.no_use": "You can't use cleansing potions!",
   "message.cleansingpotions.cooldown": "You can't do that for %s more seconds!",
 
-  "toast.cleansingpotions.update.title": "CleansingPotions",
-  "toast.cleansingpotions.update.normal": "Version %s is available",
-  "toast.cleansingpotions.update.bug": "v%s available: fixes a %s bug"
+  "toast.cleansingpotions.update.title": "Cleansing Potions",
+  "toast.cleansingpotions.update.normal": "Version %s has been released! Available on Modrinth and CurseForge.",
+  "toast.cleansingpotions.update.bug": "v%s is available, it is recommended to update. This version fixes a %s bug!"
 }
