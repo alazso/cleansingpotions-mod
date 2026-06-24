@@ -8,6 +8,8 @@ public interface IPlatformHelper {
 
     String getPlatformName();
 
+    String getModVersion();
+
     boolean isModLoaded(String modId);
 
     boolean isDevelopmentEnvironment();

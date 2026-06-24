@@ -4,9 +4,18 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 semantic versioning.
 
+## [0.2.0]
+
+- Fixed a crash on Minecraft 26.2 when a thrown lingering potion lands or when brewing. The 26.x line now ships native per-version builds (26.1.2 and 26.2), so each runs against its own Minecraft.
+- Cleansing now gives feedback: sparkle particles and a chime when an entity's effects are cleared.
+- Splash and lingering potions shatter on impact, with the burst scaled to the cleanse radius.
+- A throw cooldown now tells you the time remaining instead of failing silently.
+- An optional update notifier shows a toast on join when a newer version is out, and flags patches that fix a tagged bug. Toggle with checkForUpdates.
+- New config toggles for the cleanse feedback, impact particles, and update check.
+
 ## [0.1.3]
 
-- Fixed a crash on Minecraft 26.2 when a thrown lingering potion lands, and when brewing. A vanilla potion field changed type between 26.1.2 and 26.2, so the mod no longer references it directly.
+- Fixed a crash on Minecraft 26.2 when a thrown lingering potion lands, and when brewing (a vanilla potion field changed type between 26.1.2 and 26.2).
 
 ## [0.1.2]
 

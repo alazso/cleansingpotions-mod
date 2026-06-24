@@ -40,10 +40,21 @@ public final class CleansingConfigScreen {
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Lingering Enabled"), cfg.lingeringEnabled)
             .setSaveConsumer(v -> cfg.lingeringEnabled = v).build());
 
+        var effects = builder.getOrCreateCategory(Component.literal("Effects"));
+        effects.addEntry(entry.startBooleanToggle(Component.literal("Cleanse Feedback"), cfg.cleanseFeedback)
+            .setTooltip(Component.literal("Sparkle particles and a chime when an entity is cleansed."))
+            .setSaveConsumer(v -> cfg.cleanseFeedback = v).build());
+        effects.addEntry(entry.startBooleanToggle(Component.literal("Impact Particles"), cfg.impactParticles)
+            .setTooltip(Component.literal("Shatter particles when a splash or lingering potion lands."))
+            .setSaveConsumer(v -> cfg.impactParticles = v).build());
+
         var misc = builder.getOrCreateCategory(Component.literal("Misc"));
         misc.addEntry(entry.startBooleanToggle(Component.literal("Permissions Enabled"), cfg.permissionsEnabled)
             .setTooltip(Component.literal("Server-only gate; never affects singleplayer."))
             .setSaveConsumer(v -> cfg.permissionsEnabled = v).build());
+        misc.addEntry(entry.startBooleanToggle(Component.literal("Check For Updates"), cfg.checkForUpdates)
+            .setTooltip(Component.literal("Toast on join when a newer version is available (anonymous Modrinth check)."))
+            .setSaveConsumer(v -> cfg.checkForUpdates = v).build());
         misc.addEntry(entry.startBooleanToggle(Component.literal("Metrics"), cfg.metrics)
             .setTooltip(Component.literal("Anonymous usage metrics via FastStats (26.x only)."))
             .setSaveConsumer(v -> cfg.metrics = v).build());

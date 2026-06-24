@@ -71,9 +71,9 @@ jobs:
             exit 0
           fi
           ASSET_COUNT="$(gh release view "$TAG" --json assets -q '.assets | length')"
-          # Five jars: two Fabric (1.21.9-1.21.11, 26.1.2-26.2) and three NeoForge
-          # (1.21.9-1.21.10, 1.21.11, 26.1.2-26.2).
-          if [ "$ASSET_COUNT" -ge 5 ]; then
+          # Seven jars: three Fabric (1.21.9-1.21.11, 26.1.2, 26.2) and four NeoForge
+          # (1.21.9-1.21.10, 1.21.11, 26.1.2, 26.2).
+          if [ "$ASSET_COUNT" -ge 7 ]; then
             echo "Release $TAG already published; skipping."
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else

@@ -6,6 +6,11 @@ plugins {
 val mcVersion = project.name.substringBeforeLast("-")
 fun dep(key: String): String = property("${key}_$mcVersion") as String
 
+// 26.1.2 -> 26.2 broke ABI, so each patch is its own jar: scope the dependency range and the
+// published game versions to this node's exact patch.
+val fabricMcRange = if (mcVersion == "26.2") ">=26.2 <26.3" else ">=26.1.2 <26.2"
+val publishGameVersions = if (mcVersion == "26.2") listOf("26.2") else listOf("26.1.2")
+
 stonecutter {
     // 1.21.11+ (including unobfuscated 26.x) renamed ResourceLocation -> Identifier and moved the
     // throwable-item projectile classes into a .throwableitemprojectile subpackage.
@@ -14,9 +19,11 @@ stonecutter {
         replace("location()", "identifier()")
         replace("projectile.ThrowableItemProjectile", "projectile.throwableitemprojectile.ThrowableItemProjectile")
     }
+    // 26.2 moved the toast manager off Minecraft onto Gui: getToastManager() -> gui.toastManager().
+    replacements.string(current.parsed >= "26.2") {
+        replace("getToastManager()", "gui.toastManager()")
+    }
     // Minecraft 26.x (unobfuscated) API renames are added here as the compiler flags them.
-    // This is server content (items/effects/brewing/entities), so duraping's client-only
-    // renames (HUD/keybind/displayClientMessage) do not apply.
 }
 
 version = "${property("version")}+$mcVersion"
@@ -83,7 +90,7 @@ tasks.jar {
 val resourceProps = mapOf(
     "version" to property("version").toString(),
     "fabric_loader_version" to dep("fabric_loader"),
-    "fabric_minecraft_version_range" to ">=26.1.2 <26.3",
+    "fabric_minecraft_version_range" to fabricMcRange,
 )
 tasks.processResources {
     inputs.properties(resourceProps)
@@ -110,7 +117,7 @@ publishMods {
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = property("modrinth_id").toString()
-        minecraftVersions.addAll("26.1.2", "26.2")
+        minecraftVersions.addAll(publishGameVersions)
         requires("fabric-api")
         optional("cloth-config")
         optional("modmenu")
@@ -118,7 +125,7 @@ publishMods {
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
         projectId = property("curseforge_id").toString()
-        minecraftVersions.addAll("26.1.2", "26.2")
+        minecraftVersions.addAll(publishGameVersions)
         requires { slug = "fabric-api" }
         optional { slug = "cloth-config" }
         optional { slug = "modmenu" }

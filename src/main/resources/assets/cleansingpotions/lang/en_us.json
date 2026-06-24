@@ -13,5 +13,10 @@
   "command.cleansingpotions.unknown_potion": "Unknown potion '%s'. Use cleansing, soothing, or purging.",
   "command.cleansingpotions.unknown_variant": "Unknown variant '%s'. Use regular, splash, or lingering.",
 
-  "message.cleansingpotions.no_use": "You can't use cleansing potions!"
+  "message.cleansingpotions.no_use": "You can't use cleansing potions!",
+  "message.cleansingpotions.cooldown": "You can't do that for %s more seconds!",
+
+  "toast.cleansingpotions.update.title": "Cleansing Potions",
+  "toast.cleansingpotions.update.normal": "Version %s has been released! Available on Modrinth and CurseForge.",
+  "toast.cleansingpotions.update.bug": "v%s is available, it is recommended to update. This version fixes a %s bug!"
 }

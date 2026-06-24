@@ -3,6 +3,7 @@ package so.alaz.cleansingpotions.platform;
 //? fabric {
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.world.entity.Entity;
+import so.alaz.cleansingpotions.Constants;
 import so.alaz.cleansingpotions.platform.services.IPlatformHelper;
 
 import java.nio.file.Path;
@@ -11,6 +12,13 @@ public class FabricPlatformHelper implements IPlatformHelper {
     @Override
     public String getPlatformName() {
         return "Fabric";
+    }
+
+    @Override
+    public String getModVersion() {
+        return FabricLoader.getInstance().getModContainer(Constants.MOD_ID)
+            .map(container -> container.getMetadata().getVersion().getFriendlyString())
+            .orElse("0.0.0");
     }
 
     @Override
