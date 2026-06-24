@@ -13,6 +13,10 @@ semantic versioning.
 - An optional update notifier shows a toast on join when a newer version is out, and flags patches that fix a tagged bug. Toggle with checkForUpdates.
 - New config toggles for the cleanse feedback, impact particles, and update check.
 
+## [0.1.3]
+
+- Fixed a crash on Minecraft 26.2 when a thrown lingering potion lands, and when brewing (a vanilla potion field changed type between 26.1.2 and 26.2).
+
 ## [0.1.2]
 
 - Fixed the lingering cloud rendering as invisible (and potion liquids showing untinted). Particle and tint colors are now opaque, so the cloud is visible and cleanses anyone standing in it.
