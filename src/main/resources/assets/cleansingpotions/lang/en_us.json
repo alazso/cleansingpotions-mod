@@ -12,6 +12,9 @@
   "command.cleansingpotions.given_many": "Gave a %s to %s players.",
   "command.cleansingpotions.unknown_potion": "Unknown potion '%s'. Use cleansing, soothing, or purging.",
   "command.cleansingpotions.unknown_variant": "Unknown variant '%s'. Use regular, splash, or lingering.",
+  "command.cleansingpotions.testerror": "Reported an intentional test error to FastStats.",
+  "command.cleansingpotions.testerror_disabled": "Metrics are disabled in the config, so no error was reported.",
+  "command.cleansingpotions.testerror_unsupported": "FastStats error tracking is only available on Minecraft 26.x.",
 
   "message.cleansingpotions.no_use": "You can't use cleansing potions!",
   "message.cleansingpotions.cooldown": "You can't do that for %s more seconds!",

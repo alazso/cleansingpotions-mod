@@ -17,6 +17,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.core.CleanseMode;
+import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 import so.alaz.cleansingpotions.util.PermissionGate;
 
 public class CleansingPotionItem extends Item {
@@ -39,6 +40,7 @@ public class CleansingPotionItem extends Item {
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
         if (player instanceof ServerPlayer serverPlayer
             && !PermissionGate.allows(serverPlayer, "cleansingpotions.use")) {
+            CleansingMetrics.permissionDenied();
             serverPlayer.sendSystemMessage(
                 Component.translatable("message.cleansingpotions.no_use").withStyle(ChatFormatting.RED));
             return InteractionResult.FAIL;
@@ -52,6 +54,7 @@ public class CleansingPotionItem extends Item {
         if (!level.isClientSide()) {
             CleanseMode mode = stack.getOrDefault(ModComponents.CLEANSE_MODE, CleanseMode.ALL);
             CleansingPotions.cleanser().cleanse(entity, mode);
+            CleansingMetrics.potionConsumed();
         }
         if (player != null) {
             player.awardStat(Stats.ITEM_USED.get(this));

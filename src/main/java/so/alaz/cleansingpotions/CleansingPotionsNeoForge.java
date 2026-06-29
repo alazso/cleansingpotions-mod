@@ -48,7 +48,8 @@ public class CleansingPotionsNeoForge {
         //? if >=26.1.2 {
         if (so.alaz.cleansingpotions.config.CleansingConfig.get().metrics) {
             metrics = new dev.faststats.neoforge.NeoForgeContext.Factory("cleansingpotions", "321f21c8899fa729330e9508a4b7fe34")
-                    .metrics(dev.faststats.Metrics.Factory::create)
+                    .metrics(so.alaz.cleansingpotions.metrics.FastStatsBridge::registerMetrics)
+                    .errorTrackerService(so.alaz.cleansingpotions.metrics.FastStatsBridge.errorTracker())
                     .create();
         }
         //?}

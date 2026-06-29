@@ -9,6 +9,8 @@ import net.minecraft.world.entity.LivingEntity;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.core.CleansePolicy;
+import so.alaz.cleansingpotions.core.EffectDisposition;
+import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 
 import java.util.List;
 import java.util.function.Function;
@@ -28,11 +30,14 @@ public final class EffectCleanser {
         int removed = 0;
         for (MobEffectInstance effect : List.copyOf(entity.getActiveEffects())) {
             var holder = effect.getEffect();
-            if (policy.shouldRemove(classifier.id(holder), classifier.disposition(holder))
-                && entity.removeEffect(holder)) {
+            String id = classifier.id(holder);
+            EffectDisposition disposition = classifier.disposition(holder);
+            if (policy.shouldRemove(id, disposition) && entity.removeEffect(holder)) {
                 removed++;
+                CleansingMetrics.effectRemoved(id, disposition);
             }
         }
+        CleansingMetrics.cleanseCompleted(mode, removed);
         if (removed > 0 && CleansingConfig.get().cleanseFeedback && entity.level() instanceof ServerLevel server) {
             server.sendParticles(ParticleTypes.HAPPY_VILLAGER,
                 entity.getX(), entity.getY() + entity.getBbHeight() * 0.6, entity.getZ(),

@@ -16,6 +16,7 @@ import net.minecraft.world.level.Level;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.entity.CleansingPotionEntity;
+import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 import so.alaz.cleansingpotions.util.PermissionGate;
 
 public class CleansingThrowItem extends Item {
@@ -30,12 +31,14 @@ public class CleansingThrowItem extends Item {
         CleansingConfig cfg = CleansingConfig.get();
         if (player instanceof ServerPlayer serverPlayer
             && !PermissionGate.allows(serverPlayer, "cleansingpotions.use")) {
+            CleansingMetrics.permissionDenied();
             serverPlayer.sendSystemMessage(
                 Component.translatable("message.cleansingpotions.no_use").withStyle(ChatFormatting.RED));
             return InteractionResult.FAIL;
         }
         if (cfg.cooldownEnabled && CleansingPotions.cooldowns().isCooling(player.getUUID())) {
             if (player instanceof ServerPlayer serverPlayer) {
+                CleansingMetrics.cooldownBlocked();
                 serverPlayer.sendSystemMessage(Component.translatable("message.cleansingpotions.cooldown",
                     CleansingPotions.cooldowns().remainingSeconds(player.getUUID())).withStyle(ChatFormatting.RED));
             }
@@ -48,6 +51,7 @@ public class CleansingThrowItem extends Item {
             CleansingPotionEntity projectile = new CleansingPotionEntity(server, player, stack.copyWithCount(1));
             projectile.shootFromRotation(player, player.getXRot(), player.getYRot(), -20.0F, 0.5F, 1.0F);
             server.addFreshEntity(projectile);
+            CleansingMetrics.potionThrown(stack.is(ModItems.LINGERING) ? MilkVariant.LINGERING : MilkVariant.SPLASH);
             if (cfg.cooldownEnabled) {
                 CleansingPotions.cooldowns().start(player.getUUID(), cfg.cooldownSeconds);
             }

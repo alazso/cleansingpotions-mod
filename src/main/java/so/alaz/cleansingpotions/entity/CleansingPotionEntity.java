@@ -19,6 +19,7 @@ import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.item.MilkVariant;
 import so.alaz.cleansingpotions.item.ModComponents;
 import so.alaz.cleansingpotions.item.ModItems;
+import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 
 public class CleansingPotionEntity extends ThrowableItemProjectile {
 
@@ -78,18 +79,24 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
     private void applySplash(CleanseMode mode) {
         CleansingConfig cfg = CleansingConfig.get();
         if (cfg.onlyThrower) {
-            if (getOwner() instanceof LivingEntity shooter) {
-                CleansingPotions.cleanser().cleanse(shooter, mode);
+            int affected = 0;
+            if (getOwner() instanceof LivingEntity shooter
+                && CleansingPotions.cleanser().cleanse(shooter, mode) > 0) {
+                affected = 1;
             }
+            CleansingMetrics.throwAffected(affected);
             return;
         }
         double r = cfg.radius;
         AABB box = new AABB(getX() - r, getY() - r, getZ() - r, getX() + r, getY() + r, getZ() + r);
+        int affected = 0;
         for (LivingEntity entity : level().getEntitiesOfClass(LivingEntity.class, box)) {
-            if (entity.distanceToSqr(this) <= r * r) {
-                CleansingPotions.cleanser().cleanse(entity, mode);
+            if (entity.distanceToSqr(this) <= r * r
+                && CleansingPotions.cleanser().cleanse(entity, mode) > 0) {
+                affected++;
             }
         }
+        CleansingMetrics.throwAffected(affected);
     }
 
     private void spawnCloud(ServerLevel server, CleanseMode mode, int color) {
@@ -100,5 +107,6 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
         cloud.setMode(mode);
         cloud.configure((float) CleansingConfig.get().radius, color);
         server.addFreshEntity(cloud);
+        CleansingMetrics.lingeringCloudSpawned();
     }
 }

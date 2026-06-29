@@ -5,6 +5,7 @@ import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.config.ConfigManager;
 import so.alaz.cleansingpotions.effect.EffectClassifier;
 import so.alaz.cleansingpotions.effect.EffectCleanser;
+import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 import so.alaz.cleansingpotions.util.CooldownService;
 
 public final class CleansingPotions {
@@ -21,6 +22,7 @@ public final class CleansingPotions {
 
     public static void reload() {
         ConfigManager.load();
+        CleansingMetrics.configReloaded();
     }
 
     public static CooldownService cooldowns() {
