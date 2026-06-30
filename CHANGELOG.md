@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 semantic versioning.
 
+## [0.3.0]
+
+- Added anonymous gameplay metrics and error reporting on Minecraft 26.x (via FastStats), behind the existing metrics toggle.
+
 ## [0.2.0]
 
 - Fixed a crash on Minecraft 26.2 when a thrown lingering potion lands or when brewing. The 26.x line now ships native per-version builds (26.1.2 and 26.2), so each runs against its own Minecraft.
