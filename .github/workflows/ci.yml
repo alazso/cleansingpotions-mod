@@ -30,7 +30,7 @@ jobs:
             25
 
       - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: Build every version and loader
         run: ./gradlew chiseledBuild --stacktrace
