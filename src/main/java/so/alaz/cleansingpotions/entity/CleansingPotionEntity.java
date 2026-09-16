@@ -52,7 +52,7 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
         boolean lingering = stack.is(ModItems.LINGERING);
         MilkVariant variant = lingering ? MilkVariant.LINGERING : MilkVariant.SPLASH;
         if (CleansingConfig.get().variantEnabled(variant)) {
-            int color = CleansingConfig.get().color(mode);
+            int color = mode.rgb();
             if (lingering) {
                 spawnCloud(server, mode, color);
             } else {

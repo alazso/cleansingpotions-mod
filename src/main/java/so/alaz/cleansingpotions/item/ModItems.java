@@ -25,10 +25,10 @@ public final class ModItems {
             .stacksTo(1));
         SPLASH = new CleansingThrowItem(new Item.Properties()
             .setId(SPLASH_KEY)
-            .stacksTo(1));
+            .stacksTo(1), MilkVariant.SPLASH);
         LINGERING = new CleansingThrowItem(new Item.Properties()
             .setId(LINGERING_KEY)
-            .stacksTo(1));
+            .stacksTo(1), MilkVariant.LINGERING);
     }
 
     private static ResourceKey<Item> key(String name) {

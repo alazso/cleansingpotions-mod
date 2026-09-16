@@ -59,7 +59,7 @@ public final class CleansingConfigScreen {
             .setTooltip(Component.literal("Anonymous usage metrics via FastStats (26.x only)."))
             .setSaveConsumer(v -> cfg.metrics = v).build());
         misc.addEntry(entry.startTextDescription(Component.literal(
-            "§7Effect force-lists and per-potion name/color/lore are edited in config/cleansingpotions.json.")).build());
+            "§7Effect force-lists and per-potion name/lore are edited in config/cleansingpotions.json. Potion colours are fixed and come from the resource pack.")).build());
 
         builder.setSavingRunnable(ConfigManager::save);
         return builder.build();

@@ -19,26 +19,26 @@ public final class CleansingConfig {
         instance = cfg;
     }
 
+    // Colour is deliberately not configurable: the item tint is picked by the model from the
+    // cleanse_mode component, and a resource pack cannot read runtime config. See CleanseMode#rgb.
     public static final class Appearance {
         public String name;
-        public String color;
         public List<String> lore;
 
         public Appearance() {
         }
 
-        public Appearance(String name, String color, List<String> lore) {
+        public Appearance(String name, List<String> lore) {
             this.name = name;
-            this.color = color;
             this.lore = new ArrayList<>(lore);
         }
     }
 
-    public Appearance cleansing = new Appearance("Potion of Cleansing", "#FFFFFF",
+    public Appearance cleansing = new Appearance("Potion of Cleansing",
         List.of("Clears every potion effect."));
-    public Appearance soothing = new Appearance("Potion of Soothing", "#E8A33B",
+    public Appearance soothing = new Appearance("Potion of Soothing",
         List.of("Clears harmful effects."));
-    public Appearance purging = new Appearance("Potion of Purging", "#7E57A8",
+    public Appearance purging = new Appearance("Potion of Purging",
         List.of("Clears beneficial effects."));
 
     public boolean splashEnabled = true;
@@ -75,10 +75,6 @@ public final class CleansingConfig {
         };
     }
 
-    public int color(CleanseMode mode) {
-        return parseColor(appearance(mode).color, defaultColor(mode));
-    }
-
     public boolean variantEnabled(MilkVariant variant) {
         return switch (variant) {
             case REGULAR -> true;
@@ -87,23 +83,4 @@ public final class CleansingConfig {
         };
     }
 
-    private static int defaultColor(CleanseMode mode) {
-        return switch (mode) {
-            case ALL -> 0xFFFFFF;
-            case NEGATIVE_ONLY -> 0xE8A33B;
-            case POSITIVE_ONLY -> 0x7E57A8;
-        };
-    }
-
-    private static int parseColor(String hex, int fallback) {
-        if (hex == null || hex.isBlank()) {
-            return fallback;
-        }
-        try {
-            String value = hex.trim().startsWith("#") ? hex.trim().substring(1) : hex.trim();
-            return Integer.parseInt(value, 16) & 0xFFFFFF;
-        } catch (RuntimeException ex) {
-            return fallback;
-        }
-    }
 }

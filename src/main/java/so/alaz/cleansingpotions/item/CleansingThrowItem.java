@@ -12,7 +12,11 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
+
+import java.util.function.Consumer;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.entity.CleansingPotionEntity;
@@ -21,8 +25,26 @@ import so.alaz.cleansingpotions.util.PermissionGate;
 
 public class CleansingThrowItem extends Item {
 
-    public CleansingThrowItem(Properties properties) {
+    // One class backs both the splash and lingering items, so it has to be told which it is in
+    // order to prefix the display name.
+    private final MilkVariant variant;
+
+    public CleansingThrowItem(Properties properties, MilkVariant variant) {
         super(properties);
+        this.variant = variant;
+    }
+
+    // Name and lore come from config at display time; a stack only carries cleanse_mode.
+    @Override
+    public Component getName(ItemStack stack) {
+        return MilkItemFactory.displayName(variant, MilkItemFactory.modeOf(stack));
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+                                Consumer<Component> adder, TooltipFlag flag) {
+        super.appendHoverText(stack, context, display, adder, flag);
+        MilkItemFactory.loreLines(MilkItemFactory.modeOf(stack)).forEach(adder);
     }
 
     @Override

@@ -1,17 +1,23 @@
 package so.alaz.cleansingpotions.item;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.component.CustomModelData;
-import net.minecraft.world.item.component.ItemLore;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
 import java.util.List;
 
+/**
+ * Builds cleansing potion stacks, and supplies the display name and lore the item classes render.
+ *
+ * <p>A stack carries exactly one component: {@code cleanse_mode}. Name and lore are derived from
+ * config at display time rather than baked in at creation time, and the tint is chosen by the model
+ * from that same component. That keeps a stack built here identical to one produced by a data pack
+ * recipe, which can only set static components, and means a config edit restyles potions already in
+ * an inventory instead of only newly brewed ones.
+ */
 public final class MilkItemFactory {
 
     public static ItemStack create(MilkVariant variant, CleanseMode mode) {
@@ -22,34 +28,32 @@ public final class MilkItemFactory {
         };
         ItemStack stack = new ItemStack(item);
         stack.set(ModComponents.CLEANSE_MODE, mode);
-        stack.set(DataComponents.CUSTOM_NAME, name(variant, mode));
-        stack.set(DataComponents.LORE, lore(mode));
-        stack.set(DataComponents.CUSTOM_MODEL_DATA, new CustomModelData(
-            List.of(), List.of(), List.of(), List.of(0xFF000000 | CleansingConfig.get().color(mode))));
         return stack;
     }
 
-    private static Component name(MilkVariant variant, CleanseMode mode) {
+    public static CleanseMode modeOf(ItemStack stack) {
+        return stack.getOrDefault(ModComponents.CLEANSE_MODE, CleanseMode.ALL);
+    }
+
+    public static Component displayName(MilkVariant variant, CleanseMode mode) {
         String prefix = switch (variant) {
             case REGULAR -> "";
             case SPLASH -> "Splash ";
             case LINGERING -> "Lingering ";
         };
-        String text = prefix + CleansingConfig.get().appearance(mode).name;
-        return Component.literal(text)
+        return Component.literal(prefix + CleansingConfig.get().appearance(mode).name)
             .withStyle(style -> style.withItalic(false).withColor(ChatFormatting.WHITE));
     }
 
-    private static ItemLore lore(CleanseMode mode) {
+    public static List<Component> loreLines(CleanseMode mode) {
         List<String> lines = CleansingConfig.get().appearance(mode).lore;
         if (lines == null || lines.isEmpty()) {
-            return ItemLore.EMPTY;
+            return List.of();
         }
-        List<Component> rendered = lines.stream()
+        return lines.stream()
             .map(line -> (Component) Component.literal(line)
                 .withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY)))
             .toList();
-        return new ItemLore(rendered);
     }
 
     private MilkItemFactory() {

@@ -13,8 +13,12 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemUseAnimation;
 import net.minecraft.world.item.ItemUtils;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.gameevent.GameEvent;
+
+import java.util.function.Consumer;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.metrics.CleansingMetrics;
@@ -24,6 +28,20 @@ public class CleansingPotionItem extends Item {
 
     public CleansingPotionItem(Properties properties) {
         super(properties);
+    }
+
+    // Name and lore come from config at display time, so a stack only ever carries cleanse_mode
+    // and a data pack recipe can produce one that looks identical. See MilkItemFactory.
+    @Override
+    public Component getName(ItemStack stack) {
+        return MilkItemFactory.displayName(MilkVariant.REGULAR, MilkItemFactory.modeOf(stack));
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+                                Consumer<Component> adder, TooltipFlag flag) {
+        super.appendHoverText(stack, context, display, adder, flag);
+        MilkItemFactory.loreLines(MilkItemFactory.modeOf(stack)).forEach(adder);
     }
 
     @Override
