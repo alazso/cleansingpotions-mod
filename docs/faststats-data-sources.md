@@ -27,7 +27,7 @@ Increment-by-1 (or by N) counters. All are non-negative whole numbers.
 | Cleanse Operations | `cleanse_operations` | number | Scalar | false | false | 0 | — | `EffectCleanser.cleanse` (per entity with removed > 0) |
 | Effects Removed | `effects_removed` | number | Scalar | false | false | 0 | — | `EffectCleanser.cleanse` (add `removed`) |
 | Lingering Clouds Spawned | `lingering_clouds_spawned` | number | Scalar | false | false | 0 | — | `CleansingPotionEntity.spawnCloud` |
-| Potions Brewed | `potions_brewed` | number | Scalar | false | false | 0 | — | `CleansingBrewing.mix` (non-empty result) |
+| Potions Brewed | `potions_brewed` | number | Scalar | false | false | 0 | — | `PotionBrewingMixin.mix` (non-empty result). **26.2 only** |
 | Cooldown Blocks | `cooldown_blocks` | number | Scalar | false | false | 0 | — | `CleansingThrowItem.use` (cooldown FAIL) |
 | Permission Denials | `permission_denials` | number | Scalar | false | false | 0 | — | `PermissionGate.allows` == false branches |
 | Commands Executed | `commands_executed` | number | Scalar | false | false | 0 | — | `CleansingCommand.give` / `reload` |
@@ -46,7 +46,13 @@ Per-category counts. Keep these as Maps rather than one source per category so n
 | Potions Used by Variant | `potions_used_by_variant` | number | Map | false | false | 0 | — | `regular`, `splash`, `lingering` |
 | Effects Removed by Disposition | `effects_removed_by_disposition` | number | Map | false | false | 0 | — | `beneficial`, `harmful`, `neutral` |
 | Effects Removed by Type | `effects_removed_by_type` | number | Map | false | false | 0 | — | effect registry ids, e.g. `minecraft:poison` *(high cardinality — includes modded effects)* |
-| Brews by Recipe | `brews_by_recipe` | number | Map | false | false | 0 | — | `cleansing`, `soothing`, `purging`, `splash`, `lingering` |
+| Brews by Recipe | `brews_by_recipe` | number | Map | false | false | 0 | — | `cleansing`, `soothing`, `purging`, `splash`, `lingering`. **26.2 only** |
+
+> **Brewing counters stop at 26.2.** From 26.3 brewing is a data pack recipe type and `PotionBrewing`
+> is gone, so the mixin that was the only caller of `CleansingMetrics.potionBrewed` no longer ships.
+> `potions_brewed` and `brews_by_recipe` therefore report zero from 26.3 clients. Read a decline in
+> those two as version mix, not as players brewing less. Restoring them needs a hook into the
+> brewing stand's recipe path, which would mean putting a mixin back into the 26.3 jar.
 
 ---
 

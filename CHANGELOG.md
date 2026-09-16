@@ -6,7 +6,14 @@ semantic versioning.
 
 ## [0.3.0]
 
-- Added anonymous gameplay metrics and error reporting on Minecraft 26.x (via FastStats), behind the existing metrics toggle.
+- Added support for Minecraft 26.3 (Fabric). NeoForge 26.3 follows once it leaves beta.
+- Dropped Minecraft 1.21.9 through 26.1.2. Those versions stay served by 0.2.0.
+- Each potion mode is now its own item, so there are nine in total (Cleansing, Soothing, and Purging, each as regular, splash, and lingering). 26.3 brewing recipes match on item id and cannot read a data component, which is what made brewing a Soothing or Purging splash potion possible again. Recipe viewers can now show all nine.
+- Brewing on 26.3 is data driven: the recipes ship as JSON in `data/cleansingpotions/recipe/brewing` and can be overridden or removed by a data pack. The 26.3 build carries no mixins at all as a result. On 26.2 brewing is unchanged.
+- Potion names and lore now update on potions already in your inventory when you edit the config, instead of only on newly brewed ones.
+- Potion colour is no longer a config option. Colours are fixed and come from the resource pack, because the tint is chosen by the item model and a resource pack cannot read runtime config. The `color` field in each appearance block is ignored and can be deleted.
+- Soothing and Purging potions brewed before 0.3.0 keep working, though they show the Cleansing tint until re-brewed.
+- Added anonymous gameplay metrics and error reporting on Minecraft 26.x (via FastStats), behind the existing metrics toggle. The brewing counters do not report on 26.3, where the mixin that fed them no longer exists.
 
 ## [0.2.0]
 

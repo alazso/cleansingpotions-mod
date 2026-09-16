@@ -33,7 +33,9 @@ Everything is made at a brewing stand, the way you would expect:
 | Any of the three | Gunpowder | Splash version |
 | A splash version | Dragon's Breath | Lingering version |
 
-The splash and lingering steps can each be turned off in the config.
+On Minecraft 26.3 and later these are ordinary data pack recipes, living in
+`data/cleansingpotions/recipe/brewing`, so you can override or remove any of them with a data pack.
+On 26.2 they are built in and the whole brewing chain can be switched off in the config instead.
 
 ## Using them
 
@@ -47,13 +49,13 @@ It is limited to operators.
 
 Settings live in `config/cleansingpotions.json`, written on first launch, and the common ones can also
 be changed in-game through the Cloth Config screen. You can adjust the area-of-effect radius, force
-specific effects to always or never be cleared, add a throw cooldown, rename and recolour each potion,
-and gate use behind a permission on multiplayer servers. Permission gating never affects singleplayer.
+specific effects to always or never be cleared, add a throw cooldown, rename each potion, and gate use
+behind a permission on multiplayer servers. Permission gating never affects singleplayer.
 ```json
 {
-  "cleansing": { "name": "Potion of Cleansing", "color": "#FFFFFF", "lore": ["Clears every potion effect."] },
-  "soothing":  { "name": "Potion of Soothing",  "color": "#E8A33B", "lore": ["Clears harmful effects."] },
-  "purging":   { "name": "Potion of Purging",   "color": "#7E57A8", "lore": ["Clears beneficial effects."] },
+  "cleansing": { "name": "Potion of Cleansing", "lore": ["Clears every potion effect."] },
+  "soothing":  { "name": "Potion of Soothing",  "lore": ["Clears harmful effects."] },
+  "purging":   { "name": "Potion of Purging",   "lore": ["Clears beneficial effects."] },
   "onlyThrower": false,
   "radius": 4.0,
   "forceRemove": ["minecraft:bad_omen"],
@@ -63,14 +65,21 @@ and gate use behind a permission on multiplayer servers. Permission gating never
 }
 ```
 
+Potion colours are fixed and come from the resource pack rather than the config, so a resource pack
+is what changes them. Names and lore stay configurable and now apply to potions already in your
+inventory, not just newly brewed ones.
+
 ## Requirements
 
-Fabric 1.21.9 - 26.2: 
+Fabric 26.2 and 26.3:
 * Mod Menu (Optional)
 * Cloth Config (Optional)
 
-NeoForge 1.21.9 - 26.2:
+NeoForge 26.2:
 * Cloth Config (Optional)
+
+Minecraft 1.21.9 to 26.1.2 are supported by version 0.2.0, which stays available for download.
+NeoForge support for 26.3 follows once NeoForge 26.3 leaves beta.
 
 ## License
 
