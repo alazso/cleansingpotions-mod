@@ -12,20 +12,10 @@ val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
 val fabricMcRange = ">=$mcVersion <$nextMc"
 val publishGameVersions = listOf(mcVersion)
 
-stonecutter {
-    // 1.21.11+ (including unobfuscated 26.x) renamed ResourceLocation -> Identifier and moved the
-    // throwable-item projectile classes into a .throwableitemprojectile subpackage.
-    replacements.string(current.parsed >= "1.21.11") {
-        replace("ResourceLocation", "Identifier")
-        replace("location()", "identifier()")
-        replace("projectile.ThrowableItemProjectile", "projectile.throwableitemprojectile.ThrowableItemProjectile")
-    }
-    // 26.2 moved the toast manager off Minecraft onto Gui: getToastManager() -> gui.toastManager().
-    replacements.string(current.parsed >= "26.2") {
-        replace("getToastManager()", "gui.toastManager()")
-    }
-    // Minecraft 26.x (unobfuscated) API renames are added here as the compiler flags them.
-}
+// The 1.21.x-era replacement rules (ResourceLocation -> Identifier, the throwableitemprojectile
+// package move, getToastManager -> gui.toastManager) are gone: src/ now holds the 26.x names
+// directly, and every remaining node shares them. Re-adding one would be actively wrong, since
+// "projectile.ThrowableItemProjectile" is a substring of the already-replaced package path.
 
 version = "${property("version")}+$mcVersion"
 group = property("mod_group")!!
@@ -88,14 +78,25 @@ tasks.jar {
     }
 }
 
+// 26.3 made brewing data driven and deleted PotionBrewing, so the one mixin the mod has is
+// 26.2-only. From 26.3 on, the brewing recipes ship as JSON and the jar carries no mixin at all.
+val brewingIsDataDriven = mcVersion.split(".")
+    .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
+
 val resourceProps = mapOf(
     "version" to property("version").toString(),
     "fabric_loader_version" to dep("fabric_loader"),
     "fabric_minecraft_version_range" to fabricMcRange,
+    "mixin_configs" to if (brewingIsDataDriven) "[]" else """["cleansingpotions.mixins.json"]""",
+    "pack_format" to dep("pack_format"),
+    "pack_format_minor" to dep("pack_format_minor"),
 )
 tasks.processResources {
     inputs.properties(resourceProps)
-    filesMatching("fabric.mod.json") {
+    if (brewingIsDataDriven) {
+        exclude("cleansingpotions.mixins.json")
+    }
+    filesMatching(listOf("fabric.mod.json", "pack.mcmeta")) {
         expand(resourceProps)
     }
     filesMatching("cleansingpotions.mixins.json") {

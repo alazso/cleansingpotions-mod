@@ -1,5 +1,8 @@
 package so.alaz.cleansingpotions.mixin;
 
+// 26.3 made brewing data driven and deleted PotionBrewing outright, so this whole mixin is
+// 26.2-only. On 26.3 the same five recipes ship as JSON under data/cleansingpotions/recipe/brewing.
+//? if <26.3 {
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,3 +52,4 @@ public class PotionBrewingMixin {
         return result.getOrDefault(ModComponents.CLEANSE_MODE, CleanseMode.ALL).potionName();
     }
 }
+//?}

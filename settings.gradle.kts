@@ -23,6 +23,8 @@ stonecutter {
         // its own Minecraft. 1.21.x and 26.1.2 were retired in 0.3.0.
         version("26.2-fabric", "26.2").buildscript = "build.fabric-m.gradle.kts"
         version("26.2-neoforge", "26.2").buildscript = "build.neoforge.gradle.kts"
+        // NeoForge 26.3 is still 26.3.0.1-beta, so only Fabric ships for 26.3 for now.
+        version("26.3-fabric", "26.3").buildscript = "build.fabric-m.gradle.kts"
 
         vcsVersion = "26.2-fabric"
     }

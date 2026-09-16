@@ -12,20 +12,7 @@ val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
 val neoMcRange = "[$mcVersion,$nextMc)"
 val neoGameVersions = listOf(mcVersion)
 
-stonecutter {
-    // Minecraft 1.21.11 renamed ResourceLocation -> Identifier (and location() -> identifier()) and
-    // moved the throwable-item projectile classes into a .throwableitemprojectile subpackage.
-    replacements.string(current.parsed >= "1.21.11") {
-        replace("ResourceLocation", "Identifier")
-        replace("location()", "identifier()")
-        replace("projectile.ThrowableItemProjectile", "projectile.throwableitemprojectile.ThrowableItemProjectile")
-    }
-    // 26.2 moved the toast manager off Minecraft onto Gui: getToastManager() -> gui.toastManager().
-    replacements.string(current.parsed >= "26.2") {
-        replace("getToastManager()", "gui.toastManager()")
-    }
-    // Minecraft 26.x (unobfuscated) API renames are added here as the compiler flags them.
-}
+// The 1.21.x-era replacement rules are gone with those nodes; see build.fabric-m.gradle.kts.
 
 version = "${property("version")}+$mcVersion"
 group = property("mod_group")!!
@@ -100,10 +87,12 @@ val resourceProps = mapOf(
     "version" to property("version").toString(),
     "minecraft_version_range" to neoMcRange,
     "neoforge_loader_version_range" to "[4,)",
+    "pack_format" to dep("pack_format"),
+    "pack_format_minor" to dep("pack_format_minor"),
 )
 tasks.processResources {
     inputs.properties(resourceProps)
-    filesMatching("META-INF/neoforge.mods.toml") {
+    filesMatching(listOf("META-INF/neoforge.mods.toml", "pack.mcmeta")) {
         expand(resourceProps)
     }
     filesMatching("cleansingpotions.mixins.json") {

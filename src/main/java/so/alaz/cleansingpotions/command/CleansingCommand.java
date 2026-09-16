@@ -111,7 +111,13 @@ public final class CleansingCommand {
         for (ServerPlayer target : targets) {
             ItemStack item = MilkItemFactory.create(variant, mode);
             if (!target.getInventory().add(item)) {
+                // 26.3 dropped Player.drop(ItemStack, boolean); ServerPlayer.drop now takes a
+                // Prediction, and a command-issued drop is never client-predicted.
+                //? if >=26.3 {
+                /*target.drop(item, false, net.minecraft.util.Prediction.SERVER_ONLY);
+                *///?} else {
                 target.drop(item, false);
+                //?}
             }
         }
         CleansingMetrics.commandExecuted();

@@ -26,7 +26,5 @@
     "fabric-api": "*",
     "minecraft": "${fabric_minecraft_version_range}"
   },
-  "mixins": [
-    "cleansingpotions.mixins.json"
-  ]
+  "mixins": ${mixin_configs}
 }
