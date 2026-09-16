@@ -60,9 +60,9 @@ public class CleansingPotionsNeoForge {
             helper.register(ModComponents.CLEANSE_MODE_ID, ModComponents.CLEANSE_MODE));
         event.register(Registries.ITEM, helper -> {
             ModItems.build();
-            helper.register(ModItems.CLEANSING_KEY, ModItems.CLEANSING);
-            helper.register(ModItems.SPLASH_KEY, ModItems.SPLASH);
-            helper.register(ModItems.LINGERING_KEY, ModItems.LINGERING);
+            for (ModItems.Entry entry : ModItems.entries()) {
+                helper.register(entry.key(), entry.item());
+            }
         });
         event.register(Registries.ENTITY_TYPE, helper -> {
             ModEntities.build();

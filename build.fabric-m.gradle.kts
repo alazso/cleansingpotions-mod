@@ -94,7 +94,12 @@ val resourceProps = mapOf(
 tasks.processResources {
     inputs.properties(resourceProps)
     if (brewingIsDataDriven) {
+        // 26.3+: brewing is JSON, so the mixin config has nothing to apply.
         exclude("cleansingpotions.mixins.json")
+    } else {
+        // 26.2: the minecraft:brewing recipe type does not exist yet, so shipping these would
+        // only log unknown-recipe-type errors. The mixin covers brewing there instead.
+        exclude("data/cleansingpotions/recipe/brewing/**")
     }
     filesMatching(listOf("fabric.mod.json", "pack.mcmeta")) {
         expand(resourceProps)

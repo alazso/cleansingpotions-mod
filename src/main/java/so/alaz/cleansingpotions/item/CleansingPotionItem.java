@@ -24,14 +24,27 @@ import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 import so.alaz.cleansingpotions.util.PermissionGate;
 
-public class CleansingPotionItem extends Item {
+public class CleansingPotionItem extends Item implements CleansingItem {
 
-    public CleansingPotionItem(Properties properties) {
+    private final CleanseMode mode;
+
+    public CleansingPotionItem(Properties properties, CleanseMode mode) {
         super(properties);
+        this.mode = mode;
     }
 
-    // Name and lore come from config at display time, so a stack only ever carries cleanse_mode
-    // and a data pack recipe can produce one that looks identical. See MilkItemFactory.
+    @Override
+    public CleanseMode cleanseMode() {
+        return mode;
+    }
+
+    @Override
+    public MilkVariant variant() {
+        return MilkVariant.REGULAR;
+    }
+
+    // Name and lore are derived from config at display time, so a stack carries no components at
+    // all and a data pack recipe can produce one that looks identical. See MilkItemFactory.
     @Override
     public Component getName(ItemStack stack) {
         return MilkItemFactory.displayName(MilkVariant.REGULAR, MilkItemFactory.modeOf(stack));
@@ -70,7 +83,7 @@ public class CleansingPotionItem extends Item {
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
         Player player = entity instanceof Player p ? p : null;
         if (!level.isClientSide()) {
-            CleanseMode mode = stack.getOrDefault(ModComponents.CLEANSE_MODE, CleanseMode.ALL);
+            CleanseMode mode = MilkItemFactory.modeOf(stack);
             CleansingPotions.cleanser().cleanse(entity, mode);
             CleansingMetrics.potionConsumed();
         }

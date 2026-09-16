@@ -83,6 +83,10 @@ neoForge {
     }
 }
 
+// 26.3 made brewing data driven and deleted PotionBrewing; see build.fabric-m.gradle.kts.
+val brewingIsDataDriven = mcVersion.split(".")
+    .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
+
 val resourceProps = mapOf(
     "version" to property("version").toString(),
     "minecraft_version_range" to neoMcRange,
@@ -92,6 +96,10 @@ val resourceProps = mapOf(
 )
 tasks.processResources {
     inputs.properties(resourceProps)
+    if (!brewingIsDataDriven) {
+        // 26.2: the minecraft:brewing recipe type does not exist yet; the mixin covers brewing.
+        exclude("data/cleansingpotions/recipe/brewing/**")
+    }
     filesMatching(listOf("META-INF/neoforge.mods.toml", "pack.mcmeta")) {
         expand(resourceProps)
     }

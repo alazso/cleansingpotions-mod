@@ -3,6 +3,14 @@
   "item.cleansingpotions.cleansing_splash_potion": "Splash Cleansing Potion",
   "item.cleansingpotions.cleansing_lingering_potion": "Lingering Cleansing Potion",
 
+  "item.cleansingpotions.soothing_potion": "Soothing Potion",
+  "item.cleansingpotions.soothing_splash_potion": "Splash Soothing Potion",
+  "item.cleansingpotions.soothing_lingering_potion": "Lingering Soothing Potion",
+
+  "item.cleansingpotions.purging_potion": "Purging Potion",
+  "item.cleansingpotions.purging_splash_potion": "Splash Purging Potion",
+  "item.cleansingpotions.purging_lingering_potion": "Lingering Purging Potion",
+
   "potion.cleansingpotions.cleansing": "Potion of Cleansing",
   "potion.cleansingpotions.soothing": "Potion of Soothing",
   "potion.cleansingpotions.purging": "Potion of Purging",

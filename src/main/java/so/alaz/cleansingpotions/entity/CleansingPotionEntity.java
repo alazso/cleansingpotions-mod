@@ -16,8 +16,8 @@ import net.minecraft.world.phys.HitResult;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
+import so.alaz.cleansingpotions.item.MilkItemFactory;
 import so.alaz.cleansingpotions.item.MilkVariant;
-import so.alaz.cleansingpotions.item.ModComponents;
 import so.alaz.cleansingpotions.item.ModItems;
 import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 
@@ -33,7 +33,7 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
 
     @Override
     protected Item getDefaultItem() {
-        return ModItems.SPLASH;
+        return ModItems.get(MilkVariant.SPLASH, CleanseMode.ALL);
     }
 
     @Override
@@ -48,9 +48,9 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
             return;
         }
         ItemStack stack = getItem();
-        CleanseMode mode = stack.getOrDefault(ModComponents.CLEANSE_MODE, CleanseMode.ALL);
-        boolean lingering = stack.is(ModItems.LINGERING);
-        MilkVariant variant = lingering ? MilkVariant.LINGERING : MilkVariant.SPLASH;
+        CleanseMode mode = MilkItemFactory.modeOf(stack);
+        MilkVariant variant = MilkItemFactory.variantOf(stack);
+        boolean lingering = variant == MilkVariant.LINGERING;
         if (CleansingConfig.get().variantEnabled(variant)) {
             int color = mode.rgb();
             if (lingering) {

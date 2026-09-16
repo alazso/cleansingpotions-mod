@@ -24,9 +24,9 @@ public class CleansingPotionsFabric implements ModInitializer {
 
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
             ModComponents.CLEANSE_MODE_ID, ModComponents.CLEANSE_MODE);
-        Registry.register(BuiltInRegistries.ITEM, ModItems.CLEANSING_KEY, ModItems.CLEANSING);
-        Registry.register(BuiltInRegistries.ITEM, ModItems.SPLASH_KEY, ModItems.SPLASH);
-        Registry.register(BuiltInRegistries.ITEM, ModItems.LINGERING_KEY, ModItems.LINGERING);
+        for (ModItems.Entry entry : ModItems.entries()) {
+            Registry.register(BuiltInRegistries.ITEM, entry.key(), entry.item());
+        }
         Registry.register(BuiltInRegistries.ENTITY_TYPE,
             ModEntities.CLEANSING_POTION_KEY, ModEntities.CLEANSING_POTION);
         Registry.register(BuiltInRegistries.ENTITY_TYPE,
