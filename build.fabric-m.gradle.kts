@@ -87,7 +87,6 @@ val resourceProps = mapOf(
     "version" to property("version").toString(),
     "fabric_loader_version" to dep("fabric_loader"),
     "fabric_minecraft_version_range" to fabricMcRange,
-    "mixin_configs" to if (brewingIsDataDriven) "[]" else """["cleansingpotions.mixins.json"]""",
     "pack_format" to dep("pack_format"),
     "pack_format_minor" to dep("pack_format_minor"),
 )
@@ -103,6 +102,14 @@ tasks.processResources {
     }
     filesMatching(listOf("fabric.mod.json", "pack.mcmeta")) {
         expand(resourceProps)
+    }
+    if (brewingIsDataDriven) {
+        // Drop the mixin config reference, leaving an empty "mixins" array. Done by dropping the
+        // line rather than templating the whole array, so the source file stays valid JSON: an
+        // unquoted ${...} there breaks Fabric Loader's dev-time scan and every JSON tool.
+        filesMatching("fabric.mod.json") {
+            filter { line -> if (line.contains("cleansingpotions.mixins.json")) null else line }
+        }
     }
     filesMatching("cleansingpotions.mixins.json") {
         expand(mapOf("mixin_compat_level" to "JAVA_25"))
