@@ -6,10 +6,11 @@ plugins {
 val mcVersion = project.name.substringBeforeLast("-")
 fun dep(key: String): String = property("${key}_$mcVersion") as String
 
-// 26.1.2 -> 26.2 broke ABI, so each patch is its own jar: scope the dependency range and the
-// published game versions to this node's exact patch.
-val fabricMcRange = if (mcVersion == "26.2") ">=26.2 <26.3" else ">=26.1.2 <26.2"
-val publishGameVersions = if (mcVersion == "26.2") listOf("26.2") else listOf("26.1.2")
+// 26.x breaks ABI between drops and has no intermediary cushion, so each patch is its own jar:
+// scope the dependency range and the published game versions to this node's exact patch.
+val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
+val fabricMcRange = ">=$mcVersion <$nextMc"
+val publishGameVersions = listOf(mcVersion)
 
 stonecutter {
     // 1.21.11+ (including unobfuscated 26.x) renamed ResourceLocation -> Identifier and moved the

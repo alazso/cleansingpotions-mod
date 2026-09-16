@@ -6,27 +6,11 @@ plugins {
 val mcVersion = project.name.substringBeforeLast("-")
 fun dep(key: String): String = property("${key}_$mcVersion") as String
 
-// NeoForge has no intermediary cushion, so the 1.21.11 ResourceLocation->Identifier rename
-// splits the 1.21.x line (1.21.9-1.21.10 vs 1.21.11). Unobfuscated 26.x splits per patch too,
-// because 26.1.2 -> 26.2 has breaking ABI changes.
-val is26 = mcVersion.substringBefore(".").toInt() >= 26
-val neoMcRange = when {
-    mcVersion == "26.2" -> "[26.2,26.3)"
-    is26 -> "[26.1.2,26.2)"
-    mcVersion == "1.21.11" -> "[1.21.11,1.22)"
-    else -> "[1.21.9,1.21.11)"
-}
-val neoGameVersions = when {
-    mcVersion == "26.2" -> listOf("26.2")
-    is26 -> listOf("26.1.2")
-    mcVersion == "1.21.11" -> listOf("1.21.11")
-    else -> listOf("1.21.9", "1.21.10")
-}
-val neoLabel = when {
-    is26 -> mcVersion
-    mcVersion == "1.21.11" -> "1.21.11"
-    else -> "1.21.9-1.21.10"
-}
+// 26.x breaks ABI between drops and NeoForge has no intermediary cushion, so each patch is its
+// own jar: scope the dependency range and the published game versions to this node's exact patch.
+val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
+val neoMcRange = "[$mcVersion,$nextMc)"
+val neoGameVersions = listOf(mcVersion)
 
 stonecutter {
     // Minecraft 1.21.11 renamed ResourceLocation -> Identifier (and location() -> identifier()) and
@@ -43,19 +27,19 @@ stonecutter {
     // Minecraft 26.x (unobfuscated) API renames are added here as the compiler flags them.
 }
 
-version = "${property("version")}+$neoLabel"
+version = "${property("version")}+$mcVersion"
 group = property("mod_group")!!
 base { archivesName = "${property("mod_id")}-neoforge" }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(if (is26) 25 else (property("java_version") as String).toInt())
+    // 26.x runs on Java 25.
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
     withSourcesJar()
 }
 
 repositories {
     mavenCentral()
     maven("https://maven.neoforged.net/releases/")
-    maven("https://maven.parchmentmc.org/")
     maven("https://maven.shedaniel.me/")
     maven("https://repo.faststats.dev/releases")
 }
@@ -69,9 +53,9 @@ sourceSets {
 dependencies {
     // Cloth Config powers the in-game config screen, shared with Fabric.
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${dep("cloth")}")
-    // FastStats usage metrics requires Java 25, so only the 26.x node gets it.
+    // FastStats usage metrics.
     // gson is provided by Minecraft; drop FastStats's strict gson pin so it does not clash with MC's.
-    if (is26) implementation("dev.faststats.metrics:neoforge:0.27.0") {
+    implementation("dev.faststats.metrics:neoforge:0.27.0") {
         exclude(group = "com.google.code.gson", module = "gson")
     }
 
@@ -86,28 +70,21 @@ tasks.test {
 }
 
 // FastStats ships as a plain library (no mods.toml), so merge its classes into the jar for
-// runtime (26.x only; gson is excluded above, Minecraft provides it).
-if (is26) {
-    tasks.jar {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from({
-            configurations.runtimeClasspath.get()
-                    .filter { it.path.contains("dev.faststats") }
-                    .map { zipTree(it) }
-        }) {
-            exclude("module-info.class", "META-INF/MANIFEST.MF")
-        }
+// runtime (gson is excluded above, Minecraft provides it).
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from({
+        configurations.runtimeClasspath.get()
+                .filter { it.path.contains("dev.faststats") }
+                .map { zipTree(it) }
+    }) {
+        exclude("module-info.class", "META-INF/MANIFEST.MF")
     }
 }
 
 neoForge {
+    // 26.x is unobfuscated, so there are no mappings and no parchment block.
     version = dep("neoforge")
-    findProperty("parchment_$mcVersion")?.let { pv ->
-        parchment {
-            minecraftVersion = mcVersion
-            mappingsVersion = pv.toString()
-        }
-    }
     runs {
         register("client") { client() }
         register("server") { server() }
@@ -130,7 +107,7 @@ tasks.processResources {
         expand(resourceProps)
     }
     filesMatching("cleansingpotions.mixins.json") {
-        expand(mapOf("mixin_compat_level" to if (is26) "JAVA_25" else "JAVA_21"))
+        expand(mapOf("mixin_compat_level" to "JAVA_25"))
     }
 }
 
@@ -138,7 +115,7 @@ publishMods {
     file = tasks.named<org.gradle.api.tasks.bundling.AbstractArchiveTask>("jar").flatMap { it.archiveFile }
     type = me.modmuss50.mpp.ReleaseType.STABLE
     modLoaders.add("neoforge")
-    displayName = "CleansingPotions ${property("version")} (NeoForge $neoLabel)"
+    displayName = "CleansingPotions ${property("version")} (NeoForge $mcVersion)"
     version = project.version.toString()
     changelog = providers.environmentVariable("RELEASE_CHANGELOG")
         .orElse("See https://github.com/alazso/cleansingpotions-mod/blob/main/CHANGELOG.md")

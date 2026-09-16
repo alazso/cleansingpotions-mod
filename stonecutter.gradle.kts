@@ -1,12 +1,9 @@
 plugins {
     id("dev.kikugie.stonecutter")
-    // Loom 1.17 splits into two plugin ids (both on maven.fabricmc.net) so obfuscated (1.21.x)
-    // and unobfuscated (26.x) Minecraft can coexist in one build:
-    //   net.fabricmc.fabric-loom-remap -> obfuscated, Mojmap remapping  (build.fabric-o)
-    //   net.fabricmc.fabric-loom       -> unobfuscated, no remapping    (build.fabric-m)
-    id("net.fabricmc.fabric-loom-remap") version "1.17.11" apply false
+    // Minecraft 26.x is unobfuscated, so the plain loom plugin applies with no remapping step.
+    // (The obfuscated variant, net.fabricmc.fabric-loom-remap, went away with 1.21.x in 0.3.0.)
     id("net.fabricmc.fabric-loom") version "1.17.11" apply false
-    id("net.neoforged.moddev") version "2.0.141" apply false
+    id("net.neoforged.moddev") version "2.0.147" apply false
     id("me.modmuss50.mod-publish-plugin") version "0.7.4" apply false
 }
 

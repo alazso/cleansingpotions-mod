@@ -1,7 +1,7 @@
 package so.alaz.cleansingpotions.metrics;
 
 //? if >=26.1.2 {
-/*import dev.faststats.Attributes;
+import dev.faststats.Attributes;
 import dev.faststats.ErrorTracker;
 import dev.faststats.Metrics;
 import dev.faststats.data.Metric;
@@ -73,4 +73,4 @@ public final class FastStatsBridge {
                 .put("intentional", true));
     }
 }
-*///?}
+//?}

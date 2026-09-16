@@ -56,9 +56,9 @@ public final class CleansingCommand {
 
     private static Predicate<CommandSourceStack> adminCheck() {
         //? if <1.21.11 {
-        return source -> source.hasPermission(2);
-        //?} else {
-        /*return Commands.<CommandSourceStack>hasPermission(Commands.LEVEL_GAMEMASTERS);*/
+        /*return source -> source.hasPermission(2);
+        *///?} else {
+        return Commands.<CommandSourceStack>hasPermission(Commands.LEVEL_GAMEMASTERS);
         //?}
     }
 
@@ -77,16 +77,16 @@ public final class CleansingCommand {
             return 0;
         }
         //? if >=26.1.2 {
-        /*so.alaz.cleansingpotions.metrics.FastStatsBridge.reportTestError("command:testerror");
+        so.alaz.cleansingpotions.metrics.FastStatsBridge.reportTestError("command:testerror");
         CleansingMetrics.commandExecuted();
         ctx.getSource().sendSuccess(
             () -> Component.translatable("command.cleansingpotions.testerror"), true);
         return 1;
-        *///?} else {
-        ctx.getSource().sendFailure(
+        //?} else {
+        /*ctx.getSource().sendFailure(
             Component.translatable("command.cleansingpotions.testerror_unsupported"));
         return 0;
-        //?}
+        *///?}
     }
 
     private static MilkVariant variantArg(CommandContext<CommandSourceStack> ctx) {

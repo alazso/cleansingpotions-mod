@@ -2,7 +2,7 @@ package so.alaz.cleansingpotions.item;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
 import so.alaz.cleansingpotions.Constants;
 
@@ -33,7 +33,7 @@ public final class ModItems {
 
     private static ResourceKey<Item> key(String name) {
         return ResourceKey.create(Registries.ITEM,
-            ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, name));
+            Identifier.fromNamespaceAndPath(Constants.MOD_ID, name));
     }
 
     private ModItems() {
