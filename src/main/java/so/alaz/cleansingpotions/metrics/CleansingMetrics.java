@@ -1,6 +1,7 @@
 package so.alaz.cleansingpotions.metrics;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -10,8 +11,13 @@ import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.core.EffectDisposition;
 import so.alaz.cleansingpotions.item.MilkVariant;
 
-// No dev.faststats references, so this compiles on the 1.21.x nodes too. Counters reset on read
-// (sumThenReset), so each FastStats flush reports the delta since the previous one.
+// No dev.faststats references; FastStatsBridge wires the readers below into the SDK.
+//
+// Readers are side-effect free and report the total since the last successful metrics submission.
+// FastStats reads its metric suppliers not only when it submits metrics but also when it assembles
+// an error report, so a supplier that reset its counter on read would hand that count to the error
+// batch and it would never reach the dashboard. Counters are cleared by resetAll instead, which
+// FastStats runs as a flush callback only after a submission succeeds.
 public final class CleansingMetrics {
 
     private static final LongAdder POTIONS_CONSUMED = new LongAdder();
@@ -35,6 +41,16 @@ public final class CleansingMetrics {
     private static final LongAdder REMOVED_PER_CLEANSE_COUNT = new LongAdder();
     private static final LongAdder ENTITIES_PER_THROW_SUM = new LongAdder();
     private static final LongAdder ENTITIES_PER_THROW_COUNT = new LongAdder();
+
+    private static final List<LongAdder> COUNTERS = List.of(
+        POTIONS_CONSUMED, POTIONS_THROWN, CLEANSE_OPERATIONS, EFFECTS_REMOVED, LINGERING_CLOUDS,
+        POTIONS_BREWED, COOLDOWN_BLOCKS, PERMISSION_DENIALS, COMMANDS_EXECUTED, CONFIG_RELOADS,
+        REMOVED_PER_CLEANSE_SUM, REMOVED_PER_CLEANSE_COUNT, ENTITIES_PER_THROW_SUM,
+        ENTITIES_PER_THROW_COUNT);
+
+    private static final List<Map<String, LongAdder>> COUNTER_MAPS = List.of(
+        CLEANSES_BY_MODE, POTIONS_BY_VARIANT, REMOVED_BY_DISPOSITION, REMOVED_BY_TYPE,
+        BREWS_BY_RECIPE);
 
     private CleansingMetrics() {
     }
@@ -97,82 +113,93 @@ public final class CleansingMetrics {
         CONFIG_RELOADS.increment();
     }
 
-    public static long takePotionsConsumed() {
-        return POTIONS_CONSUMED.sumThenReset();
+    public static long peekPotionsConsumed() {
+        return POTIONS_CONSUMED.sum();
     }
 
-    public static long takePotionsThrown() {
-        return POTIONS_THROWN.sumThenReset();
+    public static long peekPotionsThrown() {
+        return POTIONS_THROWN.sum();
     }
 
-    public static long takeCleanseOperations() {
-        return CLEANSE_OPERATIONS.sumThenReset();
+    public static long peekCleanseOperations() {
+        return CLEANSE_OPERATIONS.sum();
     }
 
-    public static long takeEffectsRemoved() {
-        return EFFECTS_REMOVED.sumThenReset();
+    public static long peekEffectsRemoved() {
+        return EFFECTS_REMOVED.sum();
     }
 
-    public static long takeLingeringClouds() {
-        return LINGERING_CLOUDS.sumThenReset();
+    public static long peekLingeringClouds() {
+        return LINGERING_CLOUDS.sum();
     }
 
-    public static long takePotionsBrewed() {
-        return POTIONS_BREWED.sumThenReset();
+    public static long peekPotionsBrewed() {
+        return POTIONS_BREWED.sum();
     }
 
-    public static long takeCooldownBlocks() {
-        return COOLDOWN_BLOCKS.sumThenReset();
+    public static long peekCooldownBlocks() {
+        return COOLDOWN_BLOCKS.sum();
     }
 
-    public static long takePermissionDenials() {
-        return PERMISSION_DENIALS.sumThenReset();
+    public static long peekPermissionDenials() {
+        return PERMISSION_DENIALS.sum();
     }
 
-    public static long takeCommandsExecuted() {
-        return COMMANDS_EXECUTED.sumThenReset();
+    public static long peekCommandsExecuted() {
+        return COMMANDS_EXECUTED.sum();
     }
 
-    public static long takeConfigReloads() {
-        return CONFIG_RELOADS.sumThenReset();
+    public static long peekConfigReloads() {
+        return CONFIG_RELOADS.sum();
     }
 
-    public static Map<String, Number> takeCleansesByMode() {
-        return drain(CLEANSES_BY_MODE);
+    public static Map<String, Number> peekCleansesByMode() {
+        return snapshot(CLEANSES_BY_MODE);
     }
 
-    public static Map<String, Number> takePotionsByVariant() {
-        return drain(POTIONS_BY_VARIANT);
+    public static Map<String, Number> peekPotionsByVariant() {
+        return snapshot(POTIONS_BY_VARIANT);
     }
 
-    public static Map<String, Number> takeRemovedByDisposition() {
-        return drain(REMOVED_BY_DISPOSITION);
+    public static Map<String, Number> peekRemovedByDisposition() {
+        return snapshot(REMOVED_BY_DISPOSITION);
     }
 
-    public static Map<String, Number> takeRemovedByType() {
-        return drain(REMOVED_BY_TYPE);
+    public static Map<String, Number> peekRemovedByType() {
+        return snapshot(REMOVED_BY_TYPE);
     }
 
-    public static Map<String, Number> takeBrewsByRecipe() {
-        return drain(BREWS_BY_RECIPE);
+    public static Map<String, Number> peekBrewsByRecipe() {
+        return snapshot(BREWS_BY_RECIPE);
     }
 
-    public static double takeRemovedPerCleanse() {
+    public static double peekRemovedPerCleanse() {
         return average(REMOVED_PER_CLEANSE_SUM, REMOVED_PER_CLEANSE_COUNT);
     }
 
-    public static double takeEntitiesPerThrow() {
+    public static double peekEntitiesPerThrow() {
         return average(ENTITIES_PER_THROW_SUM, ENTITIES_PER_THROW_COUNT);
+    }
+
+    /**
+     * Clears every counter. Registered as the FastStats flush callback, which only runs once a
+     * metrics submission has been accepted, so a failed submission keeps its counts for the next.
+     * Map entries are zeroed rather than removed, so an increment racing the reset cannot land on a
+     * detached counter.
+     */
+    public static void resetAll() {
+        COUNTERS.forEach(LongAdder::reset);
+        COUNTER_MAPS.forEach(map -> map.values().forEach(LongAdder::reset));
     }
 
     private static void bump(Map<String, LongAdder> map, String key) {
         map.computeIfAbsent(key, k -> new LongAdder()).increment();
     }
 
-    private static Map<String, Number> drain(Map<String, LongAdder> map) {
+    private static Map<String, Number> snapshot(Map<String, LongAdder> map) {
         Map<String, Number> out = new HashMap<>();
         for (Map.Entry<String, LongAdder> entry : map.entrySet()) {
-            long value = entry.getValue().sumThenReset();
+            long value = entry.getValue().sum();
             if (value != 0L) {
                 out.put(entry.getKey(), value);
             }
@@ -181,8 +208,7 @@ public final class CleansingMetrics {
     }
 
     private static double average(LongAdder sum, LongAdder count) {
-        long samples = count.sumThenReset();
-        long total = sum.sumThenReset();
-        return samples == 0L ? 0.0 : (double) total / (double) samples;
+        long samples = count.sum();
+        return samples == 0L ? 0.0 : (double) sum.sum() / (double) samples;
     }
 }

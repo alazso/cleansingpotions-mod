@@ -11,8 +11,16 @@
   `string` sources these are not applicable (`—`). `min`/`max` left as `—` mean unbounded;
   bounds marked *(suggested)* are sane guardrails, not hard requirements.
 
-Auto-collected environment metrics (mod version, Minecraft version, loader, player/server
-counts) come from `dev.faststats.Metrics.Factory::create`
+Built-in environment metrics (mod version, game version, loader, player and server counts) are
+collected by the SDK itself and need no data source here. Two SDK changes matter for dashboards:
+`minecraft_version` was renamed to `game_version` in SDK 0.28.1, so jars built on an older SDK
+still send the old key, and SDK 0.29.4 added a boolean `client` that separates client installs
+from servers.
+
+**Reporting semantics.** Counters report the total since the last successful metrics submission.
+The suppliers only read (`CleansingMetrics.peek*`), because FastStats also reads them when it
+assembles an error report. They are cleared by `CleansingMetrics.resetAll`, registered through
+`Metrics.Factory#onFlush`, which runs only after a submission is accepted.
 
 ---
 

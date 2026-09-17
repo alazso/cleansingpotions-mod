@@ -77,6 +77,13 @@ public final class CleansingCommand {
             return 0;
         }
         //? if >=26.1.2 {
+        // FastStats sends nothing on its first run or when the server owner opted out, so say that
+        // instead of claiming a report went out.
+        if (!so.alaz.cleansingpotions.metrics.FastStatsBridge.errorsWillSend()) {
+            ctx.getSource().sendFailure(
+                Component.translatable("command.cleansingpotions.testerror_inactive"));
+            return 0;
+        }
         so.alaz.cleansingpotions.metrics.FastStatsBridge.reportTestError("command:testerror");
         CleansingMetrics.commandExecuted();
         ctx.getSource().sendSuccess(

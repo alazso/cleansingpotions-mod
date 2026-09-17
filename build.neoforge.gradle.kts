@@ -40,11 +40,13 @@ sourceSets {
 dependencies {
     // Cloth Config powers the in-game config screen, shared with Fabric.
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${dep("cloth")}")
-    // FastStats usage metrics.
-    // gson is provided by Minecraft; drop FastStats's strict gson pin so it does not clash with MC's.
-    implementation("dev.faststats.metrics:neoforge:0.27.0") {
+    // FastStats metrics and error tracking. Since SDK 0.29 the modded artifact is a mod in its own
+    // right (id "faststats") and ships jar-in-jar instead of being merged into our classes.
+    // gson is provided by Minecraft; drop FastStats's gson pin so it never shadows Minecraft's.
+    implementation("dev.faststats.metrics:neoforge:${dep("faststats_neoforge")}") {
         exclude(group = "com.google.code.gson", module = "gson")
     }
+    jarJar("dev.faststats.metrics:neoforge:${dep("faststats_neoforge")}")
 
     // Pure-core unit tests (no Minecraft types).
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
@@ -56,25 +58,19 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// FastStats ships as a plain library (no mods.toml), so merge its classes into the jar for
-// runtime (gson is excluded above, Minecraft provides it).
-tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from({
-        configurations.runtimeClasspath.get()
-                .filter { it.path.contains("dev.faststats") }
-                .map { zipTree(it) }
-    }) {
-        exclude("module-info.class", "META-INF/MANIFEST.MF")
-    }
-}
-
 neoForge {
     // 26.x is unobfuscated, so there are no mappings and no parchment block.
     version = dep("neoforge")
     runs {
         register("client") { client() }
         register("server") { server() }
+        // Dev runs never report to FastStats, so testing does not show up as real servers on the
+        // dashboard. Pass -Pfaststats to a run task to exercise the integration anyway.
+        configureEach {
+            if (!providers.gradleProperty("faststats").isPresent) {
+                systemProperty("faststats.enabled", "false")
+            }
+        }
     }
     mods {
         register(property("mod_id") as String) {

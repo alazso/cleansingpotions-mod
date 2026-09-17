@@ -3,6 +3,7 @@ package so.alaz.cleansingpotions.metrics;
 //? if >=26.1.2 {
 import dev.faststats.Attributes;
 import dev.faststats.ErrorTracker;
+import dev.faststats.FastStatsContext;
 import dev.faststats.Metrics;
 import dev.faststats.data.Metric;
 import so.alaz.cleansingpotions.config.CleansingConfig;
@@ -10,6 +11,7 @@ import so.alaz.cleansingpotions.config.CleansingConfig;
 public final class FastStatsBridge {
 
     private static volatile ErrorTracker errorTracker;
+    private static volatile FastStatsContext context;
 
     private FastStatsBridge() {
     }
@@ -17,23 +19,23 @@ public final class FastStatsBridge {
     // Each id must match a data source defined in the FastStats dashboard (docs/faststats-data-sources.md).
     public static Metrics registerMetrics(Metrics.Factory factory) {
         return factory
-            .addMetric(Metric.number("potions_consumed", CleansingMetrics::takePotionsConsumed))
-            .addMetric(Metric.number("potions_thrown", CleansingMetrics::takePotionsThrown))
-            .addMetric(Metric.number("cleanse_operations", CleansingMetrics::takeCleanseOperations))
-            .addMetric(Metric.number("effects_removed", CleansingMetrics::takeEffectsRemoved))
-            .addMetric(Metric.number("lingering_clouds_spawned", CleansingMetrics::takeLingeringClouds))
-            .addMetric(Metric.number("potions_brewed", CleansingMetrics::takePotionsBrewed))
-            .addMetric(Metric.number("cooldown_blocks", CleansingMetrics::takeCooldownBlocks))
-            .addMetric(Metric.number("permission_denials", CleansingMetrics::takePermissionDenials))
-            .addMetric(Metric.number("commands_executed", CleansingMetrics::takeCommandsExecuted))
-            .addMetric(Metric.number("config_reloads", CleansingMetrics::takeConfigReloads))
-            .addMetric(Metric.numberMap("cleanses_by_mode", CleansingMetrics::takeCleansesByMode))
-            .addMetric(Metric.numberMap("potions_used_by_variant", CleansingMetrics::takePotionsByVariant))
-            .addMetric(Metric.numberMap("effects_removed_by_disposition", CleansingMetrics::takeRemovedByDisposition))
-            .addMetric(Metric.numberMap("effects_removed_by_type", CleansingMetrics::takeRemovedByType))
-            .addMetric(Metric.numberMap("brews_by_recipe", CleansingMetrics::takeBrewsByRecipe))
-            .addMetric(Metric.number("effects_removed_per_cleanse", CleansingMetrics::takeRemovedPerCleanse))
-            .addMetric(Metric.number("entities_affected_per_throw", CleansingMetrics::takeEntitiesPerThrow))
+            .addMetric(Metric.number("potions_consumed", CleansingMetrics::peekPotionsConsumed))
+            .addMetric(Metric.number("potions_thrown", CleansingMetrics::peekPotionsThrown))
+            .addMetric(Metric.number("cleanse_operations", CleansingMetrics::peekCleanseOperations))
+            .addMetric(Metric.number("effects_removed", CleansingMetrics::peekEffectsRemoved))
+            .addMetric(Metric.number("lingering_clouds_spawned", CleansingMetrics::peekLingeringClouds))
+            .addMetric(Metric.number("potions_brewed", CleansingMetrics::peekPotionsBrewed))
+            .addMetric(Metric.number("cooldown_blocks", CleansingMetrics::peekCooldownBlocks))
+            .addMetric(Metric.number("permission_denials", CleansingMetrics::peekPermissionDenials))
+            .addMetric(Metric.number("commands_executed", CleansingMetrics::peekCommandsExecuted))
+            .addMetric(Metric.number("config_reloads", CleansingMetrics::peekConfigReloads))
+            .addMetric(Metric.numberMap("cleanses_by_mode", CleansingMetrics::peekCleansesByMode))
+            .addMetric(Metric.numberMap("potions_used_by_variant", CleansingMetrics::peekPotionsByVariant))
+            .addMetric(Metric.numberMap("effects_removed_by_disposition", CleansingMetrics::peekRemovedByDisposition))
+            .addMetric(Metric.numberMap("effects_removed_by_type", CleansingMetrics::peekRemovedByType))
+            .addMetric(Metric.numberMap("brews_by_recipe", CleansingMetrics::peekBrewsByRecipe))
+            .addMetric(Metric.number("effects_removed_per_cleanse", CleansingMetrics::peekRemovedPerCleanse))
+            .addMetric(Metric.number("entities_affected_per_throw", CleansingMetrics::peekEntitiesPerThrow))
             .addMetric(Metric.number("cleanse_radius", () -> CleansingConfig.get().radius))
             .addMetric(Metric.bool("cooldown_enabled", () -> CleansingConfig.get().cooldownEnabled))
             .addMetric(Metric.number("cooldown_seconds", () -> CleansingConfig.get().cooldownSeconds))
@@ -49,7 +51,25 @@ public final class FastStatsBridge {
                 () -> CleansingConfig.get().forceRemove.toArray(new String[0])))
             .addMetric(Metric.stringArray("force_keep_effects",
                 () -> CleansingConfig.get().forceKeep.toArray(new String[0])))
+            // Suppliers above only read; counters reset once a submission is accepted.
+            .onFlush(CleansingMetrics::resetAll)
             .create();
+    }
+
+    /** Remembers the loader's context, so commands can ask whether FastStats will actually send. */
+    public static <C extends FastStatsContext> C attach(C created) {
+        context = created;
+        return created;
+    }
+
+    /**
+     * Whether a tracked error will reach FastStats. False when metrics are off in our own config
+     * (no context was created), on the SDK's first run, or when the server owner opted out in
+     * config/faststats/config.properties.
+     */
+    public static boolean errorsWillSend() {
+        FastStatsContext current = context;
+        return current != null && current.errorTrackerService().isPresent();
     }
 
     // Requires "Error Tracking" enabled in the FastStats project Features.

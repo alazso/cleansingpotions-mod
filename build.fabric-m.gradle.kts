@@ -49,11 +49,13 @@ dependencies {
     implementation("net.fabricmc.fabric-api:fabric-api:${dep("fabric_api")}")
     implementation("com.terraformersmc:modmenu:${dep("modmenu")}")
     implementation("me.shedaniel.cloth:cloth-config-fabric:${dep("cloth")}")
-    // FastStats usage metrics (requires Java 25; this modern buildscript is 26.x only).
-    // gson is provided by Minecraft; drop FastStats's strict gson pin so it does not clash with MC's.
-    implementation("dev.faststats.metrics:fabric:0.27.0") {
+    // FastStats metrics and error tracking. Since SDK 0.29 the modded artifact is a mod in its own
+    // right (id "faststats") and ships jar-in-jar instead of being merged into our classes.
+    // gson is provided by Minecraft; drop FastStats's gson pin so it never shadows Minecraft's.
+    implementation("dev.faststats.metrics:fabric:${dep("faststats_fabric")}") {
         exclude(group = "com.google.code.gson", module = "gson")
     }
+    include("dev.faststats.metrics:fabric:${dep("faststats_fabric")}")
 
     // Pure-core unit tests (no Minecraft types).
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
@@ -65,16 +67,15 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// FastStats ships as a plain library (no fabric.mod.json), so merge its classes into the jar
-// for runtime (gson is excluded above; Minecraft provides it).
-tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from({
-        configurations.runtimeClasspath.get()
-                .filter { it.path.contains("dev.faststats") }
-                .map { zipTree(it) }
-    }) {
-        exclude("module-info.class", "META-INF/MANIFEST.MF")
+// Dev runs never report to FastStats, so testing does not show up as real servers on the dashboard.
+// Pass -Pfaststats to a run task to exercise the integration anyway.
+loom {
+    runs {
+        configureEach {
+            if (!providers.gradleProperty("faststats").isPresent) {
+                vmArg("-Dfaststats.enabled=false")
+            }
+        }
     }
 }
 
@@ -117,7 +118,7 @@ tasks.processResources {
 }
 
 publishMods {
-    // No-remap loom: the final artifact is the jar task (no remapJar), with FastStats bundled in.
+    // No-remap loom: the final artifact is the jar task (no remapJar), with FastStats nested inside.
     file = tasks.named<org.gradle.api.tasks.bundling.AbstractArchiveTask>("jar").flatMap { it.archiveFile }
     type = me.modmuss50.mpp.ReleaseType.STABLE
     modLoaders.add("fabric")

@@ -67,7 +67,7 @@ public final class CleansingConfigScreen {
             .setTooltip(Component.literal("Toast on join when a newer version is available (anonymous Modrinth check)."))
             .setSaveConsumer(v -> cfg.checkForUpdates = v).build());
         misc.addEntry(entry.startBooleanToggle(Component.literal("Metrics"), cfg.metrics)
-            .setTooltip(Component.literal("Anonymous usage metrics via FastStats (26.x only)."))
+            .setTooltip(Component.literal("Pseudonymous usage metrics and error reports via FastStats."))
             .setSaveConsumer(v -> cfg.metrics = v).build());
         misc.addEntry(entry.startTextDescription(Component.literal(
             "§7Effect force-lists and per-potion name/lore are edited in config/cleansingpotions.json. Potion colours are fixed and come from the resource pack.")).build());
