@@ -3,20 +3,15 @@ package so.alaz.cleansingpotions.item;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemUseAnimation;
-import net.minecraft.world.item.ItemUtils;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.gameevent.GameEvent;
 
 import java.util.function.Consumer;
 import so.alaz.cleansingpotions.CleansingPotions;
@@ -57,15 +52,8 @@ public class CleansingPotionItem extends Item implements CleansingItem {
         MilkItemFactory.loreLines(MilkItemFactory.modeOf(stack)).forEach(adder);
     }
 
-    @Override
-    public ItemUseAnimation getUseAnimation(ItemStack stack) {
-        return ItemUseAnimation.DRINK;
-    }
-
-    @Override
-    public int getUseDuration(ItemStack stack, LivingEntity entity) {
-        return 32;
-    }
+    // Use animation and duration come from the CONSUMABLE component (see ModItems#drinkable), so
+    // they are not overridden here.
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
@@ -76,30 +64,19 @@ public class CleansingPotionItem extends Item implements CleansingItem {
                 Component.translatable("message.cleansingpotions.no_use").withStyle(ChatFormatting.RED));
             return InteractionResult.FAIL;
         }
-        return ItemUtils.startUsingInstantly(level, player, hand);
+        return super.use(level, player, hand);
     }
 
     @Override
     public ItemStack finishUsingItem(ItemStack stack, Level level, LivingEntity entity) {
-        Player player = entity instanceof Player p ? p : null;
+        // Cleanse first, while the stack still holds the potion. super then does everything a
+        // vanilla drink does on finishing: the closing gulp, the use stat, the consume_item
+        // advancement trigger, the drink game event, and shrinking the stack. The empty bottle
+        // comes back through USE_REMAINDER.
         if (!level.isClientSide()) {
-            CleanseMode mode = MilkItemFactory.modeOf(stack);
-            CleansingPotions.cleanser().cleanse(entity, mode);
+            CleansingPotions.cleanser().cleanse(entity, MilkItemFactory.modeOf(stack));
             CleansingMetrics.potionConsumed();
         }
-        if (player != null) {
-            player.awardStat(Stats.ITEM_USED.get(this));
-            stack.consume(1, player);
-        }
-        entity.gameEvent(GameEvent.DRINK);
-        if (player == null || !player.hasInfiniteMaterials()) {
-            if (stack.isEmpty()) {
-                return new ItemStack(Items.GLASS_BOTTLE);
-            }
-            if (player != null) {
-                player.getInventory().add(new ItemStack(Items.GLASS_BOTTLE));
-            }
-        }
-        return stack;
+        return super.finishUsingItem(stack, level, entity);
     }
 }

@@ -1,9 +1,12 @@
 package so.alaz.cleansingpotions.item;
 
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.component.Consumables;
 import so.alaz.cleansingpotions.Constants;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
@@ -51,13 +54,25 @@ public final class ModItems {
                 ResourceKey<Item> key = key(path(variant, mode));
                 Item.Properties properties = new Item.Properties().setId(key).stacksTo(1);
                 Item item = variant == MilkVariant.REGULAR
-                    ? new CleansingPotionItem(properties, mode)
+                    ? new CleansingPotionItem(drinkable(properties), mode)
                     : new CleansingThrowItem(properties, variant, mode);
                 byMode.put(mode, item);
                 ENTRIES.add(new Entry(variant, mode, key, item));
             }
             BY_VARIANT.put(variant, byMode);
         }
+    }
+
+    /**
+     * Makes an item drink exactly like a vanilla potion. Since 1.21.2 the drinking animation and
+     * duration, the gulping sounds, the closing gulp, the use stat, and the consume_item advancement
+     * trigger all come from the CONSUMABLE component, and the empty bottle from USE_REMAINDER. An
+     * item that only overrides its use animation looks right but drinks in silence.
+     */
+    private static Item.Properties drinkable(Item.Properties properties) {
+        return properties
+            .component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)
+            .usingConvertsTo(Items.GLASS_BOTTLE);
     }
 
     /** Every item with its registry key, for the loader-specific registration calls. */

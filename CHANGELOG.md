@@ -14,6 +14,7 @@ semantic versioning.
 - Potion colour is no longer a config option. Colours are fixed and come from the resource pack, because the tint is chosen by the item model and a resource pack cannot read runtime config. The `color` field in each appearance block is ignored and can be deleted.
 - Soothing and Purging potions brewed before 0.3.0 keep working, though they show the Cleansing tint until re-brewed.
 - Added anonymous gameplay metrics and error reporting on Minecraft 26.x (via FastStats), behind the existing metrics toggle. The brewing counters do not report on 26.3, where the mixin that fed them no longer exists.
+- Fixed drinking a cleansing potion making no sound. Drinking now also counts toward advancements that track consumed items, the same as a vanilla potion.
 
 ## [0.2.0]
 
