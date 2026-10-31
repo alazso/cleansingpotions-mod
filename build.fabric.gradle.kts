@@ -10,7 +10,6 @@ fun dep(key: String): String = property("${key}_$mcVersion") as String
 // scope the dependency range and the published game versions to this node's exact patch.
 val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
 val fabricMcRange = ">=$mcVersion <$nextMc-"
-val publishGameVersions = listOf(mcVersion)
 
 // The 1.21.x-era replacement rules (ResourceLocation -> Identifier, the throwableitemprojectile
 // package move, getToastManager -> gui.toastManager) are gone: src/ now holds the 26.x names
@@ -129,7 +128,7 @@ publishMods {
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = property("modrinth_id").toString()
-        minecraftVersions.addAll(publishGameVersions)
+        minecraftVersions.add(mcVersion)
         requires("fabric-api")
         optional("cloth-config")
         optional("modmenu")
@@ -137,7 +136,7 @@ publishMods {
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
         projectId = property("curseforge_id").toString()
-        minecraftVersions.addAll(publishGameVersions)
+        minecraftVersions.add(mcVersion)
         client = true
         server = true
         requires { slug = "fabric-api" }

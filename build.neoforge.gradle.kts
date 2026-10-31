@@ -9,7 +9,6 @@ fun dep(key: String): String = property("${key}_$mcVersion") as String
 // The nested FastStats mod requires this exact Minecraft version and FML treats a missing required
 // dependency as fatal, so a wider range here could never load.
 val neoMcRange = "[$mcVersion]"
-val neoGameVersions = listOf(mcVersion)
 
 // The 1.21.x-era replacement rules are gone with those nodes; see build.fabric.gradle.kts.
 
@@ -124,13 +123,13 @@ publishMods {
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = property("modrinth_id").toString()
-        minecraftVersions.addAll(neoGameVersions)
+        minecraftVersions.add(mcVersion)
         optional("cloth-config")
     }
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
         projectId = property("curseforge_id").toString()
-        minecraftVersions.addAll(neoGameVersions)
+        minecraftVersions.add(mcVersion)
         client = true
         server = true
         optional { slug = "cloth-config" }
