@@ -29,8 +29,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
 
       - name: Resolve version
         id: version
@@ -71,7 +69,7 @@ jobs:
             exit 0
           fi
           ASSET_COUNT="$(gh release view "$TAG" --json assets -q '.assets | length')"
-          # Four jars: Fabric and NeoForge for each of 26.2 and 26.3.
+          # One jar per Stonecutter node.
           if [ "$ASSET_COUNT" -ge 4 ]; then
             echo "Release $TAG already published; skipping."
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -92,7 +90,7 @@ jobs:
 
       - name: Build every version and loader
         if: steps.published.outputs.skip != 'true'
-        run: ./gradlew chiseledBuild --stacktrace
+        run: ./gradlew chiseledBuild --continue --stacktrace
 
       - name: Stage release artifacts
         if: steps.published.outputs.skip != 'true'
@@ -102,6 +100,11 @@ jobs:
           mkdir -p "$STAGING"
           find versions -path '*/build/libs/*.jar' ! -name '*-sources.jar' -exec cp {} "$STAGING/" \;
           ls -lh "$STAGING"
+          JARS="$(find "$STAGING" -name '*.jar' | wc -l)"
+          if [ "$JARS" -ne 4 ]; then
+            echo "Expected 4 jars, found $JARS" >&2
+            exit 1
+          fi
 
       - name: Extract changelog notes
         if: steps.published.outputs.skip != 'true'

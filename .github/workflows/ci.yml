@@ -31,7 +31,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v6
 
       - name: Build every version and loader
-        run: ./gradlew chiseledBuild --stacktrace
+        run: ./gradlew chiseledBuild --continue --stacktrace
 
       - name: Upload jars (snapshot)
         uses: actions/upload-artifact@v7
