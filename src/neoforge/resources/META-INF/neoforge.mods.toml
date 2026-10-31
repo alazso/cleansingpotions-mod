@@ -1,6 +1,7 @@
 modLoader = "javafml"
 loaderVersion = "${neoforge_loader_version_range}"
 license = "MIT"
+issueTrackerURL = "https://github.com/alazso/cleansingpotions-mod/issues"
 
 [[mixins]]
 config = "cleansingpotions.mixins.json"
@@ -13,7 +14,7 @@ description = '''
 Milk-brewed potions that cleanse status effects: drink, splash, or lingering.
 '''
 authors = "Alazso"
-displayURL = "https://github.com/alazso/cleansingpotions"
+displayURL = "https://github.com/alazso/cleansingpotions-mod"
 
 [[dependencies.cleansingpotions]]
 modId = "neoforge"
@@ -28,3 +29,10 @@ type = "required"
 versionRange = "${minecraft_version_range}"
 ordering = "NONE"
 side = "BOTH"
+
+[[dependencies.cleansingpotions]]
+modId = "cloth_config"
+type = "optional"
+versionRange = "[0,)"
+ordering = "NONE"
+side = "CLIENT"
