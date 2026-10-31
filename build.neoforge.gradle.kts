@@ -49,8 +49,8 @@ dependencies {
     jarJar("dev.faststats.metrics:neoforge:${dep("faststats_neoforge")}")
 
     // Pure-core unit tests (no Minecraft types).
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
-    testImplementation("org.assertj:assertj-core:3.27.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+    testImplementation("org.assertj:assertj-core:3.27.7")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -92,12 +92,23 @@ val resourceProps = mapOf(
 )
 tasks.processResources {
     inputs.properties(resourceProps)
-    if (!brewingIsDataDriven) {
+    if (brewingIsDataDriven) {
+        // 26.3+: brewing is JSON and the mixin class is compiled out, so the config must not ship.
+        exclude("cleansingpotions.mixins.json")
+    } else {
         // 26.2: the minecraft:brewing recipe type does not exist yet; the mixin covers brewing.
         exclude("data/cleansingpotions/recipe/brewing/**")
     }
     filesMatching(listOf("META-INF/neoforge.mods.toml", "pack.mcmeta")) {
         expand(resourceProps)
+    }
+    if (brewingIsDataDriven) {
+        // Drop the [[mixins]] table: NeoForge would otherwise look for a config that is not in the jar.
+        filesMatching("META-INF/neoforge.mods.toml") {
+            filter { line ->
+                if (line == "[[mixins]]" || line.contains("cleansingpotions.mixins.json")) null else line
+            }
+        }
     }
     filesMatching("cleansingpotions.mixins.json") {
         expand(mapOf("mixin_compat_level" to "JAVA_25"))
@@ -124,6 +135,8 @@ publishMods {
         accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
         projectId = property("curseforge_id").toString()
         minecraftVersions.addAll(neoGameVersions)
+        client = true
+        server = true
         optional { slug = "cloth-config" }
     }
 }

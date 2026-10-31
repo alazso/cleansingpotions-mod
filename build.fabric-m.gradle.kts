@@ -58,8 +58,8 @@ dependencies {
     include("dev.faststats.metrics:fabric:${dep("faststats_fabric")}")
 
     // Pure-core unit tests (no Minecraft types).
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
-    testImplementation("org.assertj:assertj-core:3.27.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+    testImplementation("org.assertj:assertj-core:3.27.7")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -73,7 +73,7 @@ loom {
     runs {
         configureEach {
             if (!providers.gradleProperty("faststats").isPresent) {
-                vmArg("-Dfaststats.enabled=false")
+                systemProperties.put("faststats.enabled", "false")
             }
         }
     }
@@ -86,7 +86,7 @@ val brewingIsDataDriven = mcVersion.split(".")
 
 val resourceProps = mapOf(
     "version" to property("version").toString(),
-    "fabric_loader_version" to dep("fabric_loader"),
+    "fabric_loader_version" to property("fabric_loader_min").toString(),
     "fabric_minecraft_version_range" to fabricMcRange,
     "pack_format" to dep("pack_format"),
     "pack_format_minor" to dep("pack_format_minor"),
@@ -141,6 +141,8 @@ publishMods {
         accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
         projectId = property("curseforge_id").toString()
         minecraftVersions.addAll(publishGameVersions)
+        client = true
+        server = true
         requires { slug = "fabric-api" }
         optional { slug = "cloth-config" }
         optional { slug = "modmenu" }
