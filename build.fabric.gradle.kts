@@ -122,6 +122,7 @@ publishMods {
     // Distinct version number from the NeoForge 26.x jar (both share the 26.2 game version).
     version = "$modVersion+fabric-$mcVersion"
     changelog = providers.environmentVariable("RELEASE_CHANGELOG")
+        .filter { it.isNotBlank() }
         .orElse("See https://github.com/alazso/cleansingpotions-mod/blob/main/CHANGELOG.md")
     dryRun = providers.environmentVariable("MODRINTH_TOKEN").getOrNull() == null
 

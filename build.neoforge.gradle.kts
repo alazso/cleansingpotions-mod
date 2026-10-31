@@ -117,6 +117,7 @@ publishMods {
     displayName = "CleansingPotions $modVersion (NeoForge $mcVersion)"
     version = "$modVersion+neoforge-$mcVersion"
     changelog = providers.environmentVariable("RELEASE_CHANGELOG")
+        .filter { it.isNotBlank() }
         .orElse("See https://github.com/alazso/cleansingpotions-mod/blob/main/CHANGELOG.md")
     dryRun = providers.environmentVariable("MODRINTH_TOKEN").getOrNull() == null
 
