@@ -6,10 +6,9 @@ plugins {
 val mcVersion = project.name.substringBeforeLast("-")
 fun dep(key: String): String = property("${key}_$mcVersion") as String
 
-// 26.x breaks ABI between drops and NeoForge has no intermediary cushion, so each patch is its
-// own jar: scope the dependency range and the published game versions to this node's exact patch.
-val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
-val neoMcRange = "[$mcVersion,$nextMc)"
+// The nested FastStats mod requires this exact Minecraft version and FML treats a missing required
+// dependency as fatal, so a wider range here could never load.
+val neoMcRange = "[$mcVersion]"
 val neoGameVersions = listOf(mcVersion)
 
 // The 1.21.x-era replacement rules are gone with those nodes; see build.fabric.gradle.kts.

@@ -9,7 +9,7 @@ fun dep(key: String): String = property("${key}_$mcVersion") as String
 // 26.x breaks ABI between drops and has no intermediary cushion, so each patch is its own jar:
 // scope the dependency range and the published game versions to this node's exact patch.
 val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
-val fabricMcRange = ">=$mcVersion <$nextMc"
+val fabricMcRange = ">=$mcVersion <$nextMc-"
 val publishGameVersions = listOf(mcVersion)
 
 // The 1.21.x-era replacement rules (ResourceLocation -> Identifier, the throwableitemprojectile
