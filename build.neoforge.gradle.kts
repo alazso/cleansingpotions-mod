@@ -14,7 +14,8 @@ val neoGameVersions = listOf(mcVersion)
 
 // The 1.21.x-era replacement rules are gone with those nodes; see build.fabric.gradle.kts.
 
-version = "${property("version")}+$mcVersion"
+val modVersion = property("version").toString()
+version = "$modVersion+$mcVersion"
 group = property("mod_group")!!
 base { archivesName = "${property("mod_id")}-neoforge" }
 
@@ -84,7 +85,7 @@ val brewingIsDataDriven = mcVersion.split(".")
     .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
 
 val resourceProps = mapOf(
-    "version" to property("version").toString(),
+    "version" to project.version.toString(),
     "minecraft_version_range" to neoMcRange,
     "neoforge_loader_version_range" to "[4,)",
     "pack_format" to dep("pack_format"),
@@ -119,8 +120,8 @@ publishMods {
     file = tasks.named<org.gradle.api.tasks.bundling.AbstractArchiveTask>("jar").flatMap { it.archiveFile }
     type = me.modmuss50.mpp.ReleaseType.STABLE
     modLoaders.add("neoforge")
-    displayName = "CleansingPotions ${property("version")} (NeoForge $mcVersion)"
-    version = project.version.toString()
+    displayName = "CleansingPotions $modVersion (NeoForge $mcVersion)"
+    version = "$modVersion+neoforge-$mcVersion"
     changelog = providers.environmentVariable("RELEASE_CHANGELOG")
         .orElse("See https://github.com/alazso/cleansingpotions-mod/blob/main/CHANGELOG.md")
     dryRun = providers.environmentVariable("MODRINTH_TOKEN").getOrNull() == null

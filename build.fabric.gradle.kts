@@ -17,7 +17,8 @@ val publishGameVersions = listOf(mcVersion)
 // directly, and every remaining node shares them. Re-adding one would be actively wrong, since
 // "projectile.ThrowableItemProjectile" is a substring of the already-replaced package path.
 
-version = "${property("version")}+$mcVersion"
+val modVersion = property("version").toString()
+version = "$modVersion+$mcVersion"
 group = property("mod_group")!!
 base { archivesName = "${property("mod_id")}-fabric" }
 
@@ -85,7 +86,7 @@ val brewingIsDataDriven = mcVersion.split(".")
     .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
 
 val resourceProps = mapOf(
-    "version" to property("version").toString(),
+    "version" to project.version.toString(),
     "fabric_loader_version" to property("fabric_loader_min").toString(),
     "fabric_minecraft_version_range" to fabricMcRange,
     "pack_format" to dep("pack_format"),
@@ -122,9 +123,9 @@ publishMods {
     file = tasks.named<org.gradle.api.tasks.bundling.AbstractArchiveTask>("jar").flatMap { it.archiveFile }
     type = me.modmuss50.mpp.ReleaseType.STABLE
     modLoaders.add("fabric")
-    displayName = "CleansingPotions ${property("version")} (Fabric $mcVersion)"
+    displayName = "CleansingPotions $modVersion (Fabric $mcVersion)"
     // Distinct version number from the NeoForge 26.x jar (both share the 26.2 game version).
-    version = "${property("version")}+fabric-$mcVersion"
+    version = "$modVersion+fabric-$mcVersion"
     changelog = providers.environmentVariable("RELEASE_CHANGELOG")
         .orElse("See https://github.com/alazso/cleansingpotions-mod/blob/main/CHANGELOG.md")
     dryRun = providers.environmentVariable("MODRINTH_TOKEN").getOrNull() == null
