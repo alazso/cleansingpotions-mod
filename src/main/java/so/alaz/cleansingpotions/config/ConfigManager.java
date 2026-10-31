@@ -3,6 +3,7 @@ package so.alaz.cleansingpotions.config;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import so.alaz.cleansingpotions.Constants;
+import so.alaz.cleansingpotions.metrics.ErrorReporter;
 import so.alaz.cleansingpotions.platform.Services;
 
 import java.io.File;
@@ -32,7 +33,11 @@ public final class ConfigManager {
                 CleansingConfig.set(cfg);
             }
         } catch (Exception e) {
+            // Every setting silently falls back to its default, which an owner may not notice. On
+            // the first load this runs before the metrics backend exists, so the report is held
+            // until it does.
             Constants.LOG.error("Failed to load CleansingPotions config", e);
+            ErrorReporter.report("config:load", e);
         }
     }
 
@@ -44,7 +49,9 @@ public final class ConfigManager {
                 GSON.toJson(CleansingConfig.get(), w);
             }
         } catch (Exception e) {
+            // The edit the owner just made is gone.
             Constants.LOG.error("Failed to save CleansingPotions config", e);
+            ErrorReporter.report("config:save", e);
         }
     }
 

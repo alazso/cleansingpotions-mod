@@ -45,7 +45,11 @@ public class FabricPlatformHelper implements IPlatformHelper {
             Class<?> permissions = Class.forName("me.lucko.fabric.api.permissions.v0.Permissions");
             return (boolean) permissions.getMethod("check", Entity.class, String.class, boolean.class)
                 .invoke(null, player, node, defaultValue);
-        } catch (Throwable ignored) {
+        } catch (Throwable reflectionFailed) {
+            // The permissions mod is installed but its API no longer matches, so every check from
+            // here on silently returns the default. Worth knowing about, not worth failing over.
+            so.alaz.cleansingpotions.metrics.ErrorReporter.report(
+                "permissions:fabric-permissions-api", reflectionFailed);
             return defaultValue;
         }
     }

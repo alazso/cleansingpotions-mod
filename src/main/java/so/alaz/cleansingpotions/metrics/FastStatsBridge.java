@@ -60,6 +60,7 @@ public final class FastStatsBridge {
     public static <C extends FastStatsContext> C attach(C created) {
         context = created;
         CleansingMetrics.backendActive(true);
+        ErrorReporter.flushPending();
         return created;
     }
 
@@ -83,15 +84,36 @@ public final class FastStatsBridge {
         return tracker;
     }
 
+    /**
+     * Reports an error this mod caught and recovered from.
+     *
+     * <p>FastStats captures errors on its own only when one kills a thread, and the mod platforms
+     * register nothing else, so anything handled in a catch block reaches the dashboard only through
+     * here. Reports are deduplicated by the SDK and carry a count, so a hot path yields one entry
+     * per submission. Call {@link ErrorReporter#report} instead of this, which is safe when the
+     * nested FastStats mod is absent.
+     */
+    public static void report(String source, Throwable error) {
+        track(error, true, Attributes.empty().put("source", source));
+    }
+
     public static void reportTestError(String source) {
         RuntimeException error = new RuntimeException(
             "CleansingPotions intentional test error (triggered by " + source + ")");
-        errorTracker()
+        track(error, false, Attributes.empty()
+            .put("source", source)
+            .put("intentional", true));
+    }
+
+    private static void track(Throwable error, boolean handled, Attributes attributes) {
+        FastStatsContext current = context;
+        if (current == null) {
+            return;
+        }
+        current.errorTrackerService().ifPresent(service -> service.globalErrorTracker()
             .trackError(error)
-            .handled(false)
-            .attributes(Attributes.empty()
-                .put("source", source)
-                .put("intentional", true));
+            .handled(handled)
+            .attributes(attributes));
     }
 }
 //?}
