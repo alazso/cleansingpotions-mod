@@ -31,13 +31,24 @@ public final class CleansingConfigScreen {
             .setMin(0L).setMax(3600L).setSaveConsumer(v -> cfg.cooldownSeconds = v).build());
 
         var recipes = builder.getOrCreateCategory(Component.literal("Recipes"));
+        // Brewing is data driven from 26.3 on, so a config toggle cannot switch it off. Rather than
+        // leave a dead switch in the screen, say where the recipes actually live.
+        //? if <26.3 {
         recipes.addEntry(entry.startTextDescription(
             Component.literal("§7Recipe toggles take effect on game load, not on /cleanse reload.")).build());
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Brewing Enabled"), cfg.brewingEnabled)
             .setSaveConsumer(v -> cfg.brewingEnabled = v).build());
+        //?} else {
+        /*recipes.addEntry(entry.startTextDescription(Component.literal(
+            "§7Brewing is data driven on this version. Remove or override the recipes in "
+                + "data/cleansingpotions/recipe/brewing with a data pack. The toggles below still "
+                + "control whether a thrown potion does anything.")).build());
+        *///?}
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Splash Enabled"), cfg.splashEnabled)
+            .setTooltip(Component.literal("Whether a thrown splash potion has any effect."))
             .setSaveConsumer(v -> cfg.splashEnabled = v).build());
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Lingering Enabled"), cfg.lingeringEnabled)
+            .setTooltip(Component.literal("Whether a lingering potion leaves a cloud."))
             .setSaveConsumer(v -> cfg.lingeringEnabled = v).build());
 
         var effects = builder.getOrCreateCategory(Component.literal("Effects"));
@@ -56,10 +67,10 @@ public final class CleansingConfigScreen {
             .setTooltip(Component.literal("Toast on join when a newer version is available (anonymous Modrinth check)."))
             .setSaveConsumer(v -> cfg.checkForUpdates = v).build());
         misc.addEntry(entry.startBooleanToggle(Component.literal("Metrics"), cfg.metrics)
-            .setTooltip(Component.literal("Anonymous usage metrics via FastStats (26.x only)."))
+            .setTooltip(Component.literal("Pseudonymous usage metrics and error reports via FastStats."))
             .setSaveConsumer(v -> cfg.metrics = v).build());
         misc.addEntry(entry.startTextDescription(Component.literal(
-            "§7Effect force-lists and per-potion name/color/lore are edited in config/cleansingpotions.json.")).build());
+            "§7Effect force-lists and per-potion name/lore are edited in config/cleansingpotions.json. Potion colours are fixed and come from the resource pack.")).build());
 
         builder.setSavingRunnable(ConfigManager::save);
         return builder.build();

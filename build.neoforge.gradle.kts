@@ -6,56 +6,27 @@ plugins {
 val mcVersion = project.name.substringBeforeLast("-")
 fun dep(key: String): String = property("${key}_$mcVersion") as String
 
-// NeoForge has no intermediary cushion, so the 1.21.11 ResourceLocation->Identifier rename
-// splits the 1.21.x line (1.21.9-1.21.10 vs 1.21.11). Unobfuscated 26.x splits per patch too,
-// because 26.1.2 -> 26.2 has breaking ABI changes.
-val is26 = mcVersion.substringBefore(".").toInt() >= 26
-val neoMcRange = when {
-    mcVersion == "26.2" -> "[26.2,26.3)"
-    is26 -> "[26.1.2,26.2)"
-    mcVersion == "1.21.11" -> "[1.21.11,1.22)"
-    else -> "[1.21.9,1.21.11)"
-}
-val neoGameVersions = when {
-    mcVersion == "26.2" -> listOf("26.2")
-    is26 -> listOf("26.1.2")
-    mcVersion == "1.21.11" -> listOf("1.21.11")
-    else -> listOf("1.21.9", "1.21.10")
-}
-val neoLabel = when {
-    is26 -> mcVersion
-    mcVersion == "1.21.11" -> "1.21.11"
-    else -> "1.21.9-1.21.10"
-}
+// 26.x breaks ABI between drops and NeoForge has no intermediary cushion, so each patch is its
+// own jar: scope the dependency range and the published game versions to this node's exact patch.
+val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
+val neoMcRange = "[$mcVersion,$nextMc)"
+val neoGameVersions = listOf(mcVersion)
 
-stonecutter {
-    // Minecraft 1.21.11 renamed ResourceLocation -> Identifier (and location() -> identifier()) and
-    // moved the throwable-item projectile classes into a .throwableitemprojectile subpackage.
-    replacements.string(current.parsed >= "1.21.11") {
-        replace("ResourceLocation", "Identifier")
-        replace("location()", "identifier()")
-        replace("projectile.ThrowableItemProjectile", "projectile.throwableitemprojectile.ThrowableItemProjectile")
-    }
-    // 26.2 moved the toast manager off Minecraft onto Gui: getToastManager() -> gui.toastManager().
-    replacements.string(current.parsed >= "26.2") {
-        replace("getToastManager()", "gui.toastManager()")
-    }
-    // Minecraft 26.x (unobfuscated) API renames are added here as the compiler flags them.
-}
+// The 1.21.x-era replacement rules are gone with those nodes; see build.fabric-m.gradle.kts.
 
-version = "${property("version")}+$neoLabel"
+version = "${property("version")}+$mcVersion"
 group = property("mod_group")!!
 base { archivesName = "${property("mod_id")}-neoforge" }
 
 java {
-    toolchain.languageVersion = JavaLanguageVersion.of(if (is26) 25 else (property("java_version") as String).toInt())
+    // 26.x runs on Java 25.
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
     withSourcesJar()
 }
 
 repositories {
     mavenCentral()
     maven("https://maven.neoforged.net/releases/")
-    maven("https://maven.parchmentmc.org/")
     maven("https://maven.shedaniel.me/")
     maven("https://repo.faststats.dev/releases")
 }
@@ -69,11 +40,13 @@ sourceSets {
 dependencies {
     // Cloth Config powers the in-game config screen, shared with Fabric.
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${dep("cloth")}")
-    // FastStats usage metrics requires Java 25, so only the 26.x node gets it.
-    // gson is provided by Minecraft; drop FastStats's strict gson pin so it does not clash with MC's.
-    if (is26) implementation("dev.faststats.metrics:neoforge:0.27.0") {
+    // FastStats metrics and error tracking. Since SDK 0.29 the modded artifact is a mod in its own
+    // right (id "faststats") and ships jar-in-jar instead of being merged into our classes.
+    // gson is provided by Minecraft; drop FastStats's gson pin so it never shadows Minecraft's.
+    implementation("dev.faststats.metrics:neoforge:${dep("faststats_neoforge")}") {
         exclude(group = "com.google.code.gson", module = "gson")
     }
+    jarJar("dev.faststats.metrics:neoforge:${dep("faststats_neoforge")}")
 
     // Pure-core unit tests (no Minecraft types).
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
@@ -85,32 +58,19 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// FastStats ships as a plain library (no mods.toml), so merge its classes into the jar for
-// runtime (26.x only; gson is excluded above, Minecraft provides it).
-if (is26) {
-    tasks.jar {
-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-        from({
-            configurations.runtimeClasspath.get()
-                    .filter { it.path.contains("dev.faststats") }
-                    .map { zipTree(it) }
-        }) {
-            exclude("module-info.class", "META-INF/MANIFEST.MF")
-        }
-    }
-}
-
 neoForge {
+    // 26.x is unobfuscated, so there are no mappings and no parchment block.
     version = dep("neoforge")
-    findProperty("parchment_$mcVersion")?.let { pv ->
-        parchment {
-            minecraftVersion = mcVersion
-            mappingsVersion = pv.toString()
-        }
-    }
     runs {
         register("client") { client() }
         register("server") { server() }
+        // Dev runs never report to FastStats, so testing does not show up as real servers on the
+        // dashboard. Pass -Pfaststats to a run task to exercise the integration anyway.
+        configureEach {
+            if (!providers.gradleProperty("faststats").isPresent) {
+                systemProperty("faststats.enabled", "false")
+            }
+        }
     }
     mods {
         register(property("mod_id") as String) {
@@ -119,18 +79,28 @@ neoForge {
     }
 }
 
+// 26.3 made brewing data driven and deleted PotionBrewing; see build.fabric-m.gradle.kts.
+val brewingIsDataDriven = mcVersion.split(".")
+    .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
+
 val resourceProps = mapOf(
     "version" to property("version").toString(),
     "minecraft_version_range" to neoMcRange,
     "neoforge_loader_version_range" to "[4,)",
+    "pack_format" to dep("pack_format"),
+    "pack_format_minor" to dep("pack_format_minor"),
 )
 tasks.processResources {
     inputs.properties(resourceProps)
-    filesMatching("META-INF/neoforge.mods.toml") {
+    if (!brewingIsDataDriven) {
+        // 26.2: the minecraft:brewing recipe type does not exist yet; the mixin covers brewing.
+        exclude("data/cleansingpotions/recipe/brewing/**")
+    }
+    filesMatching(listOf("META-INF/neoforge.mods.toml", "pack.mcmeta")) {
         expand(resourceProps)
     }
     filesMatching("cleansingpotions.mixins.json") {
-        expand(mapOf("mixin_compat_level" to if (is26) "JAVA_25" else "JAVA_21"))
+        expand(mapOf("mixin_compat_level" to "JAVA_25"))
     }
 }
 
@@ -138,7 +108,7 @@ publishMods {
     file = tasks.named<org.gradle.api.tasks.bundling.AbstractArchiveTask>("jar").flatMap { it.archiveFile }
     type = me.modmuss50.mpp.ReleaseType.STABLE
     modLoaders.add("neoforge")
-    displayName = "CleansingPotions ${property("version")} (NeoForge $neoLabel)"
+    displayName = "CleansingPotions ${property("version")} (NeoForge $mcVersion)"
     version = project.version.toString()
     changelog = providers.environmentVariable("RELEASE_CHANGELOG")
         .orElse("See https://github.com/alazso/cleansingpotions-mod/blob/main/CHANGELOG.md")

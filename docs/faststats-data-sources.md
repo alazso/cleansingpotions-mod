@@ -11,8 +11,40 @@
   `string` sources these are not applicable (`—`). `min`/`max` left as `—` mean unbounded;
   bounds marked *(suggested)* are sane guardrails, not hard requirements.
 
-Auto-collected environment metrics (mod version, Minecraft version, loader, player/server
-counts) come from `dev.faststats.Metrics.Factory::create`
+Built-in environment metrics (mod version, game version, loader, player and server counts) are
+collected by the SDK itself and need no data source here. Two SDK changes matter for dashboards:
+`minecraft_version` was renamed to `game_version` in SDK 0.28.1, so jars built on an older SDK
+still send the old key, and SDK 0.29.4 added a boolean `client` that separates client installs
+from servers.
+
+**Error reports are not automatic.** FastStats captures an error on its own only when one kills a
+thread, and the Fabric and NeoForge platform modules register nothing else (the Paper
+`ServerExceptionEvent` path is Bukkit only). Anything this mod catches and recovers from reaches the
+dashboard only by calling `ErrorReporter.report`. Current report sites:
+
+| source | raised when |
+| --- | --- |
+| `config:load` | the config file could not be read or parsed, so every setting fell back to its default |
+| `config:save` | the config could not be written, so an owner's edit was lost |
+| `permissions:fabric-permissions-api` | the Fabric Permissions mod is installed but its API no longer matches, so every permission check silently returns its default |
+
+Deliberately not reported: the update check failing (offline players and timeouts are not defects),
+the toast accessor being absent, and enum parse fallbacks. Noise there buries the reports worth
+reading. `/cleanse testerror` sends a report with `intentional=true` and `handled=false`.
+
+The first config load runs before the metrics toggle has been read, so it happens before the FastStats
+context exists. `ErrorReporter` holds up to 8 such reports and flushes them when the context attaches,
+which is why a malformed config still reports on the boot that found it.
+
+**Consent.** On a client, SDK 0.31.0 and later show a consent screen on the title screen before
+anything is submitted, and one screen covers every FastStats mod installed. Dedicated servers have no
+screen and keep using `config/faststats/config.properties`. Our own `metrics` config option still
+decides whether a context is created at all, so turning it off keeps this mod out of that screen.
+
+**Reporting semantics.** Counters report the total since the last successful metrics submission.
+The suppliers only read (`CleansingMetrics.peek*`), because FastStats also reads them when it
+assembles an error report. They are cleared by `CleansingMetrics.resetAll`, registered through
+`Metrics.Factory#onFlush`, which runs only after a submission is accepted.
 
 ---
 
@@ -27,7 +59,7 @@ Increment-by-1 (or by N) counters. All are non-negative whole numbers.
 | Cleanse Operations | `cleanse_operations` | number | Scalar | false | false | 0 | — | `EffectCleanser.cleanse` (per entity with removed > 0) |
 | Effects Removed | `effects_removed` | number | Scalar | false | false | 0 | — | `EffectCleanser.cleanse` (add `removed`) |
 | Lingering Clouds Spawned | `lingering_clouds_spawned` | number | Scalar | false | false | 0 | — | `CleansingPotionEntity.spawnCloud` |
-| Potions Brewed | `potions_brewed` | number | Scalar | false | false | 0 | — | `CleansingBrewing.mix` (non-empty result) |
+| Potions Brewed | `potions_brewed` | number | Scalar | false | false | 0 | — | `PotionBrewingMixin.mix` (non-empty result). **26.2 only** |
 | Cooldown Blocks | `cooldown_blocks` | number | Scalar | false | false | 0 | — | `CleansingThrowItem.use` (cooldown FAIL) |
 | Permission Denials | `permission_denials` | number | Scalar | false | false | 0 | — | `PermissionGate.allows` == false branches |
 | Commands Executed | `commands_executed` | number | Scalar | false | false | 0 | — | `CleansingCommand.give` / `reload` |
@@ -46,7 +78,13 @@ Per-category counts. Keep these as Maps rather than one source per category so n
 | Potions Used by Variant | `potions_used_by_variant` | number | Map | false | false | 0 | — | `regular`, `splash`, `lingering` |
 | Effects Removed by Disposition | `effects_removed_by_disposition` | number | Map | false | false | 0 | — | `beneficial`, `harmful`, `neutral` |
 | Effects Removed by Type | `effects_removed_by_type` | number | Map | false | false | 0 | — | effect registry ids, e.g. `minecraft:poison` *(high cardinality — includes modded effects)* |
-| Brews by Recipe | `brews_by_recipe` | number | Map | false | false | 0 | — | `cleansing`, `soothing`, `purging`, `splash`, `lingering` |
+| Brews by Recipe | `brews_by_recipe` | number | Map | false | false | 0 | — | `cleansing`, `soothing`, `purging`, `splash`, `lingering`. **26.2 only** |
+
+> **Brewing counters stop at 26.2.** From 26.3 brewing is a data pack recipe type and `PotionBrewing`
+> is gone, so the mixin that was the only caller of `CleansingMetrics.potionBrewed` no longer ships.
+> `potions_brewed` and `brews_by_recipe` therefore report zero from 26.3 clients. Read a decline in
+> those two as version mix, not as players brewing less. Restoring them needs a hook into the
+> brewing stand's recipe path, which would mean putting a mixin back into the 26.3 jar.
 
 ---
 

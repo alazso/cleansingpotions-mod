@@ -7,10 +7,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
+import so.alaz.cleansingpotions.item.CleansingItem;
 import so.alaz.cleansingpotions.item.MilkItemFactory;
 import so.alaz.cleansingpotions.item.MilkVariant;
-import so.alaz.cleansingpotions.item.ModComponents;
-import so.alaz.cleansingpotions.item.ModItems;
 
 public final class CleansingBrewing {
 
@@ -36,17 +35,17 @@ public final class CleansingBrewing {
         if (reagent.is(Items.FERMENTED_SPIDER_EYE) && isPlainCleansing(input)) {
             return MilkItemFactory.create(MilkVariant.REGULAR, CleanseMode.POSITIVE_ONLY);
         }
-        if (reagent.is(Items.GUNPOWDER) && input.is(ModItems.CLEANSING) && cfg.splashEnabled) {
-            return MilkItemFactory.create(MilkVariant.SPLASH, modeOf(input));
+        if (reagent.is(Items.GUNPOWDER) && isVariant(input, MilkVariant.REGULAR) && cfg.splashEnabled) {
+            return MilkItemFactory.create(MilkVariant.SPLASH, MilkItemFactory.modeOf(input));
         }
-        if (reagent.is(Items.DRAGON_BREATH) && input.is(ModItems.SPLASH) && cfg.lingeringEnabled) {
-            return MilkItemFactory.create(MilkVariant.LINGERING, modeOf(input));
+        if (reagent.is(Items.DRAGON_BREATH) && isVariant(input, MilkVariant.SPLASH) && cfg.lingeringEnabled) {
+            return MilkItemFactory.create(MilkVariant.LINGERING, MilkItemFactory.modeOf(input));
         }
         return ItemStack.EMPTY;
     }
 
-    private static CleanseMode modeOf(ItemStack stack) {
-        return stack.getOrDefault(ModComponents.CLEANSE_MODE, CleanseMode.ALL);
+    private static boolean isVariant(ItemStack stack, MilkVariant variant) {
+        return stack.getItem() instanceof CleansingItem item && item.variant() == variant;
     }
 
     private static boolean isWaterBottle(ItemStack stack) {
@@ -63,8 +62,8 @@ public final class CleansingBrewing {
     }
 
     private static boolean isPlainCleansing(ItemStack stack) {
-        return stack.is(ModItems.CLEANSING)
-            && stack.getOrDefault(ModComponents.CLEANSE_MODE, CleanseMode.ALL) == CleanseMode.ALL;
+        return isVariant(stack, MilkVariant.REGULAR)
+            && MilkItemFactory.modeOf(stack) == CleanseMode.ALL;
     }
 
     private CleansingBrewing() {

@@ -56,9 +56,9 @@ public final class CleansingCommand {
 
     private static Predicate<CommandSourceStack> adminCheck() {
         //? if <1.21.11 {
-        return source -> source.hasPermission(2);
-        //?} else {
-        /*return Commands.<CommandSourceStack>hasPermission(Commands.LEVEL_GAMEMASTERS);*/
+        /*return source -> source.hasPermission(2);
+        *///?} else {
+        return Commands.<CommandSourceStack>hasPermission(Commands.LEVEL_GAMEMASTERS);
         //?}
     }
 
@@ -77,16 +77,25 @@ public final class CleansingCommand {
             return 0;
         }
         //? if >=26.1.2 {
-        /*so.alaz.cleansingpotions.metrics.FastStatsBridge.reportTestError("command:testerror");
+        // FastStats sends nothing on its first run or when the server owner opted out, so say that
+        // instead of claiming a report went out. The backend check comes first, because it resolves
+        // no dev.faststats type and the nested FastStats mod can be absent.
+        if (!CleansingMetrics.backendActive()
+            || !so.alaz.cleansingpotions.metrics.FastStatsBridge.errorsWillSend()) {
+            ctx.getSource().sendFailure(
+                Component.translatable("command.cleansingpotions.testerror_inactive"));
+            return 0;
+        }
+        so.alaz.cleansingpotions.metrics.FastStatsBridge.reportTestError("command:testerror");
         CleansingMetrics.commandExecuted();
         ctx.getSource().sendSuccess(
             () -> Component.translatable("command.cleansingpotions.testerror"), true);
         return 1;
-        *///?} else {
-        ctx.getSource().sendFailure(
+        //?} else {
+        /*ctx.getSource().sendFailure(
             Component.translatable("command.cleansingpotions.testerror_unsupported"));
         return 0;
-        //?}
+        *///?}
     }
 
     private static MilkVariant variantArg(CommandContext<CommandSourceStack> ctx) {
@@ -111,7 +120,13 @@ public final class CleansingCommand {
         for (ServerPlayer target : targets) {
             ItemStack item = MilkItemFactory.create(variant, mode);
             if (!target.getInventory().add(item)) {
+                // 26.3 dropped Player.drop(ItemStack, boolean); ServerPlayer.drop now takes a
+                // Prediction, and a command-issued drop is never client-predicted.
+                //? if >=26.3 {
+                /*target.drop(item, false, net.minecraft.util.Prediction.SERVER_ONLY);
+                *///?} else {
                 target.drop(item, false);
+                //?}
             }
         }
         CleansingMetrics.commandExecuted();

@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:brewing",
+  "input": {
+    "item": "cleansingpotions:soothing_splash_potion"
+  },
+  "reagent": {
+    "item": "minecraft:dragon_breath"
+  },
+  "output": {
+    "id": "cleansingpotions:soothing_lingering_potion"
+  }
+}

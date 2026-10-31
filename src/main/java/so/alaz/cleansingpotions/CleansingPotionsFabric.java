@@ -13,9 +13,11 @@ import so.alaz.cleansingpotions.item.ModItems;
 public class CleansingPotionsFabric implements ModInitializer {
 
     //? if >=26.1.2 {
-    /*@SuppressWarnings("unused")
-    private static dev.faststats.fabric.FabricContext metrics;
-    *///?}
+    // Holds the FastStats context alive. Declared as Object so no dev.faststats type is resolved
+    // outside the guarded block below.
+    @SuppressWarnings("unused")
+    private static Object metrics;
+    //?}
 
     @Override
     public void onInitialize() {
@@ -24,9 +26,9 @@ public class CleansingPotionsFabric implements ModInitializer {
 
         Registry.register(BuiltInRegistries.DATA_COMPONENT_TYPE,
             ModComponents.CLEANSE_MODE_ID, ModComponents.CLEANSE_MODE);
-        Registry.register(BuiltInRegistries.ITEM, ModItems.CLEANSING_KEY, ModItems.CLEANSING);
-        Registry.register(BuiltInRegistries.ITEM, ModItems.SPLASH_KEY, ModItems.SPLASH);
-        Registry.register(BuiltInRegistries.ITEM, ModItems.LINGERING_KEY, ModItems.LINGERING);
+        for (ModItems.Entry entry : ModItems.entries()) {
+            Registry.register(BuiltInRegistries.ITEM, entry.key(), entry.item());
+        }
         Registry.register(BuiltInRegistries.ENTITY_TYPE,
             ModEntities.CLEANSING_POTION_KEY, ModEntities.CLEANSING_POTION);
         Registry.register(BuiltInRegistries.ENTITY_TYPE,
@@ -38,13 +40,21 @@ public class CleansingPotionsFabric implements ModInitializer {
             CleansingCommand.register(dispatcher));
 
         //? if >=26.1.2 {
-        /*if (so.alaz.cleansingpotions.config.CleansingConfig.get().metrics) {
-            metrics = new dev.faststats.fabric.FabricContext.Factory("cleansingpotions", "321f21c8899fa729330e9508a4b7fe34")
-                    .metrics(so.alaz.cleansingpotions.metrics.FastStatsBridge::registerMetrics)
-                    .errorTrackerService(so.alaz.cleansingpotions.metrics.FastStatsBridge.errorTracker())
-                    .create();
+        if (so.alaz.cleansingpotions.config.CleansingConfig.get().metrics) {
+            try {
+                metrics = so.alaz.cleansingpotions.metrics.FastStatsBridge.attach(
+                    new dev.faststats.fabric.FabricContext.Factory("cleansingpotions", "321f21c8899fa729330e9508a4b7fe34")
+                        .metrics(so.alaz.cleansingpotions.metrics.FastStatsBridge::registerMetrics)
+                        .errorTrackerService(so.alaz.cleansingpotions.metrics.FastStatsBridge.errorTracker())
+                        .create());
+            } catch (LinkageError absent) {
+                // The nested FastStats mod pins one exact Minecraft version, so a patch release can
+                // reject it. Run without metrics rather than failing mod init.
+                Constants.LOG.warn("FastStats is unavailable; continuing without metrics ({})",
+                    absent.toString());
+            }
         }
-        *///?}
+        //?}
     }
 }
 //?}

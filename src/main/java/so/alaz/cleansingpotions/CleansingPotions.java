@@ -1,6 +1,6 @@
 package so.alaz.cleansingpotions;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.config.ConfigManager;
 import so.alaz.cleansingpotions.effect.EffectClassifier;
@@ -33,8 +33,8 @@ public final class CleansingPotions {
         return cleanser;
     }
 
-    public static ResourceLocation id(String path) {
-        return ResourceLocation.fromNamespaceAndPath(Constants.MOD_ID, path);
+    public static Identifier id(String path) {
+        return Identifier.fromNamespaceAndPath(Constants.MOD_ID, path);
     }
 
     private CleansingPotions() {

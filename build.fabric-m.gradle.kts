@@ -6,25 +6,16 @@ plugins {
 val mcVersion = project.name.substringBeforeLast("-")
 fun dep(key: String): String = property("${key}_$mcVersion") as String
 
-// 26.1.2 -> 26.2 broke ABI, so each patch is its own jar: scope the dependency range and the
-// published game versions to this node's exact patch.
-val fabricMcRange = if (mcVersion == "26.2") ">=26.2 <26.3" else ">=26.1.2 <26.2"
-val publishGameVersions = if (mcVersion == "26.2") listOf("26.2") else listOf("26.1.2")
+// 26.x breaks ABI between drops and has no intermediary cushion, so each patch is its own jar:
+// scope the dependency range and the published game versions to this node's exact patch.
+val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
+val fabricMcRange = ">=$mcVersion <$nextMc"
+val publishGameVersions = listOf(mcVersion)
 
-stonecutter {
-    // 1.21.11+ (including unobfuscated 26.x) renamed ResourceLocation -> Identifier and moved the
-    // throwable-item projectile classes into a .throwableitemprojectile subpackage.
-    replacements.string(current.parsed >= "1.21.11") {
-        replace("ResourceLocation", "Identifier")
-        replace("location()", "identifier()")
-        replace("projectile.ThrowableItemProjectile", "projectile.throwableitemprojectile.ThrowableItemProjectile")
-    }
-    // 26.2 moved the toast manager off Minecraft onto Gui: getToastManager() -> gui.toastManager().
-    replacements.string(current.parsed >= "26.2") {
-        replace("getToastManager()", "gui.toastManager()")
-    }
-    // Minecraft 26.x (unobfuscated) API renames are added here as the compiler flags them.
-}
+// The 1.21.x-era replacement rules (ResourceLocation -> Identifier, the throwableitemprojectile
+// package move, getToastManager -> gui.toastManager) are gone: src/ now holds the 26.x names
+// directly, and every remaining node shares them. Re-adding one would be actively wrong, since
+// "projectile.ThrowableItemProjectile" is a substring of the already-replaced package path.
 
 version = "${property("version")}+$mcVersion"
 group = property("mod_group")!!
@@ -58,11 +49,13 @@ dependencies {
     implementation("net.fabricmc.fabric-api:fabric-api:${dep("fabric_api")}")
     implementation("com.terraformersmc:modmenu:${dep("modmenu")}")
     implementation("me.shedaniel.cloth:cloth-config-fabric:${dep("cloth")}")
-    // FastStats usage metrics (requires Java 25; this modern buildscript is 26.x only).
-    // gson is provided by Minecraft; drop FastStats's strict gson pin so it does not clash with MC's.
-    implementation("dev.faststats.metrics:fabric:0.27.0") {
+    // FastStats metrics and error tracking. Since SDK 0.29 the modded artifact is a mod in its own
+    // right (id "faststats") and ships jar-in-jar instead of being merged into our classes.
+    // gson is provided by Minecraft; drop FastStats's gson pin so it never shadows Minecraft's.
+    implementation("dev.faststats.metrics:fabric:${dep("faststats_fabric")}") {
         exclude(group = "com.google.code.gson", module = "gson")
     }
+    include("dev.faststats.metrics:fabric:${dep("faststats_fabric")}")
 
     // Pure-core unit tests (no Minecraft types).
     testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
@@ -74,28 +67,50 @@ tasks.test {
     useJUnitPlatform()
 }
 
-// FastStats ships as a plain library (no fabric.mod.json), so merge its classes into the jar
-// for runtime (gson is excluded above; Minecraft provides it).
-tasks.jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from({
-        configurations.runtimeClasspath.get()
-                .filter { it.path.contains("dev.faststats") }
-                .map { zipTree(it) }
-    }) {
-        exclude("module-info.class", "META-INF/MANIFEST.MF")
+// Dev runs never report to FastStats, so testing does not show up as real servers on the dashboard.
+// Pass -Pfaststats to a run task to exercise the integration anyway.
+loom {
+    runs {
+        configureEach {
+            if (!providers.gradleProperty("faststats").isPresent) {
+                vmArg("-Dfaststats.enabled=false")
+            }
+        }
     }
 }
+
+// 26.3 made brewing data driven and deleted PotionBrewing, so the one mixin the mod has is
+// 26.2-only. From 26.3 on, the brewing recipes ship as JSON and the jar carries no mixin at all.
+val brewingIsDataDriven = mcVersion.split(".")
+    .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
 
 val resourceProps = mapOf(
     "version" to property("version").toString(),
     "fabric_loader_version" to dep("fabric_loader"),
     "fabric_minecraft_version_range" to fabricMcRange,
+    "pack_format" to dep("pack_format"),
+    "pack_format_minor" to dep("pack_format_minor"),
 )
 tasks.processResources {
     inputs.properties(resourceProps)
-    filesMatching("fabric.mod.json") {
+    if (brewingIsDataDriven) {
+        // 26.3+: brewing is JSON, so the mixin config has nothing to apply.
+        exclude("cleansingpotions.mixins.json")
+    } else {
+        // 26.2: the minecraft:brewing recipe type does not exist yet, so shipping these would
+        // only log unknown-recipe-type errors. The mixin covers brewing there instead.
+        exclude("data/cleansingpotions/recipe/brewing/**")
+    }
+    filesMatching(listOf("fabric.mod.json", "pack.mcmeta")) {
         expand(resourceProps)
+    }
+    if (brewingIsDataDriven) {
+        // Drop the mixin config reference, leaving an empty "mixins" array. Done by dropping the
+        // line rather than templating the whole array, so the source file stays valid JSON: an
+        // unquoted ${...} there breaks Fabric Loader's dev-time scan and every JSON tool.
+        filesMatching("fabric.mod.json") {
+            filter { line -> if (line.contains("cleansingpotions.mixins.json")) null else line }
+        }
     }
     filesMatching("cleansingpotions.mixins.json") {
         expand(mapOf("mixin_compat_level" to "JAVA_25"))
@@ -103,7 +118,7 @@ tasks.processResources {
 }
 
 publishMods {
-    // No-remap loom: the final artifact is the jar task (no remapJar), with FastStats bundled in.
+    // No-remap loom: the final artifact is the jar task (no remapJar), with FastStats nested inside.
     file = tasks.named<org.gradle.api.tasks.bundling.AbstractArchiveTask>("jar").flatMap { it.archiveFile }
     type = me.modmuss50.mpp.ReleaseType.STABLE
     modLoaders.add("fabric")

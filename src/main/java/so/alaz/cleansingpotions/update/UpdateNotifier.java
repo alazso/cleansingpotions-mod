@@ -102,10 +102,10 @@ public final class UpdateNotifier {
                 Component message = info.bugLevel() != null
                     ? Component.translatable("toast.cleansingpotions.update.bug", info.latestVersion(), info.bugLevel())
                     : Component.translatable("toast.cleansingpotions.update.normal", info.latestVersion());
-                SystemToast.add(mc.getToastManager(), SystemToast.SystemToastId.PERIODIC_NOTIFICATION, title, message);
+                SystemToast.add(mc.gui.toastManager(), SystemToast.SystemToastId.PERIODIC_NOTIFICATION, title, message);
             } catch (Throwable t) {
-                // The toast API changed between 26.1.2 (our 26.x compile target) and 26.2, so the
-                // call can be absent at runtime. Degrade to no toast rather than crash the client.
+                // The toast manager accessor has moved before. Degrade to no toast rather than
+                // crash the client if it moves again within a node's supported range.
                 Constants.LOG.warn("CleansingPotions: update toast unavailable on this version ({})", t.toString());
             }
         });

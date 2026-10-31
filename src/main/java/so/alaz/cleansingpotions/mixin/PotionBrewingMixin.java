@@ -1,5 +1,8 @@
 package so.alaz.cleansingpotions.mixin;
 
+// 26.3 made brewing data driven and deleted PotionBrewing outright, so this whole mixin is
+// 26.2-only. On 26.3 the same five recipes ship as JSON under data/cleansingpotions/recipe/brewing.
+//? if <26.3 {
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import org.spongepowered.asm.mixin.Mixin;
@@ -7,9 +10,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import so.alaz.cleansingpotions.brew.CleansingBrewing;
-import so.alaz.cleansingpotions.core.CleanseMode;
-import so.alaz.cleansingpotions.item.ModComponents;
-import so.alaz.cleansingpotions.item.ModItems;
+import so.alaz.cleansingpotions.item.MilkItemFactory;
 import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 
 @Mixin(PotionBrewing.class)
@@ -40,12 +41,11 @@ public class PotionBrewingMixin {
     }
 
     private static String brewKey(ItemStack result) {
-        if (result.is(ModItems.SPLASH)) {
-            return "splash";
-        }
-        if (result.is(ModItems.LINGERING)) {
-            return "lingering";
-        }
-        return result.getOrDefault(ModComponents.CLEANSE_MODE, CleanseMode.ALL).potionName();
+        return switch (MilkItemFactory.variantOf(result)) {
+            case SPLASH -> "splash";
+            case LINGERING -> "lingering";
+            case REGULAR -> MilkItemFactory.modeOf(result).potionName();
+        };
     }
 }
+//?}
