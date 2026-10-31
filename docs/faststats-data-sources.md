@@ -17,6 +17,11 @@ collected by the SDK itself and need no data source here. Two SDK changes matter
 still send the old key, and SDK 0.29.4 added a boolean `client` that separates client installs
 from servers.
 
+**Consent.** On a client, SDK 0.31.0 and later show a consent screen on the title screen before
+anything is submitted, and one screen covers every FastStats mod installed. Dedicated servers have no
+screen and keep using `config/faststats/config.properties`. Our own `metrics` config option still
+decides whether a context is created at all, so turning it off keeps this mod out of that screen.
+
 **Reporting semantics.** Counters report the total since the last successful metrics submission.
 The suppliers only read (`CleansingMetrics.peek*`), because FastStats also reads them when it
 assembles an error report. They are cleared by `CleansingMetrics.resetAll`, registered through

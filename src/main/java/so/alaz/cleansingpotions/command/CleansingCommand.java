@@ -78,8 +78,10 @@ public final class CleansingCommand {
         }
         //? if >=26.1.2 {
         // FastStats sends nothing on its first run or when the server owner opted out, so say that
-        // instead of claiming a report went out.
-        if (!so.alaz.cleansingpotions.metrics.FastStatsBridge.errorsWillSend()) {
+        // instead of claiming a report went out. The backend check comes first, because it resolves
+        // no dev.faststats type and the nested FastStats mod can be absent.
+        if (!CleansingMetrics.backendActive()
+            || !so.alaz.cleansingpotions.metrics.FastStatsBridge.errorsWillSend()) {
             ctx.getSource().sendFailure(
                 Component.translatable("command.cleansingpotions.testerror_inactive"));
             return 0;

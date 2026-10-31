@@ -59,6 +59,7 @@ public final class FastStatsBridge {
     /** Remembers the loader's context, so commands can ask whether FastStats will actually send. */
     public static <C extends FastStatsContext> C attach(C created) {
         context = created;
+        CleansingMetrics.backendActive(true);
         return created;
     }
 

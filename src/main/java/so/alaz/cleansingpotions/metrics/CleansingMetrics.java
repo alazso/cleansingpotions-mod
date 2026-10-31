@@ -52,7 +52,23 @@ public final class CleansingMetrics {
         CLEANSES_BY_MODE, POTIONS_BY_VARIANT, REMOVED_BY_DISPOSITION, REMOVED_BY_TYPE,
         BREWS_BY_RECIPE);
 
+    private static volatile boolean backendActive;
+
     private CleansingMetrics() {
+    }
+
+    /**
+     * Whether the FastStats backend loaded and a context was created. Lives here rather than in
+     * {@link FastStatsBridge} so a caller can ask without resolving any {@code dev.faststats} type:
+     * FastStats ships as a nested mod pinned to one exact Minecraft version, so on a patch release
+     * it can be rejected while this mod still loads.
+     */
+    public static boolean backendActive() {
+        return backendActive;
+    }
+
+    static void backendActive(boolean active) {
+        backendActive = active;
     }
 
     public static void potionConsumed() {
