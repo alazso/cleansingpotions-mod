@@ -6,6 +6,7 @@ import so.alaz.cleansingpotions.item.MilkVariant;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class CleansingConfig {
 
@@ -62,6 +63,27 @@ public final class CleansingConfig {
     public boolean checkForUpdates = true;
 
     public boolean metrics = true;
+
+    /**
+     * Brings every value into its supported range. Radius stays within 0.5 to 32, because a vanilla area
+     * effect cloud clamps its radius to 32 and discards itself below 0.5, and a non-finite radius becomes
+     * the default. Cooldown stays within 0 to 3600 seconds. Both force lists end up non-null and hold no
+     * null entries.
+     */
+    public void sanitize() {
+        radius = Double.isFinite(radius) ? Math.clamp(radius, 0.5, 32.0) : 4.0;
+        cooldownSeconds = Math.clamp(cooldownSeconds, 0L, 3600L);
+        forceRemove = cleaned(forceRemove);
+        forceKeep = cleaned(forceKeep);
+    }
+
+    private static List<String> cleaned(List<String> ids) {
+        List<String> out = new ArrayList<>();
+        if (ids != null) {
+            ids.stream().filter(Objects::nonNull).forEach(out::add);
+        }
+        return out;
+    }
 
     public CleansePolicy policy(CleanseMode mode) {
         return new CleansePolicy(mode, forceRemove, forceKeep);

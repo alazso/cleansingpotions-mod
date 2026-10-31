@@ -30,6 +30,7 @@ public final class ConfigManager {
                 if (cfg == null) {
                     cfg = new CleansingConfig();
                 }
+                cfg.sanitize();
                 CleansingConfig.set(cfg);
             }
         } catch (Exception e) {
