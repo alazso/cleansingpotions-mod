@@ -12,7 +12,7 @@ val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
 val neoMcRange = "[$mcVersion,$nextMc)"
 val neoGameVersions = listOf(mcVersion)
 
-// The 1.21.x-era replacement rules are gone with those nodes; see build.fabric-m.gradle.kts.
+// The 1.21.x-era replacement rules are gone with those nodes; see build.fabric.gradle.kts.
 
 version = "${property("version")}+$mcVersion"
 group = property("mod_group")!!
@@ -79,7 +79,7 @@ neoForge {
     }
 }
 
-// 26.3 made brewing data driven and deleted PotionBrewing; see build.fabric-m.gradle.kts.
+// 26.3 made brewing data driven and deleted PotionBrewing; see build.fabric.gradle.kts.
 val brewingIsDataDriven = mcVersion.split(".")
     .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
 
