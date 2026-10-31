@@ -80,8 +80,7 @@ neoForge {
 }
 
 // 26.3 made brewing data driven and deleted PotionBrewing; see build.fabric.gradle.kts.
-val brewingIsDataDriven = mcVersion.split(".")
-    .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
+val brewingIsDataDriven = stonecutter.current.parsed >= "26.3"
 
 val resourceProps = mapOf(
     "version" to project.version.toString(),

@@ -82,8 +82,7 @@ loom {
 
 // 26.3 made brewing data driven and deleted PotionBrewing, so the one mixin the mod has is
 // 26.2-only. From 26.3 on, the brewing recipes ship as JSON and the jar carries no mixin at all.
-val brewingIsDataDriven = mcVersion.split(".")
-    .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
+val brewingIsDataDriven = stonecutter.current.parsed >= "26.3"
 
 val resourceProps = mapOf(
     "version" to project.version.toString(),
