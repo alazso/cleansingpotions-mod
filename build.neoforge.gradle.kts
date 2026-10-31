@@ -10,15 +10,12 @@ fun dep(key: String): String = property("${key}_$mcVersion") as String
 // dependency as fatal, so a wider range here could never load.
 val neoMcRange = "[$mcVersion]"
 
-// The 1.21.x-era replacement rules are gone with those nodes; see build.fabric.gradle.kts.
-
 val modVersion = property("version").toString()
 version = "$modVersion+$mcVersion"
 group = property("mod_group")!!
 base { archivesName = "${property("mod_id")}-neoforge" }
 
 java {
-    // 26.x runs on Java 25.
     toolchain.languageVersion = JavaLanguageVersion.of(25)
     withSourcesJar()
 }
@@ -37,17 +34,14 @@ sourceSets {
 }
 
 dependencies {
-    // Cloth Config powers the in-game config screen, shared with Fabric.
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${dep("cloth")}")
-    // FastStats metrics and error tracking. Since SDK 0.29 the modded artifact is a mod in its own
-    // right (id "faststats") and ships jar-in-jar instead of being merged into our classes.
-    // gson is provided by Minecraft; drop FastStats's gson pin so it never shadows Minecraft's.
+    // The FastStats artifact is a mod (id "faststats") and ships jar-in-jar. Minecraft provides gson,
+    // so FastStats's pin is excluded.
     implementation("dev.faststats.metrics:neoforge:${dep("faststats_neoforge")}") {
         exclude(group = "com.google.code.gson", module = "gson")
     }
     jarJar("dev.faststats.metrics:neoforge:${dep("faststats_neoforge")}")
 
-    // Pure-core unit tests (no Minecraft types).
     testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
     testImplementation("org.assertj:assertj-core:3.27.7")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -58,13 +52,11 @@ tasks.test {
 }
 
 neoForge {
-    // 26.x is unobfuscated, so there are no mappings and no parchment block.
     version = dep("neoforge")
     runs {
         register("client") { client() }
         register("server") { server() }
-        // Dev runs never report to FastStats, so testing does not show up as real servers on the
-        // dashboard. Pass -Pfaststats to a run task to exercise the integration anyway.
+        // Run tasks disable FastStats unless -Pfaststats is passed.
         configureEach {
             if (!providers.gradleProperty("faststats").isPresent) {
                 systemProperty("faststats.enabled", "false")
@@ -78,7 +70,7 @@ neoForge {
     }
 }
 
-// 26.3 made brewing data driven and deleted PotionBrewing; see build.fabric.gradle.kts.
+// PotionBrewing does not exist from 26.3. Those nodes ship JSON brewing recipes and no mixin.
 val brewingIsDataDriven = stonecutter.current.parsed >= "26.3"
 
 val resourceProps = mapOf(
@@ -91,17 +83,16 @@ val resourceProps = mapOf(
 tasks.processResources {
     inputs.properties(resourceProps)
     if (brewingIsDataDriven) {
-        // 26.3+: brewing is JSON and the mixin class is compiled out, so the config must not ship.
         exclude("cleansingpotions.mixins.json")
     } else {
-        // 26.2: the minecraft:brewing recipe type does not exist yet; the mixin covers brewing.
+        // 26.2 has no minecraft:brewing recipe type, and loading these files logs errors.
         exclude("data/cleansingpotions/recipe/brewing/**")
     }
     filesMatching(listOf("META-INF/neoforge.mods.toml", "pack.mcmeta")) {
         expand(resourceProps)
     }
     if (brewingIsDataDriven) {
-        // Drop the [[mixins]] table: NeoForge would otherwise look for a config that is not in the jar.
+        // Removes the [[mixins]] table, because these jars ship no mixin config.
         filesMatching("META-INF/neoforge.mods.toml") {
             filter { line ->
                 if (line == "[[mixins]]" || line.contains("cleansingpotions.mixins.json")) null else line
