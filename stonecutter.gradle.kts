@@ -2,7 +2,7 @@ plugins {
     id("dev.kikugie.stonecutter")
     // Minecraft 26.x is unobfuscated, so the plain loom plugin applies with no remapping step.
     // (The obfuscated variant, net.fabricmc.fabric-loom-remap, went away with 1.21.x in 0.3.0.)
-    id("net.fabricmc.fabric-loom") version "1.17.11" apply false
+    id("net.fabricmc.fabric-loom") version "1.17.21" apply false
     id("net.neoforged.moddev") version "2.0.147" apply false
     id("me.modmuss50.mod-publish-plugin") version "0.7.4" apply false
 }
