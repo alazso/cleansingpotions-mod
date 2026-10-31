@@ -109,9 +109,6 @@ tasks.processResources {
             }
         }
     }
-    filesMatching("cleansingpotions.mixins.json") {
-        expand(mapOf("mixin_compat_level" to "JAVA_25"))
-    }
 }
 
 publishMods {

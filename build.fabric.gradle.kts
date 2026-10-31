@@ -112,9 +112,6 @@ tasks.processResources {
             filter { line -> if (line.contains("cleansingpotions.mixins.json")) null else line }
         }
     }
-    filesMatching("cleansingpotions.mixins.json") {
-        expand(mapOf("mixin_compat_level" to "JAVA_25"))
-    }
 }
 
 publishMods {
