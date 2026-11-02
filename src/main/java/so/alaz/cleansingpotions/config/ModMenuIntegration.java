@@ -8,7 +8,10 @@ import net.fabricmc.loader.api.FabricLoader;
 public class ModMenuIntegration implements ModMenuApi {
     @Override
     public ConfigScreenFactory<?> getModConfigScreenFactory() {
-        return FabricLoader.getInstance().isModLoaded("cloth-config") ? CleansingConfigScreen::create : parent -> null;
+        // Mod Menu shows a config button for every factory except the one this default returns.
+        return FabricLoader.getInstance().isModLoaded("cloth-config")
+            ? CleansingConfigScreen::create
+            : ModMenuApi.super.getModConfigScreenFactory();
     }
 }
 //?}
