@@ -1,6 +1,6 @@
 package so.alaz.cleansingpotions.brew;
 
-//? neoforge {
+//? if neoforge && >=26.3 {
 /*import com.mojang.serialization.MapCodec;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import so.alaz.cleansingpotions.config.CleansingConfig;

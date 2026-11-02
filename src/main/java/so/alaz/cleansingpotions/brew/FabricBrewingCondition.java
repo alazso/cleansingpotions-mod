@@ -1,7 +1,7 @@
 package so.alaz.cleansingpotions.brew;
 
-//? fabric {
-import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
+//? if fabric && >=26.3 {
+/*import net.fabricmc.fabric.api.resource.conditions.v1.ResourceCondition;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditionType;
 import net.minecraft.resources.RegistryOps;
 import so.alaz.cleansingpotions.config.CleansingConfig;
@@ -24,4 +24,4 @@ public record FabricBrewingCondition(MilkVariant variant) implements ResourceCon
         return CleansingConfig.get().brewingAllowed(variant);
     }
 }
-//?}
+*///?}

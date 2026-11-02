@@ -16,11 +16,15 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
+//? if >=26.3 {
+/^import net.neoforged.neoforge.registries.NeoForgeRegistries;
+^///?}
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent;
-import so.alaz.cleansingpotions.brew.BrewingCondition;
+//? if >=26.3 {
+/^import so.alaz.cleansingpotions.brew.BrewingCondition;
 import so.alaz.cleansingpotions.brew.NeoForgeBrewingCondition;
+^///?}
 import so.alaz.cleansingpotions.command.CleansingCommand;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.config.CleansingConfigScreen;
@@ -81,8 +85,10 @@ public class CleansingPotionsNeoForge {
             helper.register(ModEntities.CLEANSING_POTION_KEY, ModEntities.CLEANSING_POTION);
             helper.register(ModEntities.CLEANSING_CLOUD_KEY, ModEntities.CLEANSING_CLOUD);
         });
-        event.register(NeoForgeRegistries.Keys.CONDITION_CODECS, helper ->
+        //? if >=26.3 {
+        /^event.register(NeoForgeRegistries.Keys.CONDITION_CODECS, helper ->
             helper.register(BrewingCondition.ID, NeoForgeBrewingCondition.CODEC));
+        ^///?}
     }
 
     private void onCommonSetup(FMLCommonSetupEvent event) {

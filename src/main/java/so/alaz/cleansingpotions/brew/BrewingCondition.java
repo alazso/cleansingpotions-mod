@@ -1,13 +1,14 @@
 package so.alaz.cleansingpotions.brew;
 
-import com.mojang.serialization.Codec;
+//? if >=26.3 {
+/*import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.Identifier;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.item.MilkVariant;
 
-/** Id and codec shared by the Fabric and NeoForge load conditions that gate the brewing recipes. */
+// Id and codec shared by the Fabric and NeoForge load conditions that gate the brewing recipes.
 public final class BrewingCondition {
 
     public static final Identifier ID = CleansingPotions.id("brewing");
@@ -25,3 +26,4 @@ public final class BrewingCondition {
     private BrewingCondition() {
     }
 }
+*///?}

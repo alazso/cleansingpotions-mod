@@ -4,11 +4,15 @@ package so.alaz.cleansingpotions;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+//? if >=26.3 {
+/*import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+*///?}
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
-import so.alaz.cleansingpotions.brew.FabricBrewingCondition;
+//? if >=26.3 {
+/*import so.alaz.cleansingpotions.brew.FabricBrewingCondition;
+*///?}
 import so.alaz.cleansingpotions.command.CleansingCommand;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.entity.ModEntities;
@@ -36,7 +40,9 @@ public class CleansingPotionsFabric implements ModInitializer {
         Registry.register(BuiltInRegistries.ENTITY_TYPE,
             ModEntities.CLEANSING_CLOUD_KEY, ModEntities.CLEANSING_CLOUD);
         ModItems.registerDispenserBehaviors();
-        ResourceConditions.register(FabricBrewingCondition.TYPE);
+        //? if >=26.3 {
+        /*ResourceConditions.register(FabricBrewingCondition.TYPE);
+        *///?}
 
         CleansingPotions.init();
 
