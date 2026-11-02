@@ -69,8 +69,9 @@ public final class FastStatsBridge {
         ErrorTracker tracker = ErrorTracker.contextAware();
         try {
             // Every mod and Minecraft share one class loader, so the SDK's loader check alone also
-            // captures another mod's thread death.
-            tracker.addExclusionRule((thread, error) -> !ErrorReporter.hasOwnFrame(error));
+            // captures another mod's thread death. The tracker holds what it captures until a send, so
+            // a death while errors will not send would go out with the first batch after consent.
+            tracker.addExclusionRule((thread, error) -> !errorsWillSend() || !ErrorReporter.hasOwnFrame(error));
             context = factory.apply(tracker);
         } catch (Throwable failure) {
             // ErrorTracker.contextAware installed the JVM default uncaught exception handler.

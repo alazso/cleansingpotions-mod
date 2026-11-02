@@ -149,12 +149,16 @@ class FastStatsBridgeTest {
     }
 
     /** Hands the throwable to the JVM default handler, which is how a dying thread reaches the SDK. */
-    private static List<Throwable> capturedOnThreadDeath(String frameClass) {
-        List<Throwable> captured = new ArrayList<>();
-        started(tracker -> tracker.setContextErrorHandler((loader, error) -> captured.add(error)));
+    private static void threadDeath(String frameClass) {
         RuntimeException error = new RuntimeException("thread death");
         error.setStackTrace(new StackTraceElement[]{new StackTraceElement(frameClass, "run", "Source.java", 1)});
         Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), error);
+    }
+
+    private static List<Throwable> capturedOnThreadDeath(String frameClass) {
+        List<Throwable> captured = new ArrayList<>();
+        started(tracker -> tracker.setContextErrorHandler((loader, error) -> captured.add(error)));
+        threadDeath(frameClass);
         return captured;
     }
 
@@ -166,6 +170,17 @@ class FastStatsBridgeTest {
     @Test
     void automaticCaptureDropsAThreadDeathWithNoFrameInThisMod() {
         assertThat(capturedOnThreadDeath(OTHER_CLASS)).isEmpty();
+    }
+
+    @Test
+    void automaticCaptureDropsAThreadDeathWhileErrorsWillNotSend() {
+        List<Throwable> captured = new ArrayList<>();
+        RecordingContext context = started(tracker -> tracker.setContextErrorHandler((loader, error) -> captured.add(error)));
+        context.submissionActive = false;
+
+        threadDeath(OWN_CLASS);
+
+        assertThat(captured).isEmpty();
     }
 
     @Test

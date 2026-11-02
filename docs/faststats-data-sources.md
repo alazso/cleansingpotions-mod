@@ -191,8 +191,8 @@ Separate FS feature from metrics; **not** a data source you define.
 - **Automatic capture:** `FastStatsBridge.start` attaches `ErrorTracker.contextAware()` through
   `.errorTrackerService(...)` on both loaders. It sees every throwable that kills a thread. The SDK's own
   check only compares class loaders, and every mod and Minecraft share one loader on both platforms, so
-  `start` adds an exclusion rule: a throwable is dropped unless it or one of its causes has a stack frame
-  in `so.alaz.cleansingpotions`. The rule applies to automatic capture only, so `ErrorReporter.report` and
+  `start` adds an exclusion rule: a throwable is dropped when `errorsWillSend` is false, or when neither it
+  nor any of its causes has a stack frame in `so.alaz.cleansingpotions`. The rule applies to automatic capture only, so `ErrorReporter.report` and
   `/cleanse testerror` are unaffected.
 - **Handled failures:** report them through `ErrorReporter.report(source, error)`, which is safe when the
   nested FastStats mod is absent. It sends at most one report per source per process, because the SDK stores
