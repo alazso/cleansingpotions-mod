@@ -129,9 +129,9 @@ gated, and neither are guests on a LAN world.
 
 **Metrics.** The mod reports pseudonymous usage statistics and errors through
 [FastStats](https://faststats.dev): counts such as potions used and effects removed, the mod's settings,
-error reports with stack traces for failures in this mod's code, and environment details (mod, game, and loader versions, player count,
-online mode, Java version, operating system, and CPU core count). An install is identified by a random ID
-in `config/faststats/config.properties`. The
+error reports with stack traces for failures in this mod's code, and environment details (mod, game, and
+loader versions, player count, online mode, Java version, operating system, and CPU core count). An install
+is identified by a random ID in `config/faststats/config.properties`. The
 [full list of metrics](https://github.com/alazso/cleansingpotions-mod/blob/main/docs/faststats-data-sources.md)
 is in the repository.
 
@@ -149,9 +149,10 @@ If `config/cleansingpotions.json` cannot be parsed at game start, metrics stay o
 the file's text holds `"metrics": true`.
 
 **Update check.** On the first world join of a session, the client asks the Modrinth API whether a newer
-release exists for your game version and loader, and shows a toast if there is one. The request carries
-the game version, the loader, and the mod version (in its user agent). It runs only on clients, never on
-dedicated servers. Set `checkForUpdates` to `false` to turn it off.
+release exists for your game version and loader, and shows a toast if there is one. On a Fabric patch
+release such as 26.3.1 it also asks about 26.3, because a Fabric jar for 26.3 loads there. The request
+carries the game version, the loader, and the mod version (in its user agent). It runs only on clients,
+never on dedicated servers. Set `checkForUpdates` to `false` to turn it off.
 
 ## Requirements
 

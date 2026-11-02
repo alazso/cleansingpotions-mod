@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * Builds the Modrinth version query, reads its response, and compares versions and changelog markers.
@@ -33,9 +34,26 @@ public final class UpdateLogic {
     private UpdateLogic() {
     }
 
-    /** The Modrinth query for versions that list both this loader and this game version. */
+    /**
+     * The Modrinth query for versions that list this loader and any of this install's game versions.
+     * Modrinth matches a game version exactly.
+     *
+     * <p>On Fabric, a game id with more than two dot-separated parts also asks for its first two parts:
+     * 26.3.1 sends 26.3.1 and 26.3, because a Fabric jar loads on every patch release of its Minecraft
+     * drop and is tagged with the drop alone. Every other case sends the game id alone. A NeoForge jar
+     * pins one exact version, so a jar tagged 26.3 would refuse to load on 26.3.1.
+     */
     public static String queryUrl(String loader, String game) {
-        return VERSIONS_URL + "?loaders=" + oneElementArray(loader) + "&game_versions=" + oneElementArray(game);
+        return VERSIONS_URL + "?loaders=" + jsonArray(List.of(loader))
+            + "&game_versions=" + jsonArray(gameVersions(loader, game));
+    }
+
+    private static List<String> gameVersions(String loader, String game) {
+        String[] parts = game.split("\\.");
+        if ("fabric".equals(loader) && parts.length > 2) {
+            return List.of(game, parts[0] + "." + parts[1]);
+        }
+        return List.of(game);
     }
 
     /**
@@ -62,8 +80,9 @@ public final class UpdateLogic {
         return value == null || value.isJsonNull() ? null : value.getAsString();
     }
 
-    private static String oneElementArray(String value) {
-        return URLEncoder.encode("[\"" + value + "\"]", StandardCharsets.UTF_8);
+    private static String jsonArray(List<String> values) {
+        String quoted = values.stream().map(value -> "\"" + value + "\"").collect(Collectors.joining(","));
+        return URLEncoder.encode("[" + quoted + "]", StandardCharsets.UTF_8);
     }
 
     public static Optional<UpdateInfo> evaluate(String currentVersion, List<RemoteVersion> remote) {

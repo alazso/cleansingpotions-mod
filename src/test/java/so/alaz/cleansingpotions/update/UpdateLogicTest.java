@@ -69,6 +69,40 @@ class UpdateLogicTest {
             .isEqualTo("loaders=[\"neoforge\"]&game_versions=[\"26.3\"]");
     }
 
+    private static String decodedQuery(String loader, String game) {
+        String url = UpdateLogic.queryUrl(loader, game);
+        return URLDecoder.decode(url.substring(url.indexOf('?') + 1), StandardCharsets.UTF_8);
+    }
+
+    @Test
+    void fabricDropSendsOneGameVersion() {
+        assertThat(decodedQuery("fabric", "26.3")).isEqualTo("loaders=[\"fabric\"]&game_versions=[\"26.3\"]");
+    }
+
+    @Test
+    void fabricPatchReleaseAlsoSendsItsDrop() {
+        assertThat(decodedQuery("fabric", "26.3.1"))
+            .isEqualTo("loaders=[\"fabric\"]&game_versions=[\"26.3.1\",\"26.3\"]");
+    }
+
+    @Test
+    void fabricPatchReleaseKeepsTheUrlEncoding() {
+        assertThat(UpdateLogic.queryUrl("fabric", "26.3.1")).isEqualTo(
+            "https://api.modrinth.com/v2/project/gZfP9OGb/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%2226.3.1%22%2C%2226.3%22%5D");
+    }
+
+    @Test
+    void neoForgePatchReleaseSendsOnlyItsExactVersion() {
+        assertThat(decodedQuery("neoforge", "26.3.1"))
+            .isEqualTo("loaders=[\"neoforge\"]&game_versions=[\"26.3.1\"]");
+    }
+
+    @Test
+    void fabricSnapshotSendsOneGameVersion() {
+        assertThat(decodedQuery("fabric", "26.4-snapshot-6"))
+            .isEqualTo("loaders=[\"fabric\"]&game_versions=[\"26.4-snapshot-6\"]");
+    }
+
     @Test
     void parseSkipsEverythingButReleasesWithAVersionNumber() {
         List<RemoteVersion> parsed = UpdateLogic.parse("""
