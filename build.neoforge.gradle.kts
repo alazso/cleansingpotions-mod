@@ -87,6 +87,10 @@ tasks.processResources {
     } else {
         // 26.2 has no minecraft:brewing recipe type, and loading these files logs errors.
         exclude("data/cleansingpotions/recipe/brewing/**")
+        // The BrewingStand mixin classes exist only on Fabric.
+        filesMatching("cleansingpotions.mixins.json") {
+            filter { line -> if (line.contains("BrewingStand")) null else line }
+        }
     }
     filesMatching(listOf("META-INF/neoforge.mods.toml", "pack.mcmeta")) {
         expand(resourceProps)

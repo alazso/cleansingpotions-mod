@@ -20,6 +20,11 @@ public final class CleansingBrewing {
             && (reagent.is(Items.MILK_BUCKET) || reagent.is(Items.HONEY_BOTTLE));
     }
 
+    // Lingering is left out because no recipe takes it as an input.
+    public static boolean isBrewingInput(ItemStack stack) {
+        return stack.getItem() instanceof CleansingItem item && item.variant() != MilkVariant.LINGERING;
+    }
+
     public static ItemStack mix(ItemStack input, ItemStack reagent) {
         CleansingConfig cfg = CleansingConfig.get();
         if (!cfg.brewingEnabled) {

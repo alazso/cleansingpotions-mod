@@ -23,6 +23,16 @@ public class PotionBrewingMixin {
         }
     }
 
+    //? if neoforge {
+    /*// NeoForge adds this method, and its bottle slots and hoppers all read it.
+    @Inject(method = "isInput", at = @At("HEAD"), cancellable = true)
+    private void cleansingpotions$isInput(ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
+        if (CleansingBrewing.isBrewingInput(stack)) {
+            cir.setReturnValue(true);
+        }
+    }
+    *///?}
+
     @Inject(method = "hasMix", at = @At("HEAD"), cancellable = true)
     private void cleansingpotions$hasMix(ItemStack input, ItemStack reagent, CallbackInfoReturnable<Boolean> cir) {
         if (!CleansingBrewing.mix(input, reagent).isEmpty()) {

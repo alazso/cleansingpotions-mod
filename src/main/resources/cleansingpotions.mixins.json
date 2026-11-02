@@ -4,6 +4,8 @@
   "package": "so.alaz.cleansingpotions.mixin",
   "compatibilityLevel": "JAVA_25",
   "mixins": [
+    "BrewingStandBlockEntityMixin",
+    "BrewingStandPotionSlotMixin",
     "PotionBrewingMixin"
   ],
   "injectors": {
