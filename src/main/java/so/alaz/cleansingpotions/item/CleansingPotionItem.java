@@ -1,6 +1,5 @@
 package so.alaz.cleansingpotions.item;
 
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -25,8 +24,12 @@ public class CleansingPotionItem extends CleansingItem {
         if (player instanceof ServerPlayer serverPlayer
             && !PermissionGate.allows(serverPlayer, "cleansingpotions.use")) {
             CleansingMetrics.permissionDenied();
-            serverPlayer.sendSystemMessage(
-                Component.translatable("message.cleansingpotions.no_use").withStyle(ChatFormatting.RED));
+            sendRefusal(serverPlayer, Component.translatable("message.cleansingpotions.no_use"));
+            // The client has already started the drink, and the server sends nothing back for a refused use.
+            // Starting and stopping marks the using-item flag dirty, and its update ends the drink on the client.
+            serverPlayer.startUsingItem(hand);
+            serverPlayer.stopUsingItem();
+            serverPlayer.inventoryMenu.sendAllDataToRemote();
             return InteractionResult.FAIL;
         }
         return super.use(level, player, hand);

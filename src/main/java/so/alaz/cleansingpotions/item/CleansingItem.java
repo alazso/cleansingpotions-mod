@@ -2,7 +2,9 @@ package so.alaz.cleansingpotions.item;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
@@ -44,5 +46,10 @@ public abstract class CleansingItem extends Item {
     @Override
     public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
         MilkItemFactory.migrateLegacy(stack, owner);
+    }
+
+    /** Shows why a use was refused, in the action bar: holding the use button retries every 4 ticks. */
+    protected static void sendRefusal(ServerPlayer player, MutableComponent message) {
+        player.sendOverlayMessage(message.withStyle(ChatFormatting.RED));
     }
 }

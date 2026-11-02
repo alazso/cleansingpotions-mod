@@ -26,6 +26,7 @@
   "command.cleansingpotions.testerror_disabled": "Metrics are disabled in the config, so no error was reported.",
 
   "message.cleansingpotions.no_use": "You can't use cleansing potions!",
+  "message.cleansingpotions.variant_disabled": "This potion type is disabled.",
   "message.cleansingpotions.cooldown": "You can't do that for %s more seconds!",
 
   "toast.cleansingpotions.update.title": "Cleansing Potions",
