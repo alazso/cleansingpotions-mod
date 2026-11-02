@@ -68,6 +68,35 @@ loom {
     }
 }
 
+// Adds the gametest source set and the gameTest run, and makes check depend on that run.
+fabricApi {
+    configureTests {
+        createSourceSet = true
+        modId = "cleansingpotions-gametest"
+        enableClientGameTests = false
+    }
+}
+
+loom {
+    runs {
+        named("gameTest") {
+            systemProperties.put("fabric-api.gametest.report-file",
+                layout.buildDirectory.file("reports/gametest/TEST-gametest.xml").map { it.asFile.absolutePath })
+            providers.gradleProperty("gameTestFilter").orNull?.let {
+                systemProperties.put("fabric-api.gametest.filter", it)
+            }
+        }
+    }
+}
+
+// Loom clears only the client test run directory. The server run would keep its config and world.
+val cleanGameTestRun = tasks.register<Delete>("cleanGameTestRun") {
+    delete(layout.buildDirectory.dir("run/gameTest"))
+}
+tasks.named("runGameTest") {
+    dependsOn(cleanGameTestRun)
+}
+
 // PotionBrewing does not exist from 26.3. Those nodes ship JSON brewing recipes and no mixin.
 val brewingIsDataDriven = stonecutter.current.parsed >= "26.3"
 
