@@ -127,7 +127,8 @@ gated, and neither are guests on a LAN world.
 * Fabric needs a permissions mod that works with the Fabric Permissions API. Without that API the gate
   has no effect, and the game logs a warning at startup.
 * NeoForge reads the node through its own permission API, so it needs a mod that supplies a permission
-  handler. Without one, everyone stays allowed.
+  handler, selected in NeoForge's `permissionHandler` setting. Without one, everyone stays allowed, and a
+  dedicated server logs a warning at startup.
 
 ## Metrics and the update check
 
