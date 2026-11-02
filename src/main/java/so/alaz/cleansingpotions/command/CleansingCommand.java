@@ -12,6 +12,9 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+//? if >=26.3 {
+/*import net.minecraft.server.commands.ReloadCommand;
+*///?}
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import so.alaz.cleansingpotions.CleansingPotions;
@@ -70,6 +73,10 @@ public final class CleansingCommand {
             ctx.getSource().sendFailure(Component.translatable("command.cleansingpotions.reload_failed"));
             return 0;
         }
+        //? if >=26.3 {
+        /*// The recipe load conditions read the config only during a data reload.
+        ReloadCommand.reloadPacks(ctx.getSource().getServer().getPackRepository().getSelectedIds(), ctx.getSource());
+        *///?}
         ctx.getSource().sendSuccess(() -> Component.translatable("command.cleansingpotions.reloaded"), true);
         return 1;
     }
