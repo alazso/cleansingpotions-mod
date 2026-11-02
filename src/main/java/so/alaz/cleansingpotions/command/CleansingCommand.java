@@ -25,16 +25,17 @@ import so.alaz.cleansingpotions.item.MilkVariant;
 import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 import so.alaz.cleansingpotions.metrics.FastStatsBridge;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Predicate;
 
 public final class CleansingCommand {
 
-    private static final SuggestionProvider<CommandSourceStack> POTIONS =
-        (ctx, builder) -> SharedSuggestionProvider.suggest(List.of("cleansing", "soothing", "purging"), builder);
-    private static final SuggestionProvider<CommandSourceStack> VARIANTS =
-        (ctx, builder) -> SharedSuggestionProvider.suggest(List.of("regular", "splash", "lingering"), builder);
+    private static final SuggestionProvider<CommandSourceStack> POTIONS = (ctx, builder) ->
+        SharedSuggestionProvider.suggest(Arrays.stream(CleanseMode.values()).map(CleanseMode::potionName), builder);
+    private static final SuggestionProvider<CommandSourceStack> VARIANTS = (ctx, builder) ->
+        SharedSuggestionProvider.suggest(Arrays.stream(MilkVariant.values()).map(MilkVariant::tag), builder);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("cleansingpotions")
