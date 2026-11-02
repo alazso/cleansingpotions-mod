@@ -19,8 +19,10 @@ public class CleansingPotionsFabricClient implements ClientModInitializer {
         EntityRenderers.register(ModEntities.CLEANSING_POTION, ThrownItemRenderer::new);
         EntityRenderers.register(ModEntities.CLEANSING_CLOUD, NoopRenderer::new);
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> UpdateNotifier.onJoin());
-        ScreenEvents.AFTER_INIT.register((client, screen, width, height) ->
-            TelemetryButtonGuard.apply(screen, Screens.getWidgets(screen)));
+        ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> {
+            TelemetryButtonGuard.apply(screen, Screens.getWidgets(screen));
+            ScreenEvents.afterTick(screen).register(open -> TelemetryButtonGuard.apply(open, Screens.getWidgets(open)));
+        });
     }
 }
 //?}

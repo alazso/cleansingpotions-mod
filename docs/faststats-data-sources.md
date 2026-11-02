@@ -71,9 +71,10 @@ decides whether a context is created at all, so a boot with it off keeps this mo
 The game's telemetry options screen has a FastStats button that reopens the consent screen. SDK 0.31.0's
 `ConsentScreen` constructor throws when no FastStats context is registered, which crashes the game, so
 `TelemetryButtonGuard` deactivates the button in that state: `metrics` off with no other FastStats mod on
-the install, or after `FastStatsBridge.stop` with none left. `OptionsScreen` disables its Telemetry Data
-button on an account that does not allow telemetry, which leaves that file as the way to change the answer
-there.
+the install, or after `FastStatsBridge.stop` with none left. It checks after init and every client tick on
+Fabric, and before every frame on NeoForge, so a stop while the screen is open is picked up. `OptionsScreen`
+disables its Telemetry Data button on an account that does not allow telemetry, which leaves that file as
+the way to change the answer there.
 
 **Reporting semantics.** A counter reports its total since the last accepted metrics submission. Reading
 one (`Counter.peek`) only records the value it returned, because FastStats also runs the suppliers when it

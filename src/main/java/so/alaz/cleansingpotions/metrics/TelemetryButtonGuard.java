@@ -12,7 +12,12 @@ import java.util.List;
 // constructor that button calls throws when no FastStats context is registered, which crashes the game.
 public final class TelemetryButtonGuard {
 
-    /** Deactivates that button while no context is registered. Call after the screen's init has finished. */
+    /**
+     * Keeps that button inactive while no context is registered and active otherwise. Call after the
+     * screen's init has finished and again while it stays open, because a /cleanse reload from a LAN guest
+     * or a command block can stop FastStats during that time. That stop runs on the server thread, so it
+     * can still land between two calls.
+     */
     public static void apply(Screen screen, List<?> widgets) {
         if (!(screen instanceof TelemetryInfoScreen)) {
             return;

@@ -64,7 +64,7 @@ public class CleansingPotionsNeoForge {
             NeoForge.EVENT_BUS.addListener(
                 (ClientPlayerNetworkEvent.LoggingIn event) -> UpdateNotifier.onJoin());
             NeoForge.EVENT_BUS.addListener(
-                (ScreenEvent.Init.Post event) -> TelemetryButtonGuard.apply(event.getScreen(), event.getListenersList()));
+                (ScreenEvent.Render.Pre event) -> TelemetryButtonGuard.apply(event.getScreen(), event.getScreen().children()));
         }
 
         if (CleansingConfig.get().metrics) {
