@@ -140,7 +140,7 @@ is identified by a random ID in `config/faststats/config.properties`. The
 [full list of metrics](https://github.com/alazso/cleansingpotions-mod/blob/main/docs/faststats-data-sources.md)
 is in the repository.
 
-There are three ways to turn it off:
+These turn it off:
 
 * `metrics` in `config/cleansingpotions.json` or the config screen covers this mod. Turning it off through
   the screen or `/cleanse reload` stops FastStats at once, and nothing further is sent. Turning it back on
