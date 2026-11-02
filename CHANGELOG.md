@@ -32,6 +32,7 @@ semantic versioning.
 - On 26.2 milk buckets and honey bottles are no longer accepted as brewing ingredients while `brewingEnabled` is off.
 
 **Configuration**
+- A `forceRemove` or `forceKeep` entry with no namespace, such as `night_vision`, means `minecraft:`.
 - Config values are sanitized on load and on save: `radius` stays within 0.5 to 32, `cooldownSeconds` within 0 to 3600, a radius that is not a finite number becomes the default, and null entries leave the force lists.
 - Saves write a temporary file and move it into place, so a failed write leaves the existing file intact.
 - A config file that cannot be read keeps the previous settings, and `/cleanse reload` reports that failure in place of claiming success. Plain `/reload` does not reread the file.

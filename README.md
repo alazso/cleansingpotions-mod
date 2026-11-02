@@ -99,7 +99,7 @@ The two force lists are edited in the file.
 | `splashEnabled`, `lingeringEnabled` | Allow brewing and throwing that type. |
 | `onlyThrower` | A splash cleanses only whoever threw it. |
 | `radius` | Area of effect in blocks, from 0.5 to 32. |
-| `forceRemove`, `forceKeep` | Effects every potion always clears, or never clears. An effect on both lists is kept. |
+| `forceRemove`, `forceKeep` | Effects every potion always clears, or never clears. An effect on both lists is kept. An entry with no namespace means `minecraft:`. |
 | `cooldownEnabled`, `cooldownSeconds` | A cooldown between throws, from 0 to 3600 seconds. |
 | `permissionsEnabled` | Gates drinking and throwing behind a permission, see below. |
 | `cleanseFeedback` | Sparkle particles and a chime when an entity is cleansed. |

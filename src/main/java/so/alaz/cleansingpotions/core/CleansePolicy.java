@@ -33,7 +33,8 @@ public final class CleansePolicy {
         if (ids != null) {
             for (String id : ids) {
                 if (id != null && !id.isBlank()) {
-                    out.add(id.trim().toLowerCase(Locale.ROOT));
+                    String entry = id.trim().toLowerCase(Locale.ROOT);
+                    out.add(entry.indexOf(':') < 0 ? "minecraft:" + entry : entry);
                 }
             }
         }
