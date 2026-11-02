@@ -72,7 +72,7 @@ class FastStatsBridgeTest {
         }
     }
 
-    /** Its first shutdown stands in for a stalled send. A later shutdown returns at once, as the SDK's does. */
+    /** Its first shutdown stands in for a stalled send. A later shutdown returns at once, as the SDK's does once submission is off. */
     private static final class StalledContext extends RecordingContext {
 
         final CompletableFuture<Thread> sender = new CompletableFuture<>();
@@ -213,6 +213,7 @@ class FastStatsBridgeTest {
             FastStatsBridge.sendFinalBatch(SHORT_WAIT_MILLIS);
             long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
 
+            assertThat(elapsedMillis).isGreaterThanOrEqualTo(SHORT_WAIT_MILLIS);
             assertThat(elapsedMillis).isLessThan(RETURN_LIMIT_MILLIS);
             Thread sender = context.sender.get(RETURN_LIMIT_MILLIS, TimeUnit.MILLISECONDS);
             assertThat(sender).isNotSameAs(Thread.currentThread());
