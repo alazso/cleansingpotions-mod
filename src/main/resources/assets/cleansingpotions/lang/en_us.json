@@ -49,9 +49,9 @@
   "config.cleansingpotions.brewing_enabled": "Brewing Enabled",
   "config.cleansingpotions.brewing_enabled.tooltip": "Whether cleansing, soothing, and purging potions can be brewed.",
   "config.cleansingpotions.splash_enabled": "Splash Enabled",
-  "config.cleansingpotions.splash_enabled.tooltip": "Whether splash potions can be brewed and have any effect when thrown.",
+  "config.cleansingpotions.splash_enabled.tooltip": "Whether splash potions can be brewed and thrown. A dispenser still fires one, and it shatters with no effect.",
   "config.cleansingpotions.lingering_enabled": "Lingering Enabled",
-  "config.cleansingpotions.lingering_enabled.tooltip": "Whether lingering potions can be brewed and leave a cloud.",
+  "config.cleansingpotions.lingering_enabled.tooltip": "Whether lingering potions can be brewed and thrown. A dispenser still fires one, and it shatters with no effect.",
 
   "config.cleansingpotions.category.effects": "Effects",
   "config.cleansingpotions.cleanse_feedback": "Cleanse Feedback",
@@ -61,11 +61,11 @@
 
   "config.cleansingpotions.category.misc": "Misc",
   "config.cleansingpotions.permissions_enabled": "Permissions Enabled",
-  "config.cleansingpotions.permissions_enabled.tooltip": "Server-only gate; never affects singleplayer.",
+  "config.cleansingpotions.permissions_enabled.tooltip": "Checks cleansingpotions.use on multiplayer servers and never affects singleplayer. Needs the Fabric Permissions API on Fabric, or a permission handler mod on NeoForge.",
   "config.cleansingpotions.check_for_updates": "Check For Updates",
-  "config.cleansingpotions.check_for_updates.tooltip": "Toast on join when a newer version is available (anonymous Modrinth check).",
+  "config.cleansingpotions.check_for_updates.tooltip": "Toast on join when a newer version is available. Asks Modrinth, sending your game version, loader, and mod version.",
   "config.cleansingpotions.metrics": "Metrics",
-  "config.cleansingpotions.metrics.tooltip": "Pseudonymous usage metrics and error reports via FastStats.",
+  "config.cleansingpotions.metrics.tooltip": "Pseudonymous usage metrics and error reports via FastStats. Turning this off stops them at once. Turning it back on takes effect at the next game start.",
   "config.cleansingpotions.misc.note": "Effect force-lists are edited in config/cleansingpotions.json. Potion colours are fixed and come from the resource pack.",
 
   "toast.cleansingpotions.update.title": "Cleansing Potions",

@@ -190,8 +190,16 @@ Separate FS feature from metrics; **not** a data source you define.
   in that session", not a count of failures. `/cleanse testerror` skips that limit and adds one report per
   command.
 - **When reports send:** with the metrics schedule above. A failed send keeps the reports and retries on the
-  next cycle, and the send at shutdown is the last attempt. `FastStatsBridge` queues no report while
-  `submitErrors=false` or during the run that creates the config file, and `/cleanse testerror` says so in
-  that case.
+  next cycle, and the send at shutdown is the last attempt. `FastStatsBridge` queues a report only while
+  `errorsWillSend` is true. That needs a context, which does not exist when `metrics` was off at game start,
+  when FastStats could not start (it is not loaded on this game version, for example), or after
+  `FastStatsBridge.stop`. It needs error tracking on, which `enabled=false` or `submitErrors=false` in
+  `config/faststats/config.properties` turns off, as does a choice on another mod's consent screen. It also
+  needs submission active, which is false during the run that creates that file and after the shutdown send.
+  With `metrics` off in the config, `/cleanse testerror` answers
+  `command.cleansingpotions.testerror_disabled`. With it on while `errorsWillSend` is false, the command
+  answers `command.cleansingpotions.testerror_inactive`, which names the first run, the opt-out in that
+  file, a stop until the next game start, and FastStats not being loaded on this game version. Neither
+  answer queues a report.
 - **Context:** each error report also carries the current metric values, unless the owner set
   `submitAdditionalMetrics=false`.
