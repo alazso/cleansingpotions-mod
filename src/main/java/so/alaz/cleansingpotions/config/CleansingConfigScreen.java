@@ -11,6 +11,7 @@ public final class CleansingConfigScreen {
 
     public static Screen create(Screen parent) {
         CleansingConfig cfg = CleansingConfig.get();
+        CleansingConfig defaults = new CleansingConfig();
         ConfigBuilder builder = ConfigBuilder.create()
             .setParentScreen(parent)
             .setTitle(Component.literal("CleansingPotions"));
@@ -19,24 +20,27 @@ public final class CleansingConfigScreen {
         var cleanse = builder.getOrCreateCategory(Component.literal("Cleanse"));
         cleanse.addEntry(entry.startBooleanToggle(Component.literal("Only Thrower"), cfg.onlyThrower)
             .setTooltip(Component.literal("A thrown splash cleanses only the thrower instead of an area."))
+            .setDefaultValue(defaults.onlyThrower)
             .setSaveConsumer(v -> cfg.onlyThrower = v).build());
         cleanse.addEntry(entry.startDoubleField(Component.literal("Radius"), cfg.radius)
             .setTooltip(Component.literal("Area-of-effect radius in blocks for splash and lingering."))
-            .setMin(0.0).setMax(64.0).setSaveConsumer(v -> cfg.radius = v).build());
+            .setMin(0.5).setMax(32.0).setDefaultValue(defaults.radius)
+            .setSaveConsumer(v -> cfg.radius = v).build());
 
         var cooldown = builder.getOrCreateCategory(Component.literal("Cooldown"));
         cooldown.addEntry(entry.startBooleanToggle(Component.literal("Cooldown Enabled"), cfg.cooldownEnabled)
+            .setDefaultValue(defaults.cooldownEnabled)
             .setSaveConsumer(v -> cfg.cooldownEnabled = v).build());
         cooldown.addEntry(entry.startLongField(Component.literal("Cooldown Seconds"), cfg.cooldownSeconds)
-            .setMin(0L).setMax(3600L).setSaveConsumer(v -> cfg.cooldownSeconds = v).build());
+            .setMin(0L).setMax(3600L).setDefaultValue(defaults.cooldownSeconds)
+            .setSaveConsumer(v -> cfg.cooldownSeconds = v).build());
 
         var recipes = builder.getOrCreateCategory(Component.literal("Recipes"));
-        // Brewing is data driven from 26.3 on, so a config toggle cannot switch it off. Rather than
-        // leave a dead switch in the screen, say where the recipes actually live.
         //? if <26.3 {
         recipes.addEntry(entry.startTextDescription(
             Component.literal("§7Recipe toggles take effect on game load, not on /cleanse reload.")).build());
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Brewing Enabled"), cfg.brewingEnabled)
+            .setDefaultValue(defaults.brewingEnabled)
             .setSaveConsumer(v -> cfg.brewingEnabled = v).build());
         //?} else {
         /*recipes.addEntry(entry.startTextDescription(Component.literal(
@@ -46,28 +50,35 @@ public final class CleansingConfigScreen {
         *///?}
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Splash Enabled"), cfg.splashEnabled)
             .setTooltip(Component.literal("Whether a thrown splash potion has any effect."))
+            .setDefaultValue(defaults.splashEnabled)
             .setSaveConsumer(v -> cfg.splashEnabled = v).build());
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Lingering Enabled"), cfg.lingeringEnabled)
             .setTooltip(Component.literal("Whether a lingering potion leaves a cloud."))
+            .setDefaultValue(defaults.lingeringEnabled)
             .setSaveConsumer(v -> cfg.lingeringEnabled = v).build());
 
         var effects = builder.getOrCreateCategory(Component.literal("Effects"));
         effects.addEntry(entry.startBooleanToggle(Component.literal("Cleanse Feedback"), cfg.cleanseFeedback)
             .setTooltip(Component.literal("Sparkle particles and a chime when an entity is cleansed."))
+            .setDefaultValue(defaults.cleanseFeedback)
             .setSaveConsumer(v -> cfg.cleanseFeedback = v).build());
         effects.addEntry(entry.startBooleanToggle(Component.literal("Impact Particles"), cfg.impactParticles)
             .setTooltip(Component.literal("Shatter particles when a splash or lingering potion lands."))
+            .setDefaultValue(defaults.impactParticles)
             .setSaveConsumer(v -> cfg.impactParticles = v).build());
 
         var misc = builder.getOrCreateCategory(Component.literal("Misc"));
         misc.addEntry(entry.startBooleanToggle(Component.literal("Permissions Enabled"), cfg.permissionsEnabled)
             .setTooltip(Component.literal("Server-only gate; never affects singleplayer."))
+            .setDefaultValue(defaults.permissionsEnabled)
             .setSaveConsumer(v -> cfg.permissionsEnabled = v).build());
         misc.addEntry(entry.startBooleanToggle(Component.literal("Check For Updates"), cfg.checkForUpdates)
             .setTooltip(Component.literal("Toast on join when a newer version is available (anonymous Modrinth check)."))
+            .setDefaultValue(defaults.checkForUpdates)
             .setSaveConsumer(v -> cfg.checkForUpdates = v).build());
         misc.addEntry(entry.startBooleanToggle(Component.literal("Metrics"), cfg.metrics)
             .setTooltip(Component.literal("Pseudonymous usage metrics and error reports via FastStats."))
+            .setDefaultValue(defaults.metrics)
             .setSaveConsumer(v -> cfg.metrics = v).build());
         misc.addEntry(entry.startTextDescription(Component.literal(
             "§7Effect force-lists and per-potion name/lore are edited in config/cleansingpotions.json. Potion colours are fixed and come from the resource pack.")).build());
