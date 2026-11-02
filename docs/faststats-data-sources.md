@@ -48,7 +48,11 @@ The first config load runs before the metrics toggle has been read, so it happen
 context exists. `ErrorReporter` holds a report raised then, at most one per source, and flushes it when
 the context starts, which is why a malformed config still reports on the boot that found it. That holds
 only while the file's text has `"metrics": true`: a first load that fails turns metrics off otherwise,
-so no context starts and that boot sends nothing.
+so no context starts and that boot sends nothing. It also holds only while `errorsWillSend` is true at that
+flush. On a client with the consent screen unanswered, or on a server's first run, the flush discards the
+report, and the limit of one per source then blocks that source for the rest of the session, so the report
+comes from the next boot that finds the same failure. A report raised later in that session, before the
+answer, is discarded the same way.
 
 **First run and consent.** On a dedicated server, the run that creates
 `config/faststats/config.properties` submits nothing, and submission starts at the next game start, which
@@ -57,7 +61,10 @@ install. A client gets the SDK's consent screen instead, because this mod calls 
 once at the title screen, on a fresh install and on one that already has that file, and Esc does not close
 it that time. This mod submits nothing from that client before it is answered. Closing it applies its
 choices at once to every FastStats context on that client and saves them in that file. Its boxes start
-ticked on a first run, so pressing Done unchanged starts submission during that run.
+ticked on a first run, so pressing Done unchanged starts submission during that run, at the next scheduled send or the
+shutdown send. The first batch after an answer includes every count since game start or the last accepted
+submission, because increments are not gated on consent, so it can hold counts from before the answer or
+from while submission was off.
 `-Dfaststats.enabled=false`, which dev runs set, keeps it from opening. Our own `metrics` config option
 decides whether a context is created at all, so a boot with it off keeps this mod out of that screen.
 
@@ -209,8 +216,9 @@ Separate FS feature from metrics; **not** a data source you define.
   errors ticked, on a server during the run that creates that file, and after the shutdown send.
   With `metrics` off in the config, `/cleanse testerror` answers
   `command.cleansingpotions.testerror_disabled`. With it on while `errorsWillSend` is false, the command
-  answers `command.cleansingpotions.testerror_inactive`, which names the first run, the opt-out in that
-  file, a stop until the next game start, and FastStats not being loaded on this game version. Neither
+  answers `command.cleansingpotions.testerror_inactive`, which names the unanswered consent screen, the
+  first run, the opt-out in that file, a stop until the next game start, and FastStats not being loaded on
+  this game version. Neither
   answer queues a report.
 - **Context:** each error report also carries the current metric values, unless the owner set
   `submitAdditionalMetrics=false`.

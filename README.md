@@ -140,7 +140,7 @@ is identified by a random ID in `config/faststats/config.properties`. The
 [full list of metrics](https://github.com/alazso/cleansingpotions-mod/blob/main/docs/faststats-data-sources.md)
 is in the repository.
 
-There are two ways to turn it off:
+There are three ways to turn it off:
 
 * `metrics` in `config/cleansingpotions.json` or the config screen covers this mod. Turning it off through
   the screen or `/cleanse reload` stops FastStats at once, and nothing further is sent. Turning it back on
@@ -148,9 +148,13 @@ There are two ways to turn it off:
 * `enabled=false` in `config/faststats/config.properties` covers every FastStats mod on that install, and
   is read at game start. That file also has `submitMetrics`, `submitAdditionalMetrics`, and `submitErrors`
   for finer control.
+* On a client, Unselect All then Done on the FastStats consent screen covers every FastStats mod on that
+  install and applies at once.
 
-On a client, a FastStats consent screen opens once at the title screen, and this mod sends nothing from
-that client until it is answered. Its boxes start ticked, so pressing Done unchanged starts sending at once.
+On a client, that screen opens once at the title screen, and this mod sends nothing from that client until
+it is answered. Its boxes start ticked, so pressing Done unchanged turns sending on. The first batch goes out
+at the next scheduled send, at most 30 minutes later, or when the game closes, and it includes what this mod
+counted earlier in that session, including while sending was off.
 The answer is saved in that file and covers every FastStats mod on the install. The FastStats button in the
 game's telemetry options reopens the screen. That button is greyed out while no FastStats mod is running,
 such as when `metrics` is off, and the game disables those options on an account that does not allow
