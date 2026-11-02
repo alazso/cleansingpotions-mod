@@ -16,14 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The nine cleansing potion items: one per (variant, mode).
- *
- * <p>26.3 brewing recipes match on item id and cannot read a data component, so a single item
- * carrying the mode in {@code cleanse_mode} makes "gunpowder turns a Purging potion into a Purging
- * splash potion" inexpressible. Giving each combination its own item keeps brewing, recipe viewers,
- * and the model tints all working from the same identity.
- *
- * <p>The three Cleansing ids keep their original names, so stacks from earlier versions survive.
+ * The nine cleansing potion items, one per variant and mode. 26.3 brewing recipes match on item id only, so
+ * the mode is part of the item's identity. The three Cleansing ids must not change: legacy stacks use them.
  */
 public final class ModItems {
 
@@ -34,7 +28,7 @@ public final class ModItems {
     private static final Map<MilkVariant, Map<CleanseMode, Item>> BY_VARIANT =
         new EnumMap<>(MilkVariant.class);
 
-    /** e.g. {@code soothing_splash_potion}. Cleansing keeps the pre-0.3.0 ids. */
+    /** Registry path, such as {@code soothing_splash_potion}. */
     public static String path(MilkVariant variant, CleanseMode mode) {
         String base = mode.potionName();
         return switch (variant) {
@@ -64,10 +58,8 @@ public final class ModItems {
     }
 
     /**
-     * Makes an item drink exactly like a vanilla potion. Since 1.21.2 the drinking animation and
-     * duration, the gulping sounds, the closing gulp, the use stat, and the consume_item advancement
-     * trigger all come from the CONSUMABLE component, and the empty bottle from USE_REMAINDER. An
-     * item that only overrides its use animation looks right but drinks in silence.
+     * Applies the CONSUMABLE and USE_REMAINDER components vanilla potions use, which supply the drinking
+     * animation, sounds, stat, advancement trigger, and empty bottle.
      */
     private static Item.Properties drinkable(Item.Properties properties) {
         return properties
