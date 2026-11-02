@@ -28,7 +28,6 @@ import so.alaz.cleansingpotions.metrics.FastStatsBridge;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 
 public final class CleansingCommand {
 
@@ -39,7 +38,7 @@ public final class CleansingCommand {
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("cleansingpotions")
-            .requires(adminCheck())
+            .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
             .then(Commands.literal("reload")
                 .executes(CleansingCommand::reload))
             .then(Commands.literal("testerror")
@@ -55,16 +54,8 @@ public final class CleansingCommand {
                             .executes(ctx -> give(ctx, variantArg(ctx), EntityArgument.getPlayers(ctx, "targets")))))));
         LiteralCommandNode<CommandSourceStack> node = dispatcher.register(root);
         dispatcher.register(Commands.literal("cleanse")
-            .requires(adminCheck())
+            .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
             .redirect(node));
-    }
-
-    private static Predicate<CommandSourceStack> adminCheck() {
-        //? if <1.21.11 {
-        /*return source -> source.hasPermission(2);
-        *///?} else {
-        return Commands.<CommandSourceStack>hasPermission(Commands.LEVEL_GAMEMASTERS);
-        //?}
     }
 
     private static int reload(CommandContext<CommandSourceStack> ctx) {
