@@ -52,6 +52,12 @@ class PotionLangTest {
     }
 
     @Test
+    void bothEntitiesHaveTheirNames() {
+        assertEntry("entity.cleansingpotions.cleansing_potion", "Thrown Cleansing Potion");
+        assertEntry("entity.cleansingpotions.cleansing_cloud", "Cleansing Cloud");
+    }
+
+    @Test
     void everyRefusalHasAMessage() {
         assertKey("message.cleansingpotions.no_use");
         assertKey("message.cleansingpotions.variant_disabled");

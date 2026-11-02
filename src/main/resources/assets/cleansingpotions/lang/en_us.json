@@ -15,6 +15,9 @@
   "item.cleansingpotions.soothing.desc": "Clears harmful effects.",
   "item.cleansingpotions.purging.desc": "Clears beneficial effects.",
 
+  "entity.cleansingpotions.cleansing_potion": "Thrown Cleansing Potion",
+  "entity.cleansingpotions.cleansing_cloud": "Cleansing Cloud",
+
   "command.cleansingpotions.reloaded": "Configuration reloaded.",
   "command.cleansingpotions.reload_failed": "Could not read the config, so the previous settings stay active. See the log.",
   "command.cleansingpotions.given": "Gave a %s to %s.",
