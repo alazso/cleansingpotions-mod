@@ -24,7 +24,6 @@
   "command.cleansingpotions.testerror": "Queued an intentional test error. FastStats sends it with its next batch of error reports.",
   "command.cleansingpotions.testerror_inactive": "FastStats is not sending error reports right now (this is its first run, or it is turned off in config/faststats/config.properties), so no test error was queued.",
   "command.cleansingpotions.testerror_disabled": "Metrics are disabled in the config, so no error was reported.",
-  "command.cleansingpotions.testerror_unsupported": "FastStats error tracking is only available on Minecraft 26.x.",
 
   "message.cleansingpotions.no_use": "You can't use cleansing potions!",
   "message.cleansingpotions.cooldown": "You can't do that for %s more seconds!",
