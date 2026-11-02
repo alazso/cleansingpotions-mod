@@ -30,4 +30,5 @@ eclipse
 run
 runs
 *.log
+logs/
 .claude/
