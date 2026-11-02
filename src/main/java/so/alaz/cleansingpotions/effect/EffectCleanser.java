@@ -6,6 +6,8 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.core.CleansePolicy;
@@ -46,5 +48,21 @@ public final class EffectCleanser {
                 SoundEvents.AMETHYST_BLOCK_CHIME, SoundSource.PLAYERS, 0.7F, 1.4F);
         }
         return removed;
+    }
+
+    /**
+     * Cleanses every living entity within {@code radius} of the point.
+     *
+     * @return how many of them lost at least one effect
+     */
+    public int cleanseArea(Level level, double x, double y, double z, double radius, CleanseMode mode) {
+        AABB box = new AABB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
+        int affected = 0;
+        for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box)) {
+            if (entity.distanceToSqr(x, y, z) <= radius * radius && cleanse(entity, mode) > 0) {
+                affected++;
+            }
+        }
+        return affected;
     }
 }

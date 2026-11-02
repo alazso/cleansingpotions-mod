@@ -4,11 +4,9 @@ import net.minecraft.core.particles.ColorParticleOption;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.minecraft.world.phys.AABB;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
@@ -71,11 +69,6 @@ public class CleansingCloudEntity extends AreaEffectCloud {
         if (r <= 0) {
             return;
         }
-        AABB box = new AABB(getX() - r, getY() - r, getZ() - r, getX() + r, getY() + r, getZ() + r);
-        for (LivingEntity entity : level().getEntitiesOfClass(LivingEntity.class, box)) {
-            if (entity.distanceToSqr(this) <= r * r) {
-                CleansingPotions.cleanser().cleanse(entity, mode);
-            }
-        }
+        CleansingPotions.cleanser().cleanseArea(level(), getX(), getY(), getZ(), r, mode);
     }
 }

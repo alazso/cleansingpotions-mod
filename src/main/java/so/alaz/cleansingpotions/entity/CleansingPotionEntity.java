@@ -11,7 +11,6 @@ import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableIt
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
@@ -87,16 +86,8 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
             CleansingMetrics.throwAffected(affected);
             return;
         }
-        double r = cfg.radius;
-        AABB box = new AABB(getX() - r, getY() - r, getZ() - r, getX() + r, getY() + r, getZ() + r);
-        int affected = 0;
-        for (LivingEntity entity : level().getEntitiesOfClass(LivingEntity.class, box)) {
-            if (entity.distanceToSqr(this) <= r * r
-                && CleansingPotions.cleanser().cleanse(entity, mode) > 0) {
-                affected++;
-            }
-        }
-        CleansingMetrics.throwAffected(affected);
+        CleansingMetrics.throwAffected(
+            CleansingPotions.cleanser().cleanseArea(level(), getX(), getY(), getZ(), cfg.radius, mode));
     }
 
     private void spawnCloud(ServerLevel server, CleanseMode mode, int color) {
