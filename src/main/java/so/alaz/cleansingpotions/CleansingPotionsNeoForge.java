@@ -49,7 +49,6 @@ public class CleansingPotionsNeoForge {
         // Items must be built in RegisterEvent: registries are frozen by constructor time on NeoForge.
         modBus.addListener(this::onRegister);
         modBus.addListener(this::onCommonSetup);
-        modBus.addListener(this::onRegisterRenderers);
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(this::onGatherPermissionNodes);
         NeoForge.EVENT_BUS.addListener(this::onServerStarting);
@@ -57,6 +56,7 @@ public class CleansingPotionsNeoForge {
         CleansingPotions.init();
 
         if (dist.isClient()) {
+            modBus.addListener(this::onRegisterRenderers);
             if (ModList.get().isLoaded("cloth_config")) {
                 container.registerExtensionPoint(IConfigScreenFactory.class,
                     (mc, parent) -> CleansingConfigScreen.create(parent));
