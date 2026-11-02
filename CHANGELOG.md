@@ -32,6 +32,7 @@ semantic versioning.
 - On 26.2 milk buckets and honey bottles are no longer accepted as brewing ingredients while `brewingEnabled` is off.
 
 **Configuration**
+- Throw cooldowns follow the current `cooldownSeconds`, so a lowered value applies to a player already cooling, and they reset when the server or world stops.
 - A `forceRemove` or `forceKeep` entry with no namespace, such as `night_vision`, means `minecraft:`.
 - Config values are sanitized on load and on save: `radius` stays within 0.5 to 32, `cooldownSeconds` within 0 to 3600, a radius that is not a finite number becomes the default, and null entries leave the force lists.
 - Saves write a temporary file and move it into place, so a failed write leaves the existing file intact.

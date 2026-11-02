@@ -45,10 +45,10 @@ public class CleansingThrowItem extends CleansingItem implements ProjectileItem 
             sendRefusal(serverPlayer, Component.translatable("message.cleansingpotions.variant_disabled"));
             return InteractionResult.FAIL;
         }
-        if (cfg.cooldownEnabled && CleansingPotions.cooldowns().isCooling(player.getUUID())) {
+        if (cfg.cooldownEnabled && CleansingPotions.cooldowns().isCooling(player.getUUID(), cfg.cooldownSeconds)) {
             CleansingMetrics.cooldownBlocked();
             sendRefusal(serverPlayer, Component.translatable("message.cleansingpotions.cooldown",
-                CleansingPotions.cooldowns().remainingSeconds(player.getUUID())));
+                CleansingPotions.cooldowns().remainingSeconds(player.getUUID(), cfg.cooldownSeconds)));
             return InteractionResult.FAIL;
         }
         ItemStack stack = player.getItemInHand(hand);
@@ -60,7 +60,7 @@ public class CleansingThrowItem extends CleansingItem implements ProjectileItem 
         server.addFreshEntity(projectile);
         CleansingMetrics.potionThrown(variant());
         if (cfg.cooldownEnabled) {
-            CleansingPotions.cooldowns().start(player.getUUID(), cfg.cooldownSeconds);
+            CleansingPotions.cooldowns().start(player.getUUID());
         }
         player.awardStat(Stats.ITEM_USED.get(this));
         stack.consume(1, player);

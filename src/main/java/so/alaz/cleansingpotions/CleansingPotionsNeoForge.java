@@ -15,6 +15,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent;
@@ -42,6 +43,7 @@ public class CleansingPotionsNeoForge {
         modBus.addListener(this::onRegisterRenderers);
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
         NeoForge.EVENT_BUS.addListener(this::onGatherPermissionNodes);
+        NeoForge.EVENT_BUS.addListener(this::onServerStopped);
         CleansingPotions.init();
 
         if (dist.isClient()) {
@@ -100,6 +102,10 @@ public class CleansingPotionsNeoForge {
     private void onGatherPermissionNodes(PermissionGatherEvent.Nodes event) {
         // Registered whatever the config says, because PermissionAPI throws for an unregistered node.
         event.addNodes(NeoForgePlatformHelper.USE);
+    }
+
+    private void onServerStopped(ServerStoppedEvent event) {
+        CleansingPotions.cooldowns().clear();
     }
 }
 *///?}

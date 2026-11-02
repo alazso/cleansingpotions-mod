@@ -3,6 +3,7 @@ package so.alaz.cleansingpotions;
 //? fabric {
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
+import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
@@ -47,6 +48,7 @@ public class CleansingPotionsFabric implements ModInitializer {
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
             CleansingCommand.register(dispatcher));
+        ServerLifecycleEvents.SERVER_STOPPED.register(server -> CleansingPotions.cooldowns().clear());
 
         if (CleansingConfig.get().metrics) {
             try {
