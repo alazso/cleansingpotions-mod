@@ -4,6 +4,7 @@ import dev.faststats.Attributes;
 import dev.faststats.ErrorTracker;
 import dev.faststats.FastStatsContext;
 import dev.faststats.Metrics;
+import dev.faststats.SimpleContext;
 import dev.faststats.data.Metric;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 
@@ -73,13 +74,22 @@ public final class FastStatsBridge {
     }
 
     /**
-     * Whether a tracked error will reach FastStats. False when metrics are off in our own config
-     * (no context was created), on the SDK's first run, or when the server owner opted out in
-     * config/faststats/config.properties.
+     * Whether a tracked error will reach FastStats. False when no context exists, on the SDK's first
+     * run, or when the owner opted out in config/faststats/config.properties. The SDK builds its error
+     * service in all of those cases, so {@code errorTrackerService()} being present says nothing.
      */
     public static boolean errorsWillSend() {
         FastStatsContext current = context;
-        return current != null && current.errorTrackerService().isPresent();
+        return current != null && current.getConfig().errorTracking() && submitting(current);
+    }
+
+    private static boolean submitting(FastStatsContext current) {
+        try {
+            return ((SimpleContext) current).submissionActive;
+        } catch (LinkageError fieldGone) {
+            // The field is undocumented, and another mod can nest a newer FastStats without it.
+            return true;
+        }
     }
 
     /**
@@ -107,7 +117,7 @@ public final class FastStatsBridge {
 
     private static void track(Throwable error, boolean handled, Attributes attributes) {
         FastStatsContext current = context;
-        if (current == null) {
+        if (current == null || !errorsWillSend()) {
             return;
         }
         current.errorTrackerService().ifPresent(service -> service.globalErrorTracker()
