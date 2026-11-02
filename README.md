@@ -42,8 +42,9 @@ On 26.2 they are built in.
 The config can switch them off on both versions: `brewingEnabled` covers all of them, `splashEnabled`
 the gunpowder step, and `lingeringEnabled` the dragon's breath step. On 26.2 a change applies at once.
 On 26.3 a change applies on the next world load, `/reload`, or `/cleanse reload`, because the recipes
-are only rebuilt when data loads. A hand edit to the config file is read at game start or by
-`/cleanse reload`, on either version.
+are only rebuilt when data loads. A hand edit to the config file is read at game start, by
+`/cleanse reload`, or when the config screen opens, on either version. Closing the screen without saving
+does not undo that read.
 
 ## Using them
 
