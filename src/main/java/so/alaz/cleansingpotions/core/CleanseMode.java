@@ -22,7 +22,7 @@ public enum CleanseMode {
 
     /** Reads a value from {@link #tag()}, ignoring case. A null, blank, or unknown value reads as {@link #ALL}. */
     public static CleanseMode fromTag(String raw) {
-        if (raw == null || raw.isBlank()) {
+        if (raw == null) {
             return ALL;
         }
         try {
@@ -50,10 +50,7 @@ public enum CleanseMode {
     }
 
     public static CleanseMode fromPotionName(String name) {
-        if (name == null) {
-            return null;
-        }
-        return switch (name.trim().toLowerCase(Locale.ROOT)) {
+        return switch (name.toLowerCase(Locale.ROOT)) {
             case "cleansing" -> ALL;
             case "soothing" -> NEGATIVE_ONLY;
             case "purging" -> POSITIVE_ONLY;

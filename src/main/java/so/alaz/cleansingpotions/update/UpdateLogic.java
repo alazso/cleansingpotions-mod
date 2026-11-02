@@ -105,9 +105,6 @@ public final class UpdateLogic {
     }
 
     public static String highestBug(String changelog) {
-        if (changelog == null) {
-            return null;
-        }
         String best = null;
         Matcher m = BUG_MARKER.matcher(changelog);
         while (m.find()) {
@@ -137,7 +134,7 @@ public final class UpdateLogic {
     }
 
     private static String stripBuildMetadata(String version) {
-        String v = version == null ? "" : version.trim();
+        String v = version.trim();
         int plus = v.indexOf('+');
         if (plus >= 0) {
             v = v.substring(0, plus);

@@ -16,20 +16,17 @@ import so.alaz.cleansingpotions.core.EffectDisposition;
 import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 
 import java.util.List;
-import java.util.function.Function;
 
 public final class EffectCleanser {
 
     private final EffectClassifier classifier;
-    private final Function<CleanseMode, CleansePolicy> policyLookup;
 
-    public EffectCleanser(EffectClassifier classifier, Function<CleanseMode, CleansePolicy> policyLookup) {
+    public EffectCleanser(EffectClassifier classifier) {
         this.classifier = classifier;
-        this.policyLookup = policyLookup;
     }
 
     public int cleanse(LivingEntity entity, CleanseMode mode) {
-        CleansePolicy policy = policyLookup.apply(mode);
+        CleansePolicy policy = CleansingConfig.get().policy(mode);
         int removed = 0;
         for (MobEffectInstance effect : List.copyOf(entity.getActiveEffects())) {
             var holder = effect.getEffect();

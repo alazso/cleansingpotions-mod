@@ -16,8 +16,7 @@ public final class CleansingPotions {
 
     public static void init() {
         ConfigManager.load();
-        cleanser = new EffectCleanser(new EffectClassifier(),
-            mode -> CleansingConfig.get().policy(mode));
+        cleanser = new EffectCleanser(new EffectClassifier());
         Constants.LOG.info("CleansingPotions initialized.");
     }
 

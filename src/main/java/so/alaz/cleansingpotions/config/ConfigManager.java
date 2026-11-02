@@ -37,7 +37,7 @@ public final class ConfigManager {
      *
      * @return false if the file could not be read or parsed
      */
-    public static synchronized boolean load() {
+    public static boolean load() {
         return load(ConfigManager::file);
     }
 
@@ -91,7 +91,7 @@ public final class ConfigManager {
      * <p>The first save after a failed load copies the file to {@code cleansingpotions.json.bak} before
      * replacing it. If that copy fails, the save stops and the file stays.
      */
-    public static synchronized void save() {
+    public static void save() {
         save(ConfigManager::file);
     }
 
