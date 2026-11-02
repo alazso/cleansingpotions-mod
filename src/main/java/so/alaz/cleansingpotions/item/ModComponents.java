@@ -14,21 +14,16 @@ public final class ModComponents {
     public static final Identifier CLEANSE_MODE_ID = CleansingPotions.id("cleanse_mode");
 
     public static final Codec<CleanseMode> MODE_CODEC =
-        Codec.STRING.xmap(ModComponents::parse, CleanseMode::tag);
+        Codec.STRING.xmap(CleanseMode::fromTag, CleanseMode::tag);
 
     public static final StreamCodec<ByteBuf, CleanseMode> MODE_STREAM_CODEC =
-        ByteBufCodecs.STRING_UTF8.map(ModComponents::parse, CleanseMode::tag);
+        ByteBufCodecs.STRING_UTF8.map(CleanseMode::fromTag, CleanseMode::tag);
 
     public static final DataComponentType<CleanseMode> CLEANSE_MODE =
         DataComponentType.<CleanseMode>builder()
             .persistent(MODE_CODEC)
             .networkSynchronized(MODE_STREAM_CODEC)
             .build();
-
-    private static CleanseMode parse(String raw) {
-        CleanseMode mode = CleanseMode.fromTag(raw);
-        return mode == null ? CleanseMode.ALL : mode;
-    }
 
     private ModComponents() {
     }

@@ -52,7 +52,7 @@ public class CleansingCloudEntity extends AreaEffectCloud {
     @Override
     protected void readAdditionalSaveData(ValueInput input) {
         super.readAdditionalSaveData(input);
-        mode = CleanseMode.fromConfig(input.getStringOr(MODE_KEY, ""), CleanseMode.ALL);
+        mode = CleanseMode.fromTag(input.getStringOr(MODE_KEY, ""));
     }
 
     @Override
