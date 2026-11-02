@@ -30,7 +30,7 @@
 
   "message.cleansingpotions.no_use": "You can't use cleansing potions!",
   "message.cleansingpotions.variant_disabled": "This potion type is disabled.",
-  "message.cleansingpotions.cooldown": "You can't do that for %s more seconds!",
+  "message.cleansingpotions.cooldown": "On cooldown for %ss.",
 
   "toast.cleansingpotions.update.title": "Cleansing Potions",
   "toast.cleansingpotions.update.normal": "Version %s has been released! Available on Modrinth and CurseForge.",
