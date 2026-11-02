@@ -149,10 +149,11 @@ There are two ways to turn it off:
   is read at game start. That file also has `submitMetrics`, `submitAdditionalMetrics`, and `submitErrors`
   for finer control.
 
-FastStats sends nothing during the run that creates that file, so you can opt out before anything is sent.
-The one exception is a player closing the FastStats consent screen during that run, which applies that
-screen's choices at once. Its boxes start ticked, so closing it unchanged starts sending. The game's
-telemetry options offer that screen, and another FastStats mod can open it at the title screen.
+On a client, a FastStats consent screen opens once at the title screen, and this mod sends nothing from
+that client until it is answered. Its boxes start ticked, so pressing Done unchanged starts sending at once.
+The answer is saved in that file and covers every FastStats mod on the install, and the game's telemetry
+options reopen the screen to change it. On a dedicated server there is no screen: FastStats sends nothing
+during the run that creates that file, so you can opt out before anything is sent.
 If `config/cleansingpotions.json` cannot be parsed at game start, metrics stay off for that session unless
 the file's text holds `"metrics": true`.
 

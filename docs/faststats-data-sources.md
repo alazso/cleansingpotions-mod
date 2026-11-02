@@ -50,16 +50,17 @@ the context starts, which is why a malformed config still reports on the boot th
 only while the file's text has `"metrics": true`: a first load that fails turns metrics off otherwise,
 so no context starts and that boot sends nothing.
 
-**First run and consent.** Clients and servers follow the same rule. The run that creates
+**First run and consent.** On a dedicated server, the run that creates
 `config/faststats/config.properties` submits nothing, and submission starts at the next game start, which
 gives an owner the chance to opt out in that file first. The file is shared by every FastStats mod on the
-install. A client has one exception, the SDK's consent screen. SDK 0.31.0 opens it by itself only when a
-mod asks for it with `requireConsent()`, and this mod does not, but the game's telemetry options screen
-always has a FastStats button that opens it. Closing that screen applies its choices at once to every
-FastStats context on that client, this one included, so on a first run it can start submission. Its boxes
-start ticked on a first run, so closing it unchanged does that. Our own
-`metrics` config option decides whether a context is created at all, so a boot with it off keeps this mod
-out of that screen.
+install. A client gets the SDK's consent screen instead, because this mod calls `requireConsent()`. It opens
+once at the title screen, on a fresh install and on one that already has that file, and Esc does not close
+it that time. This mod submits nothing from that client before it is answered. Closing it applies its
+choices at once to every FastStats context on that client and saves them in that file. Its boxes start
+ticked on a first run, so pressing Done unchanged starts submission during that run. The game's telemetry
+options screen always has a FastStats button that reopens it. `-Dfaststats.enabled=false`, which dev runs
+set, keeps it from opening. Our own `metrics` config option decides whether a context is created at all, so
+a boot with it off keeps this mod out of that screen.
 
 **Reporting semantics.** A counter reports its total since the last accepted metrics submission. Reading
 one (`Counter.peek`) only records the value it returned, because FastStats also runs the suppliers when it
@@ -198,8 +199,8 @@ Separate FS feature from metrics; **not** a data source you define.
   when FastStats could not start (it is not loaded on this game version, for example), or after
   `FastStatsBridge.stop`. It needs error tracking on, which `enabled=false` or `submitErrors=false` in
   `config/faststats/config.properties` turns off, as does a choice on the FastStats consent screen. It also
-  needs submission active, which is false during the run that creates that file until the consent screen
-  is closed with metrics or errors ticked, and after the shutdown send.
+  needs submission active, which is false on a client until the consent screen is closed with metrics or
+  errors ticked, on a server during the run that creates that file, and after the shutdown send.
   With `metrics` off in the config, `/cleanse testerror` answers
   `command.cleansingpotions.testerror_disabled`. With it on while `errorsWillSend` is false, the command
   answers `command.cleansingpotions.testerror_inactive`, which names the first run, the opt-out in that

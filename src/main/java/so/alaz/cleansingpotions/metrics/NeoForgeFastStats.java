@@ -14,6 +14,7 @@ public final class NeoForgeFastStats {
 
     public static void start() {
         FastStatsBridge.start(tracker -> new NeoForgeContext.Factory(Constants.MOD_ID, FastStatsBridge.PROJECT_TOKEN)
+            .requireConsent()
             .metrics(FastStatsBridge::registerMetrics)
             .errorTrackerService(tracker)
             .create());

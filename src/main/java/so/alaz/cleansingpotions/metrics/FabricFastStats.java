@@ -12,6 +12,7 @@ public final class FabricFastStats {
 
     public static void start() {
         FastStatsBridge.start(tracker -> new FabricContext.Factory(Constants.MOD_ID, FastStatsBridge.PROJECT_TOKEN)
+            .requireConsent()
             .metrics(FastStatsBridge::registerMetrics)
             .errorTrackerService(tracker)
             .create());

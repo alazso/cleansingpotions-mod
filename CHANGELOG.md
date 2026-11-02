@@ -45,7 +45,8 @@ semantic versioning.
 
 **Metrics**
 - Added pseudonymous gameplay metrics and error reporting via FastStats (SDK 0.31.0), behind the `metrics` toggle. FastStats ships nested inside the jar as its own mod, and the mod keeps working without metrics if FastStats cannot start.
-- FastStats sends nothing during the run that creates `config/faststats/config.properties`, on clients and servers alike, unless a player closes the FastStats consent screen during that run (offered in the game's telemetry options, and opened at the title screen by another FastStats mod that asks for it). Closing it applies its choices at once, and its boxes start ticked. That file is shared by every FastStats mod on the install and has its own opt-outs.
+- Clients get a FastStats consent screen once at the title screen, including installs updating from an older version, and this mod sends nothing from a client until it is answered. Its boxes start ticked, the answer covers every FastStats mod on the install, and the game's telemetry options reopen it.
+- A dedicated server has no screen and sends nothing during the run that creates `config/faststats/config.properties`. That file is shared by every FastStats mod on the install and has its own opt-outs.
 - Turning `metrics` off through the config screen or `/cleanse reload` stops FastStats at once, and nothing further is sent. Turning it back on takes effect at the next game start.
 - If the config file cannot be parsed at game start, metrics stay off for that session unless the file's text holds `"metrics": true`.
 - Failures the mod recovers from are reported too, once per source per game session: an unreadable or unwritable config, and an installed Fabric Permissions mod whose API does not match.

@@ -24,6 +24,7 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class FastStatsBridgeTest {
 
+    private static final String FABRIC_HOLDER = "so/alaz/cleansingpotions/metrics/FabricFastStats.class";
     private static final String NEOFORGE_HOLDER = "so/alaz/cleansingpotions/metrics/NeoForgeFastStats.class";
     private static final String OWN_CLASS = "so.alaz.cleansingpotions.metrics.ErrorReporter";
     // The SDK's loader check loads each frame's class, so this one must exist on the test classpath.
@@ -253,6 +254,18 @@ class FastStatsBridgeTest {
             // Class names sit in the constant pool as plain ASCII.
             assertThat(new String(in.readAllBytes(), StandardCharsets.ISO_8859_1))
                 .contains("net/neoforged/neoforge/event/GameShuttingDownEvent");
+        }
+    }
+
+    @Test
+    void holderRequiresConsent() throws IOException {
+        ClassLoader loader = FastStatsBridgeTest.class.getClassLoader();
+        try (InputStream fabric = loader.getResourceAsStream(FABRIC_HOLDER);
+             InputStream neoForge = loader.getResourceAsStream(NEOFORGE_HOLDER)) {
+            InputStream holder = fabric != null ? fabric : neoForge;
+            assertThat(holder).isNotNull();
+            // Method names sit in the constant pool as plain ASCII.
+            assertThat(new String(holder.readAllBytes(), StandardCharsets.ISO_8859_1)).contains("requireConsent");
         }
     }
 }
