@@ -24,7 +24,7 @@ dashboard only by calling `ErrorReporter.report`. Current report sites:
 
 | source | raised when |
 | --- | --- |
-| `config:load` | the config file could not be read or parsed, so every setting fell back to its default |
+| `config:load` | the config file could not be read or parsed, so the previous values stayed in effect (the defaults on the first load) |
 | `config:save` | the config could not be written, so an owner's edit was lost |
 | `permissions:fabric-permissions-api` | the Fabric Permissions mod is installed but its API no longer matches, so every permission check silently returns its default |
 
@@ -34,7 +34,9 @@ reading. `/cleanse testerror` sends a report with `intentional=true` and `handle
 
 The first config load runs before the metrics toggle has been read, so it happens before the FastStats
 context exists. `ErrorReporter` holds up to 8 such reports and flushes them when the context attaches,
-which is why a malformed config still reports on the boot that found it.
+which is why a malformed config still reports on the boot that found it. That holds only while the
+file's text has `"metrics": true`: a first load that fails turns metrics off otherwise, so no context
+starts and that boot sends nothing.
 
 **Consent.** On a client, SDK 0.31.0 and later show a consent screen on the title screen before
 anything is submitted, and one screen covers every FastStats mod installed. Dedicated servers have no
@@ -107,7 +109,7 @@ mirror `CleansingConfig` fields. Booleans use no numeric validation.
 
 | name | reference_id | type | shape | allowNegative | allowDecimals | min | max |
 |---|---|---|---|---|---|---|---|
-| Cleanse Radius | `cleanse_radius` | number | Scalar | false | true | 0 | 64 *(suggested)* |
+| Cleanse Radius | `cleanse_radius` | number | Scalar | false | true | 0 | 32 |
 | Cooldown Enabled | `cooldown_enabled` | boolean | Scalar | — | — | — | — |
 | Cooldown Seconds | `cooldown_seconds` | number | Scalar | false | false | 0 | — |
 | Only Thrower | `only_thrower` | boolean | Scalar | — | — | — | — |
