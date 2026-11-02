@@ -16,6 +16,7 @@ import net.minecraft.network.chat.Component;
 /*import net.minecraft.server.commands.ReloadCommand;
 *///?}
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
@@ -118,10 +119,15 @@ public final class CleansingCommand {
             if (!target.getInventory().add(item)) {
                 // A command-issued drop is never client-predicted.
                 //? if >=26.3 {
-                /*target.drop(item, false, net.minecraft.util.Prediction.SERVER_ONLY);
+                /*ItemEntity dropped = target.drop(item, false, net.minecraft.util.Prediction.SERVER_ONLY);
                 *///?} else {
-                target.drop(item, false);
+                ItemEntity dropped = target.drop(item, false);
                 //?}
+                // As vanilla /give does: the target can take it at once, and nobody else can.
+                if (dropped != null) {
+                    dropped.setNoPickUpDelay();
+                    dropped.setTarget(target.getUUID());
+                }
             }
         }
         CleansingMetrics.commandExecuted();

@@ -23,6 +23,7 @@ semantic versioning.
 - A use the server refuses (no permission, a disabled potion type, a throw cooldown) shows its reason in the action bar and the potion stays in your inventory, on the client as well. Throwing a disabled potion type is refused, so the potion is kept. The cooldown message reads correctly at one second.
 - The thrown potion and the cloud have proper names, and their entity settings match the vanilla splash potion and area effect cloud.
 - `/cleanse give` feedback names the potion that was given, including its variant.
+- A `/cleanse give` potion that does not fit drops for the target only, with no pickup delay, as with vanilla `/give`.
 
 **Brewing**
 - On 26.3 the recipes are JSON in `data/cleansingpotions/recipe/brewing`, which a data pack can override or remove. The 26.3 builds carry no mixin as a result.
