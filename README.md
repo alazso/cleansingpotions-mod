@@ -33,7 +33,8 @@ Everything is made at a brewing stand, the way you would expect:
 | Any of the three | Gunpowder | Splash version |
 | A splash version | Dragon's Breath | Lingering version |
 
-Lingering potions are the end of the chain, so the bottle slots do not accept them.
+Lingering potions are the end of the chain, so the bottle slots do not accept them. The slots also refuse
+a potion when the config has switched off every brew that takes it.
 
 On Minecraft 26.3 these are ordinary data pack recipes, living in
 `data/cleansingpotions/recipe/brewing`, so you can override or remove any of them with a data pack.

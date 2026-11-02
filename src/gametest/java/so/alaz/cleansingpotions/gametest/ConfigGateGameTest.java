@@ -1,6 +1,9 @@
 package so.alaz.cleansingpotions.gametest;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
+//? if <26.3 {
+import net.minecraft.core.BlockPos;
+//?}
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -8,6 +11,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionBrewing;
 import net.minecraft.world.item.alchemy.PotionContents;
 import net.minecraft.world.item.alchemy.Potions;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.item.MilkVariant;
@@ -75,6 +80,44 @@ public class ConfigGateGameTest {
             helper.assertFalse(brewing.hasMix(splash, dragonBreath), "the lingering brew survived brewingEnabled=false");
             helper.assertFalse(brewing.isIngredient(milk), "milk stayed an ingredient with brewingEnabled=false");
             helper.assertFalse(brewing.isIngredient(honey), "honey stayed an ingredient with brewingEnabled=false");
+        } finally {
+            set(cfg, brewingEnabled, splashEnabled, lingeringEnabled);
+        }
+        helper.succeed();
+    }
+
+    @GameTest(environment = ISOLATED)
+    public void bottleSlotsFollowConfig(GameTestHelper helper) {
+        BlockPos pos = new BlockPos(1, 1, 1);
+        helper.setBlock(pos, Blocks.BREWING_STAND);
+        BrewingStandBlockEntity stand = helper.getBlockEntity(pos, BrewingStandBlockEntity.class);
+        ItemStack cleansing = new ItemStack(ModItems.get(MilkVariant.REGULAR, CleanseMode.ALL));
+        ItemStack soothing = new ItemStack(ModItems.get(MilkVariant.REGULAR, CleanseMode.NEGATIVE_ONLY));
+        ItemStack splash = new ItemStack(ModItems.get(MilkVariant.SPLASH, CleanseMode.ALL));
+
+        CleansingConfig cfg = CleansingConfig.get();
+        boolean brewingEnabled = cfg.brewingEnabled;
+        boolean splashEnabled = cfg.splashEnabled;
+        boolean lingeringEnabled = cfg.lingeringEnabled;
+        try {
+            set(cfg, true, true, true);
+            helper.assertTrue(stand.canPlaceItem(0, cleansing), "Cleansing was refused with every brew on");
+            helper.assertTrue(stand.canPlaceItem(0, soothing), "Soothing was refused with every brew on");
+            helper.assertTrue(stand.canPlaceItem(0, splash), "a splash potion was refused with every brew on");
+
+            set(cfg, true, false, true);
+            helper.assertTrue(stand.canPlaceItem(0, cleansing), "splashEnabled=false refused Cleansing, which other brews take");
+            helper.assertFalse(stand.canPlaceItem(0, soothing), "splashEnabled=false left Soothing accepted");
+            helper.assertTrue(stand.canPlaceItem(0, splash), "splashEnabled=false refused a splash potion");
+
+            set(cfg, true, true, false);
+            helper.assertTrue(stand.canPlaceItem(0, soothing), "lingeringEnabled=false refused Soothing");
+            helper.assertFalse(stand.canPlaceItem(0, splash), "lingeringEnabled=false left a splash potion accepted");
+
+            set(cfg, false, true, true);
+            helper.assertFalse(stand.canPlaceItem(0, cleansing), "brewingEnabled=false left Cleansing accepted");
+            helper.assertFalse(stand.canPlaceItem(0, soothing), "brewingEnabled=false left Soothing accepted");
+            helper.assertFalse(stand.canPlaceItem(0, splash), "brewingEnabled=false left a splash potion accepted");
         } finally {
             set(cfg, brewingEnabled, splashEnabled, lingeringEnabled);
         }

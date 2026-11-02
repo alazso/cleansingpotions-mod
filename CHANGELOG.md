@@ -29,7 +29,7 @@ semantic versioning.
 - On 26.3 the recipes are JSON in `data/cleansingpotions/recipe/brewing`, which a data pack can override or remove. The 26.3 builds carry no mixin as a result.
 - `brewingEnabled`, `splashEnabled`, and `lingeringEnabled` control the 26.3 recipes through load conditions, and apply on the next world load, `/reload`, or `/cleanse reload`. They work on 26.2 as well, where a change applies at once.
 - `/cleanse reload` rereads the config file, and on 26.3 also reloads data packs so the recipe toggles apply.
-- On 26.2 the regular and splash potions go into brewing stand bottle slots, by hand and by hopper. Lingering potions are refused, because no recipe takes them.
+- On 26.2 the regular and splash potions go into brewing stand bottle slots, by hand and by hopper, when a brew switched on in the config takes them. Lingering potions are refused, because no recipe takes them.
 - On 26.2 milk buckets and honey bottles are no longer accepted as brewing ingredients while `brewingEnabled` is off.
 
 **Configuration**

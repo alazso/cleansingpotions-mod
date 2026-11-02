@@ -20,9 +20,17 @@ public final class CleansingBrewing {
             && (reagent.is(Items.MILK_BUCKET) || reagent.is(Items.HONEY_BOTTLE));
     }
 
-    // Lingering is left out because no recipe takes it as an input.
+    // True when a brew switched on in the config takes this potion. No brew takes a lingering potion.
     public static boolean isBrewingInput(ItemStack stack) {
-        return stack.getItem() instanceof CleansingItem item && item.variant() != MilkVariant.LINGERING;
+        if (!(stack.getItem() instanceof CleansingItem item)) {
+            return false;
+        }
+        CleansingConfig cfg = CleansingConfig.get();
+        return switch (item.variant()) {
+            case REGULAR -> cfg.brewingAllowed(isPlainCleansing(stack) ? MilkVariant.REGULAR : MilkVariant.SPLASH);
+            case SPLASH -> cfg.brewingAllowed(MilkVariant.LINGERING);
+            case LINGERING -> false;
+        };
     }
 
     public static ItemStack mix(ItemStack input, ItemStack reagent) {
