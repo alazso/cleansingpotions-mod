@@ -23,6 +23,9 @@ import static org.junit.jupiter.api.Assumptions.assumeTrue;
 class FastStatsBridgeTest {
 
     private static final String NEOFORGE_HOLDER = "so/alaz/cleansingpotions/metrics/NeoForgeFastStats.class";
+    private static final String OWN_CLASS = "so.alaz.cleansingpotions.metrics.ErrorReporter";
+    // The SDK's loader check loads each frame's class, so this one must exist on the test classpath.
+    private static final String OTHER_CLASS = "org.assertj.core.api.Assertions";
 
     /** A real SDK context with no services, so nothing can reach the network. */
     private static final class RecordingContext extends SimpleContext {
@@ -108,6 +111,26 @@ class FastStatsBridgeTest {
     @AfterEach
     void stopBridge() {
         FastStatsBridge.stop();
+    }
+
+    /** Hands the throwable to the JVM default handler, which is how a dying thread reaches the SDK. */
+    private static List<Throwable> capturedOnThreadDeath(String frameClass) {
+        List<Throwable> captured = new ArrayList<>();
+        started(tracker -> tracker.setContextErrorHandler((loader, error) -> captured.add(error)));
+        RuntimeException error = new RuntimeException("thread death");
+        error.setStackTrace(new StackTraceElement[]{new StackTraceElement(frameClass, "run", "Source.java", 1)});
+        Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), error);
+        return captured;
+    }
+
+    @Test
+    void automaticCaptureKeepsAThreadDeathWithAFrameInThisMod() {
+        assertThat(capturedOnThreadDeath(OWN_CLASS)).hasSize(1);
+    }
+
+    @Test
+    void automaticCaptureDropsAThreadDeathWithNoFrameInThisMod() {
+        assertThat(capturedOnThreadDeath(OTHER_CLASS)).isEmpty();
     }
 
     @Test

@@ -45,6 +45,7 @@ semantic versioning.
 - Turning `metrics` off through the config screen or `/cleanse reload` stops FastStats at once, and nothing further is sent. Turning it back on takes effect at the next game start.
 - If the config file cannot be parsed at game start, metrics stay off for that session unless the file's text holds `"metrics": true`.
 - Failures the mod recovers from are reported too, once per source per game session: an unreadable or unwritable config, and an installed Fabric Permissions mod whose API does not match.
+- An error that kills a thread is reported automatically only when its stack trace includes this mod's code, so another mod's failure is not reported.
 - The brewing counters stay at zero on 26.3, where the mixin that feeds them does not ship.
 
 ## [0.2.0]

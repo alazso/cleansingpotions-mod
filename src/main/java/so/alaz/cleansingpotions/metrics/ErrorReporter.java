@@ -3,7 +3,9 @@ package so.alaz.cleansingpotions.metrics;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.Deque;
+import java.util.IdentityHashMap;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,6 +19,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * <p>Callers report failures a player would notice as degraded behaviour.
  */
 public final class ErrorReporter {
+
+    private static final String OWN_PACKAGE_PREFIX = "so.alaz.cleansingpotions.";
 
     /**
      * Reports raised before the backend exists are held here. Config is read before the metrics
@@ -46,6 +50,22 @@ public final class ErrorReporter {
                 PENDING.add(new Pending(source, error));
             }
         }
+    }
+
+    /**
+     * Whether the throwable or one of its causes has a stack frame in this mod's package. Visits each
+     * cause once, because a cause chain can cycle.
+     */
+    static boolean hasOwnFrame(Throwable error) {
+        Set<Throwable> visited = Collections.newSetFromMap(new IdentityHashMap<>());
+        for (Throwable current = error; current != null && visited.add(current); current = current.getCause()) {
+            for (StackTraceElement frame : current.getStackTrace()) {
+                if (frame.getClassName().startsWith(OWN_PACKAGE_PREFIX)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     /** Called once the FastStats context exists, from {@link FastStatsBridge#start}. */

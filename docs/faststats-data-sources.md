@@ -26,9 +26,9 @@ response headers stall, and that timeout does not cover a stalled name lookup or
 Gradle run tasks set `faststats.enabled=false`, so dev runs send nothing unless `-Pfaststats` is passed.
 
 **Error reports are not automatic.** FastStats captures an error on its own only when one kills a
-thread, and the Fabric and NeoForge platform modules register nothing else (the Paper
-`ServerExceptionEvent` path is Bukkit only). Anything this mod catches and recovers from reaches the
-dashboard only by calling `ErrorReporter.report`. Current report sites:
+thread and has a stack frame in this mod's package, and the Fabric and NeoForge platform modules register
+nothing else (the Paper `ServerExceptionEvent` path is Bukkit only). Anything this mod catches and
+recovers from reaches the dashboard only by calling `ErrorReporter.report`. Current report sites:
 
 | source | raised when |
 | --- | --- |
@@ -174,8 +174,11 @@ Separate FS feature from metrics; **not** a data source you define.
 - **Platform:** you must turn on **Error Tracking** in the FS project **Features** settings. Captured
   errors are retained for **30 days**.
 - **Automatic capture:** `FastStatsBridge.start` attaches `ErrorTracker.contextAware()` through
-  `.errorTrackerService(...)` on both loaders. It captures uncaught throwables tied to the mod's own class
-  loader.
+  `.errorTrackerService(...)` on both loaders. It sees every throwable that kills a thread. The SDK's own
+  check only compares class loaders, and every mod and Minecraft share one loader on both platforms, so
+  `start` adds an exclusion rule: a throwable is dropped unless it or one of its causes has a stack frame
+  in `so.alaz.cleansingpotions`. The rule applies to automatic capture only, so `ErrorReporter.report` and
+  `/cleanse testerror` are unaffected.
 - **Handled failures:** report them through `ErrorReporter.report(source, error)`, which is safe when the
   nested FastStats mod is absent. It sends at most one report per source per process, because the SDK stores
   each report that carries attributes as its own entry, so a dashboard entry means "this failed at least once

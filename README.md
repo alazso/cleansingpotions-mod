@@ -129,7 +129,7 @@ gated, and neither are guests on a LAN world.
 
 **Metrics.** The mod reports pseudonymous usage statistics and errors through
 [FastStats](https://faststats.dev): counts such as potions used and effects removed, the mod's settings,
-error reports with stack traces, and environment details (mod, game, and loader versions, player count,
+error reports with stack traces for failures in this mod's code, and environment details (mod, game, and loader versions, player count,
 online mode, Java version, operating system, and CPU core count). An install is identified by a random ID
 in `config/faststats/config.properties`. The
 [full list of metrics](https://github.com/alazso/cleansingpotions-mod/blob/main/docs/faststats-data-sources.md)
