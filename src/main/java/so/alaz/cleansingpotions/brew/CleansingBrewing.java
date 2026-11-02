@@ -14,12 +14,10 @@ import so.alaz.cleansingpotions.item.MilkVariant;
 
 public final class CleansingBrewing {
 
+    // Vanilla mixes already make fermented spider eye, gunpowder, and dragon breath ingredients.
     public static boolean isIngredient(ItemStack reagent) {
-        return reagent.is(Items.MILK_BUCKET)
-            || reagent.is(Items.HONEY_BOTTLE)
-            || reagent.is(Items.FERMENTED_SPIDER_EYE)
-            || reagent.is(Items.GUNPOWDER)
-            || reagent.is(Items.DRAGON_BREATH);
+        return CleansingConfig.get().brewingEnabled
+            && (reagent.is(Items.MILK_BUCKET) || reagent.is(Items.HONEY_BOTTLE));
     }
 
     public static ItemStack mix(ItemStack input, ItemStack reagent) {
