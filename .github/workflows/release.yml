@@ -78,6 +78,25 @@ jobs:
             echo "skip=false" >> "$GITHUB_OUTPUT"
           fi
 
+      - name: Check publish secrets
+        if: steps.published.outputs.skip != 'true' && (github.event_name == 'push' || inputs.dry_run != true)
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+        run: |
+          set -euo pipefail
+          EMPTY=""
+          if [ -z "$MODRINTH_TOKEN" ]; then
+            EMPTY="MODRINTH_TOKEN"
+          fi
+          if [ -z "$CURSEFORGE_API_KEY" ]; then
+            EMPTY="${EMPTY:+$EMPTY and }CURSEFORGE_API_KEY"
+          fi
+          if [ -n "$EMPTY" ]; then
+            echo "Publish secret is empty: $EMPTY" >&2
+            exit 1
+          fi
+
       - name: Set up JDK 25
         if: steps.published.outputs.skip != 'true'
         uses: actions/setup-java@v6
