@@ -75,4 +75,8 @@ public final class CleansingConfig {
         };
     }
 
+    public boolean brewingAllowed(MilkVariant variant) {
+        return brewingEnabled && variantEnabled(variant);
+    }
+
 }
