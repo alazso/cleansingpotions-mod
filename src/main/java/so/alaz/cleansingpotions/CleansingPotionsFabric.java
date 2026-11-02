@@ -30,6 +30,7 @@ public class CleansingPotionsFabric implements ModInitializer {
             ModEntities.CLEANSING_POTION_KEY, ModEntities.CLEANSING_POTION);
         Registry.register(BuiltInRegistries.ENTITY_TYPE,
             ModEntities.CLEANSING_CLOUD_KEY, ModEntities.CLEANSING_CLOUD);
+        ModItems.registerDispenserBehaviors();
 
         CleansingPotions.init();
 

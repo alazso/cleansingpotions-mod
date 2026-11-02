@@ -9,6 +9,7 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
@@ -32,6 +33,7 @@ public class CleansingPotionsNeoForge {
     public CleansingPotionsNeoForge(IEventBus modBus, ModContainer container, Dist dist) {
         // Items must be built in RegisterEvent: registries are frozen by constructor time on NeoForge.
         modBus.addListener(this::onRegister);
+        modBus.addListener(this::onCommonSetup);
         modBus.addListener(this::onRegisterRenderers);
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
         CleansingPotions.init();
@@ -71,6 +73,11 @@ public class CleansingPotionsNeoForge {
             helper.register(ModEntities.CLEANSING_POTION_KEY, ModEntities.CLEANSING_POTION);
             helper.register(ModEntities.CLEANSING_CLOUD_KEY, ModEntities.CLEANSING_CLOUD);
         });
+    }
+
+    private void onCommonSetup(FMLCommonSetupEvent event) {
+        // Common setup listeners run in parallel off the main thread, and the behaviour map is not thread-safe.
+        event.enqueueWork(ModItems::registerDispenserBehaviors);
     }
 
     private void onRegisterRenderers(EntityRenderersEvent.RegisterRenderers event) {

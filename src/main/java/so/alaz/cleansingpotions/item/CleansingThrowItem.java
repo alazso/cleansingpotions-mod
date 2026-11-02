@@ -1,5 +1,7 @@
 package so.alaz.cleansingpotions.item;
 
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -9,7 +11,9 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ProjectileItem;
 import net.minecraft.world.level.Level;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
@@ -18,7 +22,7 @@ import so.alaz.cleansingpotions.entity.CleansingPotionEntity;
 import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 import so.alaz.cleansingpotions.util.PermissionGate;
 
-public class CleansingThrowItem extends CleansingItem {
+public class CleansingThrowItem extends CleansingItem implements ProjectileItem {
 
     public CleansingThrowItem(Properties properties, MilkVariant variant, CleanseMode mode) {
         super(properties, variant, mode);
@@ -61,5 +65,18 @@ public class CleansingThrowItem extends CleansingItem {
         player.awardStat(Stats.ITEM_USED.get(this));
         stack.consume(1, player);
         return InteractionResult.SUCCESS_SERVER;
+    }
+
+    @Override
+    public Projectile asProjectile(Level level, Position pos, ItemStack stack, Direction direction) {
+        return new CleansingPotionEntity(level, pos.x(), pos.y(), pos.z(), stack);
+    }
+
+    @Override
+    public DispenseConfig createDispenseConfig() {
+        return DispenseConfig.builder()
+            .uncertainty(DispenseConfig.DEFAULT.uncertainty() * 0.5F)
+            .power(DispenseConfig.DEFAULT.power() * 1.25F)
+            .build();
     }
 }

@@ -30,6 +30,10 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
         super(ModEntities.CLEANSING_POTION, thrower, level, stack);
     }
 
+    public CleansingPotionEntity(Level level, double x, double y, double z, ItemStack stack) {
+        super(ModEntities.CLEANSING_POTION, x, y, z, level, stack);
+    }
+
     @Override
     protected Item getDefaultItem() {
         return ModItems.get(MilkVariant.SPLASH, CleanseMode.ALL);

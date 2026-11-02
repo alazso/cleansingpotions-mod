@@ -7,6 +7,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumables;
+import net.minecraft.world.level.block.DispenserBlock;
 import so.alaz.cleansingpotions.Constants;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
@@ -65,6 +66,18 @@ public final class ModItems {
         return properties
             .component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)
             .usingConvertsTo(Items.GLASS_BOTTLE);
+    }
+
+    /**
+     * Makes dispensers throw the splash and lingering potions. Requires {@link #build} first, and must run
+     * on the main thread: {@link DispenserBlock#DISPENSER_REGISTRY} is not thread-safe.
+     */
+    public static void registerDispenserBehaviors() {
+        for (Entry entry : ENTRIES) {
+            if (entry.item() instanceof CleansingThrowItem) {
+                DispenserBlock.registerProjectileBehavior(entry.item());
+            }
+        }
     }
 
     /** Every item with its registry key, for the loader-specific registration calls. */
