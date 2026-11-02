@@ -23,7 +23,7 @@ import java.util.List;
 
 public class BrewingGameTest {
 
-    /** A brew takes 400 ticks, plus one tick for the stand to take its fuel. */
+    /** Ticks a test allows for one brew: the 400 ticks a brew takes, plus 20 spare. */
     private static final int ONE_BREW = 420;
 
     private static final int BOTTLE_SLOT = 0;

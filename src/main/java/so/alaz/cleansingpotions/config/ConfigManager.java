@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
 
 public final class ConfigManager {
 
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final Pattern METRICS_ON = Pattern.compile("\"metrics\"\\s*:\\s*true");
 
     private static boolean loadSucceeded;

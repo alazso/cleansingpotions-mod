@@ -1,7 +1,5 @@
 package so.alaz.cleansingpotions.config;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -15,17 +13,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CleansingConfigTest {
 
-    // Matches the Gson that ConfigManager builds.
-    private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
-
     /** The shape of a 0.2.0 file. Its per-potion blocks match no {@link CleansingConfig} field. */
     private static final String OLD_FILE = """
         {
           "splashEnabled": false,
           "radius": 7.5,
-          "cleansing": {"name": "Potion of Cleansing", "lore": ["Removes every effect"], "color": 16777215},
-          "soothing": {"name": "Potion of Soothing", "lore": ["Removes harmful effects"], "color": 15246139},
-          "purging": {"name": "Potion of Purging", "lore": ["Removes beneficial effects"], "color": 8279976},
+          "cleansing": {"name": "Potion of Cleansing", "lore": ["Removes every effect"], "color": "#FFFFFF"},
+          "soothing": {"name": "Potion of Soothing", "lore": ["Removes harmful effects"], "color": "#E8A33B"},
+          "purging": {"name": "Potion of Purging", "lore": ["Removes beneficial effects"], "color": "#7E57A8"},
           "cooldownSeconds": 12
         }
         """;
@@ -95,7 +90,7 @@ class CleansingConfigTest {
 
     @Test
     void oldFileLoadsAndTheNextSaveDropsItsPotionBlocks() {
-        CleansingConfig cfg = GSON.fromJson(OLD_FILE, CleansingConfig.class);
+        CleansingConfig cfg = ConfigManager.GSON.fromJson(OLD_FILE, CleansingConfig.class);
         cfg.sanitize();
         assertThat(cfg.splashEnabled).isFalse();
         assertThat(cfg.radius).isEqualTo(7.5);
@@ -103,10 +98,10 @@ class CleansingConfigTest {
         // A value the file does not name keeps its default.
         assertThat(cfg.lingeringEnabled).isTrue();
 
-        String saved = GSON.toJson(cfg);
+        String saved = ConfigManager.GSON.toJson(cfg);
         assertThat(saved).doesNotContain("\"cleansing\"", "\"soothing\"", "\"purging\"", "Potion of");
 
-        CleansingConfig reloaded = GSON.fromJson(saved, CleansingConfig.class);
+        CleansingConfig reloaded = ConfigManager.GSON.fromJson(saved, CleansingConfig.class);
         assertThat(reloaded.splashEnabled).isFalse();
         assertThat(reloaded.radius).isEqualTo(7.5);
         assertThat(reloaded.forceRemove).isEqualTo(cfg.forceRemove);
@@ -114,12 +109,12 @@ class CleansingConfigTest {
 
     @Test
     void badValuesFromAFileCanBeSavedOnceSanitized() {
-        CleansingConfig cfg = GSON.fromJson("""
+        CleansingConfig cfg = ConfigManager.GSON.fromJson("""
             {"radius": NaN, "cooldownSeconds": -4, "forceRemove": null, "forceKeep": ["minecraft:luck", null]}
             """, CleansingConfig.class);
         cfg.sanitize();
-        String saved = GSON.toJson(cfg);
-        CleansingConfig reloaded = GSON.fromJson(saved, CleansingConfig.class);
+        String saved = ConfigManager.GSON.toJson(cfg);
+        CleansingConfig reloaded = ConfigManager.GSON.fromJson(saved, CleansingConfig.class);
         assertThat(reloaded.radius).isEqualTo(4.0);
         assertThat(reloaded.cooldownSeconds).isZero();
         assertThat(reloaded.forceRemove).isEmpty();
