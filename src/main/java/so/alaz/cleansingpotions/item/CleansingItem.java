@@ -1,17 +1,43 @@
 package so.alaz.cleansingpotions.item;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.item.component.TooltipDisplay;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
-/**
- * Implemented by every cleansing potion item so the mode and variant can be read back off a stack.
- *
- * <p>Since 0.3.0 the mode lives in the item's identity rather than in a {@code cleanse_mode}
- * component: 26.3 brewing recipes match on item id and cannot read a component, so brewing a
- * Soothing splash potion is only expressible if that is its own item.
- */
-public interface CleansingItem {
+import java.util.function.Consumer;
 
-    CleanseMode cleanseMode();
+/** Base of every cleansing potion item. Holds the mode and variant fixed at registration. */
+public abstract class CleansingItem extends Item {
 
-    MilkVariant variant();
+    private final MilkVariant variant;
+    private final CleanseMode mode;
+
+    protected CleansingItem(Properties properties, MilkVariant variant, CleanseMode mode) {
+        super(properties);
+        this.variant = variant;
+        this.mode = mode;
+    }
+
+    public CleanseMode cleanseMode() {
+        return mode;
+    }
+
+    public MilkVariant variant() {
+        return variant;
+    }
+
+    @Override
+    public Component getName(ItemStack stack) {
+        return MilkItemFactory.displayName(variant, MilkItemFactory.modeOf(stack));
+    }
+
+    @Override
+    public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
+                                Consumer<Component> adder, TooltipFlag flag) {
+        super.appendHoverText(stack, context, display, adder, flag);
+        MilkItemFactory.loreLines(MilkItemFactory.modeOf(stack)).forEach(adder);
+    }
 }
