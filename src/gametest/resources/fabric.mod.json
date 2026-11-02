@@ -8,7 +8,8 @@
     "fabric-gametest": [
       "so.alaz.cleansingpotions.gametest.BrewingGameTest",
       "so.alaz.cleansingpotions.gametest.MigrationGameTest",
-      "so.alaz.cleansingpotions.gametest.CloudGameTest"
+      "so.alaz.cleansingpotions.gametest.CloudGameTest",
+      "so.alaz.cleansingpotions.gametest.ConfigGateGameTest"
     ]
   },
   "depends": {
