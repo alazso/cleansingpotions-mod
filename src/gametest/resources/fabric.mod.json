@@ -6,7 +6,8 @@
   "environment": "*",
   "entrypoints": {
     "fabric-gametest": [
-      "so.alaz.cleansingpotions.gametest.BrewingGameTest"
+      "so.alaz.cleansingpotions.gametest.BrewingGameTest",
+      "so.alaz.cleansingpotions.gametest.MigrationGameTest"
     ]
   },
   "depends": {
