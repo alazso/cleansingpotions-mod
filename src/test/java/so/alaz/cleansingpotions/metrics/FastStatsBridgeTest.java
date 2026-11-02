@@ -14,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -26,9 +28,13 @@ class FastStatsBridgeTest {
     private static final String OWN_CLASS = "so.alaz.cleansingpotions.metrics.ErrorReporter";
     // The SDK's loader check loads each frame's class, so this one must exist on the test classpath.
     private static final String OTHER_CLASS = "org.assertj.core.api.Assertions";
+    private static final long SHORT_WAIT_MILLIS = 100;
+    private static final long RETURN_LIMIT_MILLIS = 5_000;
+    // Above RETURN_LIMIT_MILLIS, so a caller held for the whole stall fails its assertion.
+    private static final long STALL_MILLIS = 15_000;
 
     /** A real SDK context with no services, so nothing can reach the network. */
-    private static final class RecordingContext extends SimpleContext {
+    private static class RecordingContext extends SimpleContext {
 
         final List<Boolean> submissionActiveAtShutdown = new ArrayList<>();
 
@@ -63,6 +69,34 @@ class FastStatsBridgeTest {
         @Override
         protected void scheduleAtFixedRate(Runnable task, long initialDelay, long period, TimeUnit unit) {
             throw new UnsupportedOperationException();
+        }
+    }
+
+    /** Its first shutdown stands in for a stalled send. A later shutdown returns at once, as the SDK's does. */
+    private static final class StalledContext extends RecordingContext {
+
+        final CompletableFuture<Thread> sender = new CompletableFuture<>();
+        private final CountDownLatch release = new CountDownLatch(1);
+
+        @Override
+        public void shutdown() {
+            if (sender.complete(Thread.currentThread())) {
+                try {
+                    release.await(STALL_MILLIS, TimeUnit.MILLISECONDS);
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                }
+            }
+            super.shutdown();
+        }
+
+        /** Ends the stall and waits for the sending thread, if one started. */
+        void finish() throws InterruptedException {
+            release.countDown();
+            Thread thread = sender.getNow(Thread.currentThread());
+            if (thread != Thread.currentThread()) {
+                thread.join(STALL_MILLIS);
+            }
         }
     }
 
@@ -168,6 +202,47 @@ class FastStatsBridgeTest {
     @Test
     void finalBatchWithoutAContextDoesNothing() {
         FastStatsBridge.sendFinalBatch();
+    }
+
+    @Test
+    void finalBatchHoldsTheCallerOnlyForTheWaitWhileTheSendStalls() throws Exception {
+        StalledContext context = new StalledContext();
+        FastStatsBridge.start(tracker -> context);
+        try {
+            long start = System.nanoTime();
+            FastStatsBridge.sendFinalBatch(SHORT_WAIT_MILLIS);
+            long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+
+            assertThat(elapsedMillis).isLessThan(RETURN_LIMIT_MILLIS);
+            Thread sender = context.sender.get(RETURN_LIMIT_MILLIS, TimeUnit.MILLISECONDS);
+            assertThat(sender).isNotSameAs(Thread.currentThread());
+            assertThat(sender.isDaemon()).isTrue();
+            assertThat(sender.isAlive()).isTrue();
+        } finally {
+            context.finish();
+        }
+    }
+
+    @Test
+    void stopDoesNotWaitForAStalledFinalBatch() throws Exception {
+        StalledContext context = new StalledContext();
+        FastStatsBridge.start(tracker -> context);
+        // The wait outlasts RETURN_LIMIT_MILLIS, so a class lock held across it fails the assertion.
+        Thread caller = new Thread(() -> FastStatsBridge.sendFinalBatch(STALL_MILLIS));
+        caller.setDaemon(true);
+        try {
+            caller.start();
+            context.sender.get(RETURN_LIMIT_MILLIS, TimeUnit.MILLISECONDS);
+
+            long start = System.nanoTime();
+            FastStatsBridge.stop();
+            long elapsedMillis = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - start);
+
+            assertThat(elapsedMillis).isLessThan(RETURN_LIMIT_MILLIS);
+        } finally {
+            context.finish();
+            caller.join(STALL_MILLIS);
+        }
     }
 
     @Test

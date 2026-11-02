@@ -15,6 +15,9 @@ public final class FastStatsBridge {
 
     static final String PROJECT_TOKEN = "321f21c8899fa729330e9508a4b7fe34";
 
+    /** Two requests at the SDK's 3 second timeout. */
+    private static final long FINAL_SEND_WAIT_MILLIS = 6_000L;
+
     private static volatile ErrorTracker errorTracker;
     private static volatile FastStatsContext context;
 
@@ -84,7 +87,8 @@ public final class FastStatsBridge {
      * restart, because shutdown closes its executor, so turning metrics back on needs a game restart.
      * Callers run after the context is ready: a dedicated server starts it at SERVER_STARTED, before
      * any command can run. Thread-safe: the reload command and the config screen run on different
-     * threads.
+     * threads. Does not wait for a {@link #sendFinalBatch} still running: a request it already has in
+     * flight finishes on its own thread, and it makes no further request.
      */
     public static synchronized void stop() {
         FastStatsContext current = context;
@@ -105,14 +109,34 @@ public final class FastStatsBridge {
     }
 
     /**
-     * Shuts the context down, which sends one last batch and ends its traffic. Does nothing after
-     * {@link #stop}, which has already ended traffic without that batch, and repeating the call sends
-     * nothing. The send blocks the calling thread.
+     * Shuts the context down, which sends one last batch and ends its traffic, and holds the calling
+     * thread for at most 6 seconds while that happens. The send runs on a daemon thread, so one still
+     * running after the wait continues until it finishes or JVM exit abandons it. Holds no lock during
+     * the send, so {@link #stop} does not wait for it. Does nothing after {@link #stop}, which has
+     * already ended traffic without that batch, and repeating the call after a finished send sends
+     * nothing.
      */
-    public static synchronized void sendFinalBatch() {
+    public static void sendFinalBatch() {
+        sendFinalBatch(FINAL_SEND_WAIT_MILLIS);
+    }
+
+    /**
+     * {@link #sendFinalBatch()} with the wait in milliseconds. The wait must be above zero, because
+     * {@link Thread#join(long)} waits without limit at zero. An interrupt ends the wait and stays set on
+     * the calling thread.
+     */
+    static void sendFinalBatch(long waitMillis) {
         FastStatsContext current = context;
-        if (current != null) {
-            current.shutdown();
+        if (current == null) {
+            return;
+        }
+        Thread send = new Thread(current::shutdown, "cleansingpotions-faststats-final-send");
+        send.setDaemon(true);
+        send.start();
+        try {
+            send.join(waitMillis);
+        } catch (InterruptedException interrupted) {
+            Thread.currentThread().interrupt();
         }
     }
 

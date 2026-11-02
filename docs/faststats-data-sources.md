@@ -17,12 +17,16 @@ dashboards: `minecraft_version` was renamed to `game_version` in SDK 0.28.1, so 
 SDK still send the old key, and SDK 0.29.4 added a boolean `client` that separates client installs from
 servers.
 
-A context submits 30 seconds after it is ready, then every 30 minutes, and once more at shutdown. The SDK
-runs the shutdown send itself on Fabric (`CLIENT_STOPPING`, `SERVER_STOPPING`) and on a NeoForge dedicated
-server (`ServerStoppingEvent`). A NeoForge client gets it from `NeoForgeFastStats`, at
-`GameShuttingDownEvent`. The send blocks the thread stopping the game: one metrics request, plus one error
-request when reports are pending. Each request times out after 3 seconds when the connection or the
-response headers stall, and that timeout does not cover a stalled name lookup or a stalled response body.
+A context submits 30 seconds after it is ready, then every 30 minutes, and once more at shutdown. The
+shutdown send is one metrics request, plus one error request when reports are pending. Each request times
+out after 3 seconds when the connection or the response headers stall, and that timeout does not cover a
+stalled name lookup or a stalled response body. The SDK runs the shutdown send itself on Fabric
+(`CLIENT_STOPPING`, `SERVER_STOPPING`) and on a NeoForge dedicated server (`ServerStoppingEvent`), where it
+blocks the thread stopping the game until the send ends. A NeoForge client gets it from
+`NeoForgeFastStats`, at `GameShuttingDownEvent`, and so does a dedicated server whose run loop crashed,
+because a crash skips `ServerStoppingEvent`. There the send runs on a daemon thread, and the thread stopping
+the game waits for it for at most 6 seconds, which covers both requests at their timeout. A send still
+running after that continues until it finishes or JVM exit abandons it, so its batch can be lost.
 Gradle run tasks set `faststats.enabled=false`, so dev runs send nothing unless `-Pfaststats` is passed.
 
 **Error reports are not automatic.** FastStats captures an error on its own only when one kills a
@@ -160,10 +164,11 @@ in FS with these `reference_id`s, data starts landing on the next submission.
 **Turning metrics off.** `CleansingConfig.get().metrics` decides at game start whether a context is
 created. Turning it off later, through `/cleanse reload` or the config screen, calls `FastStatsBridge.stop`,
 which ends all traffic at once: no final batch goes out, queued error reports are dropped, and uncaught
-exception tracking is detached. The one exception is another mod nesting a newer FastStats that lacks the
-`SimpleContext.submissionActive` field, in which case a final batch can go out and the log says so. Turning
-it back on takes effect at the next game start, because a stopped context cannot restart. A reload that
-fails to read the file neither stops nor starts FastStats.
+exception tracking is detached. There are two exceptions. Another mod nesting a newer FastStats that lacks
+the `SimpleContext.submissionActive` field can let a final batch go out, and the log says so. A request the
+`GameShuttingDownEvent` send already has in flight finishes, because `stop` does not wait for that send, and
+the send makes no further request. Turning `metrics` back on takes effect at the next game start, because a
+stopped context cannot restart. A reload that fails to read the file neither stops nor starts FastStats.
 
 ---
 
