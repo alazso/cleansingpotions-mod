@@ -10,7 +10,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
-/** Builds cleansing potion stacks and reads their mode and variant. A stack carries no components: both come from the item. */
+/**
+ * Builds cleansing potion stacks and reads their mode and variant. A stack it builds has no cleanse_mode component:
+ * its mode and variant come from the item.
+ */
 public final class MilkItemFactory {
 
     // The style that versions up to 0.2.0 stamped on a generated custom name. An anvil rename has an empty style.

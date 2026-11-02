@@ -16,8 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The nine cleansing potion items, one per variant and mode. 26.3 brewing recipes match on item id only, so
- * the mode is part of the item's identity. The three Cleansing ids must not change: legacy stacks use them.
+ * The nine cleansing potion items, one per variant and mode. 26.3 brewing recipe inputs match an item and its
+ * potion contents, not a custom component, so the mode is part of the item's identity. The three Cleansing ids
+ * must not change: legacy stacks use them.
  */
 public final class ModItems {
 

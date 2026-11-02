@@ -13,10 +13,12 @@ semantic versioning.
 
 **Potions**
 - Each potion mode is now its own item, so there are nine in total: Cleansing, Soothing, and Purging, each as regular, splash, and lingering. Brewing a Soothing or Purging splash or lingering potion works on 26.3 as a result, because recipes there match on item id.
-- Potions from earlier versions turn into their new items automatically once they are in a player's inventory, and a name given on an anvil is kept. A stack still in a chest or other container keeps its mode until then.
+- Potions from earlier versions turn into their new items automatically once they are in a player's inventory, and a name given on an anvil is kept. A stack still in a chest or other container keeps its mode until then, with one limit on 26.3: recipes there match the item and not its components, so an older Soothing or Purging potion that reaches a brewing stand without passing through a player's inventory (left in a bottle slot, or fed by a hopper) brews as a Cleansing potion of that variant.
 - Names and tooltips come from language files, so a resource pack can change them. Colours are fixed tints that a resource pack can also change. The `cleansing`, `soothing`, and `purging` blocks in an older config file are ignored, including their `name`, `lore`, and `color` fields, and they drop out the next time the config is saved.
 - Dispensers now throw splash and lingering potions.
 - A lingering cloud keeps its mode across a save and load. A cloud saved by an earlier version loads as Cleansing.
+- A lingering cloud lasts its full duration at every radius.
+- A cleanse reaches an entity when its hitbox is within the radius, as in vanilla.
 - Fixed drinking a cleansing potion making no sound. Drinking now also counts toward advancements that track consumed items, the same as a vanilla potion.
 - A use the server refuses (no permission, a disabled potion type, a throw cooldown) shows its reason in the action bar and the potion stays in your inventory, on the client as well. Throwing a disabled potion type is refused, so the potion is kept. The cooldown message reads correctly at one second.
 - The thrown potion and the cloud have proper names, and their entity settings match the vanilla splash potion and area effect cloud.
@@ -43,7 +45,7 @@ semantic versioning.
 - Turning `metrics` off through the config screen or `/cleanse reload` stops FastStats at once, and nothing further is sent. Turning it back on takes effect at the next game start.
 - If the config file cannot be parsed at game start, metrics stay off for that session unless the file's text holds `"metrics": true`.
 - Failures the mod recovers from are reported too, once per source per game session: an unreadable or unwritable config, and an installed Fabric Permissions mod whose API does not match.
-- The brewing counters do not report on 26.3, where the mixin that feeds them does not ship.
+- The brewing counters stay at zero on 26.3, where the mixin that feeds them does not ship.
 
 ## [0.2.0]
 
