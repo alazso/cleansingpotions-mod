@@ -21,11 +21,18 @@ public final class ModEntities {
         }
         CLEANSING_POTION = EntityType.Builder
             .<CleansingPotionEntity>of(CleansingPotionEntity::new, MobCategory.MISC)
+            .noLootTable()
             .sized(0.25F, 0.25F)
+            .clientTrackingRange(4)
+            .updateInterval(10)
             .build(CLEANSING_POTION_KEY);
         CLEANSING_CLOUD = EntityType.Builder
             .<CleansingCloudEntity>of(CleansingCloudEntity::new, MobCategory.MISC)
+            .noLootTable()
+            .fireImmune()
             .sized(6.0F, 0.5F)
+            .clientTrackingRange(10)
+            .updateInterval(Integer.MAX_VALUE)
             .build(CLEANSING_CLOUD_KEY);
     }
 
