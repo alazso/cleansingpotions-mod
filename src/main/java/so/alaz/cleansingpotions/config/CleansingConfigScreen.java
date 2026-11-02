@@ -1,6 +1,9 @@
 package so.alaz.cleansingpotions.config;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
+//? if >=26.3 {
+/*import net.minecraft.ChatFormatting;
+*///?}
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import so.alaz.cleansingpotions.CleansingPotions;
@@ -37,24 +40,21 @@ public final class CleansingConfigScreen {
             .setSaveConsumer(v -> cfg.cooldownSeconds = v).build());
 
         var recipes = builder.getOrCreateCategory(Component.literal("Recipes"));
-        //? if <26.3 {
-        recipes.addEntry(entry.startTextDescription(
-            Component.literal("§7Recipe toggles take effect on game load, not on /cleanse reload.")).build());
+        //? if >=26.3 {
+        /*recipes.addEntry(entry.startTextDescription(
+            Component.literal("Recipe toggles apply on the next world load, /reload, or /cleanse reload.")
+                .withStyle(ChatFormatting.GRAY)).build());
+        *///?}
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Brewing Enabled"), cfg.brewingEnabled)
+            .setTooltip(Component.literal("Whether cleansing, soothing, and purging potions can be brewed."))
             .setDefaultValue(defaults.brewingEnabled)
             .setSaveConsumer(v -> cfg.brewingEnabled = v).build());
-        //?} else {
-        /*recipes.addEntry(entry.startTextDescription(Component.literal(
-            "§7Brewing is data driven on this version. Remove or override the recipes in "
-                + "data/cleansingpotions/recipe/brewing with a data pack. The toggles below still "
-                + "control whether a thrown potion does anything.")).build());
-        *///?}
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Splash Enabled"), cfg.splashEnabled)
-            .setTooltip(Component.literal("Whether a thrown splash potion has any effect."))
+            .setTooltip(Component.literal("Whether splash potions can be brewed and have any effect when thrown."))
             .setDefaultValue(defaults.splashEnabled)
             .setSaveConsumer(v -> cfg.splashEnabled = v).build());
         recipes.addEntry(entry.startBooleanToggle(Component.literal("Lingering Enabled"), cfg.lingeringEnabled)
-            .setTooltip(Component.literal("Whether a lingering potion leaves a cloud."))
+            .setTooltip(Component.literal("Whether lingering potions can be brewed and leave a cloud."))
             .setDefaultValue(defaults.lingeringEnabled)
             .setSaveConsumer(v -> cfg.lingeringEnabled = v).build());
 
