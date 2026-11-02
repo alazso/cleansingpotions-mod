@@ -24,23 +24,23 @@ public final class FastStatsBridge {
     // Each id must match a data source defined in the FastStats dashboard (docs/faststats-data-sources.md).
     public static Metrics registerMetrics(Metrics.Factory factory) {
         return factory
-            .addMetric(Metric.number("potions_consumed", CleansingMetrics::peekPotionsConsumed))
-            .addMetric(Metric.number("potions_thrown", CleansingMetrics::peekPotionsThrown))
-            .addMetric(Metric.number("cleanse_operations", CleansingMetrics::peekCleanseOperations))
-            .addMetric(Metric.number("effects_removed", CleansingMetrics::peekEffectsRemoved))
-            .addMetric(Metric.number("lingering_clouds_spawned", CleansingMetrics::peekLingeringClouds))
-            .addMetric(Metric.number("potions_brewed", CleansingMetrics::peekPotionsBrewed))
-            .addMetric(Metric.number("cooldown_blocks", CleansingMetrics::peekCooldownBlocks))
-            .addMetric(Metric.number("permission_denials", CleansingMetrics::peekPermissionDenials))
-            .addMetric(Metric.number("commands_executed", CleansingMetrics::peekCommandsExecuted))
-            .addMetric(Metric.number("config_reloads", CleansingMetrics::peekConfigReloads))
-            .addMetric(Metric.numberMap("cleanses_by_mode", CleansingMetrics::peekCleansesByMode))
-            .addMetric(Metric.numberMap("potions_used_by_variant", CleansingMetrics::peekPotionsByVariant))
-            .addMetric(Metric.numberMap("effects_removed_by_disposition", CleansingMetrics::peekRemovedByDisposition))
-            .addMetric(Metric.numberMap("effects_removed_by_type", CleansingMetrics::peekRemovedByType))
-            .addMetric(Metric.numberMap("brews_by_recipe", CleansingMetrics::peekBrewsByRecipe))
-            .addMetric(Metric.number("effects_removed_per_cleanse", CleansingMetrics::peekRemovedPerCleanse))
-            .addMetric(Metric.number("entities_affected_per_throw", CleansingMetrics::peekEntitiesPerThrow))
+            .addMetric(Metric.number("potions_consumed", CleansingMetrics.POTIONS_CONSUMED::peek))
+            .addMetric(Metric.number("potions_thrown", CleansingMetrics.POTIONS_THROWN::peek))
+            .addMetric(Metric.number("cleanse_operations", CleansingMetrics.CLEANSE_OPERATIONS::peek))
+            .addMetric(Metric.number("effects_removed", CleansingMetrics.EFFECTS_REMOVED::peek))
+            .addMetric(Metric.number("lingering_clouds_spawned", CleansingMetrics.LINGERING_CLOUDS::peek))
+            .addMetric(Metric.number("potions_brewed", CleansingMetrics.POTIONS_BREWED::peek))
+            .addMetric(Metric.number("cooldown_blocks", CleansingMetrics.COOLDOWN_BLOCKS::peek))
+            .addMetric(Metric.number("permission_denials", CleansingMetrics.PERMISSION_DENIALS::peek))
+            .addMetric(Metric.number("commands_executed", CleansingMetrics.COMMANDS_EXECUTED::peek))
+            .addMetric(Metric.number("config_reloads", CleansingMetrics.CONFIG_RELOADS::peek))
+            .addMetric(Metric.numberMap("cleanses_by_mode", CleansingMetrics::cleansesByMode))
+            .addMetric(Metric.numberMap("potions_used_by_variant", CleansingMetrics::potionsByVariant))
+            .addMetric(Metric.numberMap("effects_removed_by_disposition", CleansingMetrics::removedByDisposition))
+            .addMetric(Metric.numberMap("effects_removed_by_type", CleansingMetrics::removedByType))
+            .addMetric(Metric.numberMap("brews_by_recipe", CleansingMetrics::brewsByRecipe))
+            .addMetric(Metric.number("effects_removed_per_cleanse", CleansingMetrics::removedPerCleanse))
+            .addMetric(Metric.number("entities_affected_per_throw", CleansingMetrics::entitiesPerThrow))
             .addMetric(Metric.number("cleanse_radius", () -> CleansingConfig.get().radius))
             .addMetric(Metric.bool("cooldown_enabled", () -> CleansingConfig.get().cooldownEnabled))
             .addMetric(Metric.number("cooldown_seconds", () -> CleansingConfig.get().cooldownSeconds))
@@ -56,8 +56,8 @@ public final class FastStatsBridge {
                 () -> CleansingConfig.get().forceRemove.toArray(new String[0])))
             .addMetric(Metric.stringArray("force_keep_effects",
                 () -> CleansingConfig.get().forceKeep.toArray(new String[0])))
-            // Suppliers above only read; counters reset once a submission is accepted.
-            .onFlush(CleansingMetrics::resetAll)
+            // A counter supplier records what it read, and a flush subtracts only that.
+            .onFlush(CleansingMetrics::commitAll)
             .create();
     }
 
