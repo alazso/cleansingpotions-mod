@@ -2,9 +2,12 @@ package so.alaz.cleansingpotions.update;
 
 import org.junit.jupiter.api.Test;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static so.alaz.cleansingpotions.update.UpdateLogic.RemoteVersion;
 
 class UpdateLogicTest {
@@ -50,5 +53,54 @@ class UpdateLogicTest {
     void markerIsCaseInsensitiveAndOptional() {
         assertThat(UpdateLogic.highestBug("[@BUG:High]")).isEqualTo("high");
         assertThat(UpdateLogic.highestBug("nothing to see")).isNull();
+    }
+
+    @Test
+    void queryUrlEncodesLoaderAndGameVersionAsJsonArrays() {
+        assertThat(UpdateLogic.queryUrl("fabric", "26.2")).isEqualTo(
+            "https://api.modrinth.com/v2/project/gZfP9OGb/version?loaders=%5B%22fabric%22%5D&game_versions=%5B%2226.2%22%5D");
+    }
+
+    @Test
+    void queryUrlDecodesToTheValuesItWasGiven() {
+        String query = UpdateLogic.queryUrl("neoforge", "26.3");
+        query = query.substring(query.indexOf('?') + 1);
+        assertThat(URLDecoder.decode(query, StandardCharsets.UTF_8))
+            .isEqualTo("loaders=[\"neoforge\"]&game_versions=[\"26.3\"]");
+    }
+
+    @Test
+    void parseSkipsEverythingButReleasesWithAVersionNumber() {
+        List<RemoteVersion> parsed = UpdateLogic.parse("""
+            [{"version_number":"1.0.0+x","version_type":"release","changelog":"[@bug:high]"},
+             {"version_number":"1.1.0-beta.1","version_type":"beta","changelog":"b"},
+             {"version_number":"1.2.0","version_type":"alpha"},
+             {"version_number":"1.3.0"},
+             {"version_number":"1.4.0","version_type":null},
+             {"version_number":null,"version_type":"release"},
+             {"version_type":"release"}]
+            """);
+        assertThat(parsed).containsExactly(new RemoteVersion("1.0.0+x", "[@bug:high]"));
+    }
+
+    @Test
+    void parseReadsAMissingOrNullChangelogAsEmpty() {
+        List<RemoteVersion> parsed = UpdateLogic.parse("""
+            [{"version_number":"1.5.0","version_type":"release","changelog":null},
+             {"version_number":"1.6.0","version_type":"release"}]
+            """);
+        assertThat(parsed).containsExactly(new RemoteVersion("1.5.0", ""), new RemoteVersion("1.6.0", ""));
+    }
+
+    @Test
+    void parseReadsAnEmptyListAsNoVersions() {
+        assertThat(UpdateLogic.parse("[]")).isEmpty();
+    }
+
+    @Test
+    void parseThrowsOnAnythingButAnArrayOfObjects() {
+        assertThatThrownBy(() -> UpdateLogic.parse("{\"error\":\"not found\"}")).isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(() -> UpdateLogic.parse("[1,2]")).isInstanceOf(RuntimeException.class);
+        assertThatThrownBy(() -> UpdateLogic.parse("not json [")).isInstanceOf(RuntimeException.class);
     }
 }
