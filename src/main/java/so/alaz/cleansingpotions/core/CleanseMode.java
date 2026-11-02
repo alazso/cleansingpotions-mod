@@ -40,12 +40,7 @@ public enum CleanseMode {
         };
     }
 
-    /**
-     * The potion's colour, as 0xRRGGBB. Fixed rather than configurable: the item tint is chosen by
-     * the model from the cleanse_mode component (assets/cleansingpotions/items/*.json), and a
-     * resource pack cannot read a runtime config value. These constants and the tints in those
-     * model files must stay in step. Splash and cloud particles read the same value from here.
-     */
+    /** The potion colour as 0xRRGGBB. Must match the constant tints in assets/cleansingpotions/items/*.json. */
     public int rgb() {
         return switch (this) {
             case ALL -> 0xFFFFFF;
