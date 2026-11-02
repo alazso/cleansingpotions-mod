@@ -15,6 +15,8 @@ public class CleansingCloudEntity extends AreaEffectCloud {
     private static final int DURATION_TICKS = 600;
     private static final int WAIT_TICKS = 10;
     private static final int CLEANSE_INTERVAL_TICKS = 20;
+    // AreaEffectCloud discards itself once its radius falls below this value.
+    private static final float MIN_RADIUS = 0.5F;
     private static final String MODE_KEY = "cleanse_mode";
 
     private CleanseMode mode = CleanseMode.ALL;
@@ -37,7 +39,7 @@ public class CleansingCloudEntity extends AreaEffectCloud {
         setRadius(radius);
         setDuration(DURATION_TICKS);
         setWaitTime(WAIT_TICKS);
-        setRadiusPerTick(-radius / (float) DURATION_TICKS);
+        setRadiusPerTick(-(radius - MIN_RADIUS) / (float) DURATION_TICKS);
         // Entity-effect particles need an opaque color, or they render fully transparent.
         setCustomParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color));
     }
@@ -65,10 +67,6 @@ public class CleansingCloudEntity extends AreaEffectCloud {
             return;
         }
         sinceCleanse = 0;
-        float r = getRadius();
-        if (r <= 0) {
-            return;
-        }
-        CleansingPotions.cleanser().cleanseArea(level(), getX(), getY(), getZ(), r, mode);
+        CleansingPotions.cleanser().cleanseArea(level(), getX(), getY(), getZ(), getRadius(), mode);
     }
 }

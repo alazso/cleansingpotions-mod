@@ -64,4 +64,35 @@ public class CloudGameTest {
     public void soothingCloudKeepsItsModeAcrossSaveAndLoad(GameTestHelper helper) {
         assertModeSurvivesSaveAndLoad(helper, CleanseMode.NEGATIVE_ONLY, MobEffects.POISON, MobEffects.SPEED);
     }
+
+    @GameTest(maxTicks = 100)
+    public void cloudAtTheMinimumRadiusCleansesAMobAtItsCentre(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        BlockPos middle = new BlockPos(4, 1, 4);
+        helper.setBlock(middle.below(), Blocks.STONE);
+        LivingEntity pig = helper.spawnWithNoFreeWill(EntityTypes.PIG, middle);
+        pig.addEffect(new MobEffectInstance(MobEffects.SPEED, 1200));
+
+        CleansingCloudEntity cloud = new CleansingCloudEntity(level, pig.getX(), pig.getY(), pig.getZ());
+        cloud.configure(0.5F, CleanseMode.ALL.rgb());
+        level.addFreshEntity(cloud);
+
+        helper.succeedWhen(() -> helper.assertFalse(pig.hasEffect(MobEffects.SPEED),
+            "a cloud at the minimum radius has not cleansed the mob at its centre"));
+    }
+
+    /** The cloud waits 10 ticks and then runs for 600, so it is alive at tick 600 and gone by tick 615. */
+    @GameTest(maxTicks = 640)
+    public void defaultCloudLastsItsFullDuration(GameTestHelper helper) {
+        ServerLevel level = helper.getLevel();
+        Vec3 center = helper.absoluteVec(Vec3.atCenterOf(new BlockPos(4, 1, 4)));
+        CleansingCloudEntity cloud = new CleansingCloudEntity(level, center.x, center.y, center.z);
+        cloud.configure(4.0F, CleanseMode.ALL.rgb());
+        level.addFreshEntity(cloud);
+
+        helper.startSequence()
+            .thenExecuteAfter(600, () -> helper.assertTrue(cloud.isAlive(), "the cloud ended before its duration"))
+            .thenExecuteAfter(15, () -> helper.assertFalse(cloud.isAlive(), "the cloud outlived its duration"))
+            .thenSucceed();
+    }
 }
