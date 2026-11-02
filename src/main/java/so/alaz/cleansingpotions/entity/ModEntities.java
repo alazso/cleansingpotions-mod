@@ -2,10 +2,9 @@ package so.alaz.cleansingpotions.entity;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobCategory;
-import so.alaz.cleansingpotions.Constants;
+import so.alaz.cleansingpotions.CleansingPotions;
 
 public final class ModEntities {
 
@@ -37,8 +36,7 @@ public final class ModEntities {
     }
 
     private static ResourceKey<EntityType<?>> key(String name) {
-        return ResourceKey.create(Registries.ENTITY_TYPE,
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, name));
+        return ResourceKey.create(Registries.ENTITY_TYPE, CleansingPotions.id(name));
     }
 
     private ModEntities() {

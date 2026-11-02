@@ -6,13 +6,12 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
-import so.alaz.cleansingpotions.Constants;
+import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
 public final class ModComponents {
 
-    public static final Identifier CLEANSE_MODE_ID =
-        Identifier.fromNamespaceAndPath(Constants.MOD_ID, "cleanse_mode");
+    public static final Identifier CLEANSE_MODE_ID = CleansingPotions.id("cleanse_mode");
 
     public static final Codec<CleanseMode> MODE_CODEC =
         Codec.STRING.xmap(ModComponents::parse, CleanseMode::tag);

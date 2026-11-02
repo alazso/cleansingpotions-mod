@@ -2,13 +2,12 @@ package so.alaz.cleansingpotions.item;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumables;
 import net.minecraft.world.level.block.DispenserBlock;
-import so.alaz.cleansingpotions.Constants;
+import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
 import java.util.ArrayList;
@@ -90,8 +89,7 @@ public final class ModItems {
     }
 
     private static ResourceKey<Item> key(String name) {
-        return ResourceKey.create(Registries.ITEM,
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, name));
+        return ResourceKey.create(Registries.ITEM, CleansingPotions.id(name));
     }
 
     private ModItems() {
