@@ -63,6 +63,9 @@ public class CleansingPotionsNeoForge {
             }
             NeoForge.EVENT_BUS.addListener(
                 (ClientPlayerNetworkEvent.LoggingIn event) -> UpdateNotifier.onJoin());
+            // A press in the input poll that opened the screen arrives before its first frame.
+            NeoForge.EVENT_BUS.addListener(
+                (ScreenEvent.Init.Post event) -> TelemetryButtonGuard.apply(event.getScreen(), event.getScreen().children()));
             NeoForge.EVENT_BUS.addListener(
                 (ScreenEvent.Render.Pre event) -> TelemetryButtonGuard.apply(event.getScreen(), event.getScreen().children()));
         }
