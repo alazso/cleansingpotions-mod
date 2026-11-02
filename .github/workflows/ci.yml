@@ -33,6 +33,16 @@ jobs:
       - name: Build every version and loader
         run: ./gradlew chiseledBuild --continue --stacktrace
 
+      - name: Upload GameTest results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: gametest-results-${{ github.sha }}
+          path: |
+            versions/*/build/reports/gametest/*.xml
+            versions/*/build/run/gameTest/logs/latest.log
+          if-no-files-found: ignore
+
       - name: Upload jars (snapshot)
         uses: actions/upload-artifact@v7
         with:
