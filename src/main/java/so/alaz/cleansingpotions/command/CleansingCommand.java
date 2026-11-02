@@ -117,9 +117,8 @@ public final class CleansingCommand {
         for (ServerPlayer target : targets) {
             ItemStack item = MilkItemFactory.create(variant, mode);
             if (!target.getInventory().add(item)) {
-                // A command-issued drop is never client-predicted.
                 //? if >=26.3 {
-                /*ItemEntity dropped = target.drop(item, false, net.minecraft.util.Prediction.SERVER_ONLY);
+                /*ItemEntity dropped = target.createItemStackToDrop(item, false, false);
                 *///?} else {
                 ItemEntity dropped = target.drop(item, false);
                 //?}
@@ -127,6 +126,9 @@ public final class CleansingCommand {
                 if (dropped != null) {
                     dropped.setNoPickUpDelay();
                     dropped.setTarget(target.getUUID());
+                    //? if >=26.3 {
+                    /*dropped.level().addFreshEntity(dropped);
+                    *///?}
                 }
             }
         }
