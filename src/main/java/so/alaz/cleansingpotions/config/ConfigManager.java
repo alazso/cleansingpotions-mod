@@ -12,10 +12,14 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.regex.Pattern;
 
 public final class ConfigManager {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+    private static final Pattern METRICS_ON = Pattern.compile("\"metrics\"\\s*:\\s*true");
+
+    private static boolean loadSucceeded;
 
     private static Path file() {
         return Services.PLATFORM.getConfigDir().resolve("cleansingpotions.json");
@@ -23,28 +27,38 @@ public final class ConfigManager {
 
     /**
      * Reads the config file into {@link CleansingConfig}. A missing file is created from the defaults.
-     * A failed load leaves the file as it is and keeps the values in effect.
+     *
+     * <p>A failed load leaves the file as it is and keeps the values in effect. Until a load has
+     * succeeded those values are the defaults, except that metrics are on only if the file's text holds
+     * {@code "metrics": true}.
      *
      * @return false if the file could not be read or parsed
      */
     public static synchronized boolean load() {
+        String text = null;
         try {
             Path target = file();
             if (Files.notExists(target)) {
                 CleansingConfig.set(new CleansingConfig());
                 save();
+                loadSucceeded = true;
                 return true;
             }
             // Decodes with replacement: Files.readString throws on a file saved in another encoding.
-            String text = new String(Files.readAllBytes(target), StandardCharsets.UTF_8);
+            text = new String(Files.readAllBytes(target), StandardCharsets.UTF_8);
             CleansingConfig cfg = GSON.fromJson(text, CleansingConfig.class);
             if (cfg == null) {
                 throw new JsonParseException("The config file is empty");
             }
             cfg.sanitize();
             CleansingConfig.set(cfg);
+            loadSucceeded = true;
             return true;
         } catch (Exception e) {
+            if (!loadSucceeded) {
+                // ErrorReporter consults this value, so it is set before the report.
+                CleansingConfig.get().metrics = text != null && METRICS_ON.matcher(text).find();
+            }
             Constants.LOG.error("Failed to load CleansingPotions config", e);
             // On the first load this runs before the metrics backend exists, so ErrorReporter holds
             // the report.
