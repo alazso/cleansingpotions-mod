@@ -16,7 +16,7 @@ import so.alaz.cleansingpotions.core.CleanseMode;
  */
 public final class MilkItemFactory {
 
-    // The style that versions up to 0.2.0 stamped on a generated custom name. An anvil rename has an empty style.
+    // The style of a generated custom name on a legacy stack. An anvil rename has an empty style.
     private static final Style LEGACY_NAME_STYLE = Style.EMPTY.withItalic(false).withColor(ChatFormatting.WHITE);
 
     public static ItemStack create(MilkVariant variant, CleanseMode mode) {

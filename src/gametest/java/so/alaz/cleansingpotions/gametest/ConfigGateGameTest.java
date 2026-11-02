@@ -33,7 +33,8 @@ import java.util.List;
 
 /**
  * Changes the shared config, and on 26.3 reloads the data packs, inside one test tick, and restores both
- * before returning. Runs in its own test environment, which keeps every other test out of its batch.
+ * before returning. Runs in the isolated test environment, which keeps it out of the default environment's
+ * batch. Each test in that environment restores the shared state before its tick ends.
  */
 public class ConfigGateGameTest {
 

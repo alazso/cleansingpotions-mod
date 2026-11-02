@@ -28,7 +28,7 @@ import java.util.List;
  */
 public class MigrationGameTest {
 
-    /** A stack as versions up to 0.2.0 made it: the Cleansing item of its variant, with the mode in a component. */
+    /** A legacy stack: the Cleansing item of its variant, with the mode in a component. */
     private static ItemStack legacy(MilkVariant variant, CleanseMode mode) {
         ItemStack stack = new ItemStack(ModItems.get(variant, CleanseMode.ALL));
         stack.set(ModComponents.CLEANSE_MODE, mode);

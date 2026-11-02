@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class CleansingConfigTest {
 
-    /** The shape of a 0.2.0 file. Its per-potion blocks match no {@link CleansingConfig} field. */
+    /** A legacy config file. Its per-potion blocks match no {@link CleansingConfig} field. */
     private static final String OLD_FILE = """
         {
           "splashEnabled": false,

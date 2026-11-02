@@ -67,8 +67,8 @@ public class CleansingPotionsNeoForge {
             try {
                 NeoForgeFastStats.start();
             } catch (RuntimeException | LinkageError | ServiceConfigurationError failure) {
-                // The nested FastStats mod pins one exact Minecraft version, so a patch release can
-                // reject it, and creating the context reads and writes config/faststats.
+                // Creating the context reads and writes config/faststats, and another mod can nest a
+                // different FastStats.
                 Constants.LOG.warn("FastStats is unavailable; continuing without metrics ({})",
                     failure.toString());
             }
