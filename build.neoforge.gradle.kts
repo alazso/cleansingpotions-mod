@@ -73,6 +73,11 @@ neoForge {
     }
 }
 
+// The ModDevGradle run task does not forward stdin, which a dev server's console commands need.
+tasks.withType<JavaExec>().matching { it.name == "runServer" }.configureEach {
+    standardInput = System.`in`
+}
+
 // PotionBrewing does not exist from 26.3. Those nodes ship JSON brewing recipes and no mixin.
 val brewingIsDataDriven = stonecutter.current.parsed >= "26.3"
 
