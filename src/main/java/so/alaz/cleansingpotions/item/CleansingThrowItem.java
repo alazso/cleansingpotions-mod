@@ -36,7 +36,7 @@ public class CleansingThrowItem extends CleansingItem implements ProjectileItem 
             return InteractionResult.SUCCESS_SERVER;
         }
         CleansingConfig cfg = CleansingConfig.get();
-        if (!PermissionGate.allows(serverPlayer, "cleansingpotions.use")) {
+        if (!PermissionGate.allowsUse(serverPlayer)) {
             CleansingMetrics.permissionDenied();
             sendRefusal(serverPlayer, Component.translatable("message.cleansingpotions.no_use"));
             return InteractionResult.FAIL;

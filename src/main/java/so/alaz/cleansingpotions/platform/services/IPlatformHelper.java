@@ -1,6 +1,6 @@
 package so.alaz.cleansingpotions.platform.services;
 
-import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerPlayer;
 
 import java.nio.file.Path;
 
@@ -16,5 +16,6 @@ public interface IPlatformHelper {
 
     Path getConfigDir();
 
-    boolean hasPermission(Entity player, String node, boolean defaultValue);
+    /** Whether the loader's permission system grants {@code cleansingpotions.use}, which defaults to allowed. */
+    boolean hasUsePermission(ServerPlayer player);
 }

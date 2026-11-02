@@ -17,6 +17,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforge.server.permission.events.PermissionGatherEvent;
 import so.alaz.cleansingpotions.brew.BrewingCondition;
 import so.alaz.cleansingpotions.brew.NeoForgeBrewingCondition;
 import so.alaz.cleansingpotions.command.CleansingCommand;
@@ -26,6 +27,7 @@ import so.alaz.cleansingpotions.entity.ModEntities;
 import so.alaz.cleansingpotions.item.ModComponents;
 import so.alaz.cleansingpotions.item.ModItems;
 import so.alaz.cleansingpotions.metrics.NeoForgeFastStats;
+import so.alaz.cleansingpotions.platform.NeoForgePlatformHelper;
 import so.alaz.cleansingpotions.update.UpdateNotifier;
 
 import java.util.ServiceConfigurationError;
@@ -39,6 +41,7 @@ public class CleansingPotionsNeoForge {
         modBus.addListener(this::onCommonSetup);
         modBus.addListener(this::onRegisterRenderers);
         NeoForge.EVENT_BUS.addListener(this::onRegisterCommands);
+        NeoForge.EVENT_BUS.addListener(this::onGatherPermissionNodes);
         CleansingPotions.init();
 
         if (dist.isClient()) {
@@ -92,6 +95,11 @@ public class CleansingPotionsNeoForge {
 
     private void onRegisterCommands(RegisterCommandsEvent event) {
         CleansingCommand.register(event.getDispatcher());
+    }
+
+    private void onGatherPermissionNodes(PermissionGatherEvent.Nodes event) {
+        // Registered whatever the config says, because PermissionAPI throws for an unregistered node.
+        event.addNodes(NeoForgePlatformHelper.USE);
     }
 }
 *///?}

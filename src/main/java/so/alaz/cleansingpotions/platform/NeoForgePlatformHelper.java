@@ -1,15 +1,21 @@
 package so.alaz.cleansingpotions.platform;
 
 //? neoforge {
-/*import net.minecraft.world.entity.Entity;
+/*import net.minecraft.server.level.ServerPlayer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLPaths;
+import net.neoforged.neoforge.server.permission.PermissionAPI;
+import net.neoforged.neoforge.server.permission.nodes.PermissionNode;
+import net.neoforged.neoforge.server.permission.nodes.PermissionTypes;
 import so.alaz.cleansingpotions.Constants;
 import so.alaz.cleansingpotions.platform.services.IPlatformHelper;
 
 import java.nio.file.Path;
 
 public class NeoForgePlatformHelper implements IPlatformHelper {
+    public static final PermissionNode<Boolean> USE = new PermissionNode<>(Constants.MOD_ID, "use",
+        PermissionTypes.BOOLEAN, (player, uuid, context) -> true);
+
     @Override
     public String getPlatformName() {
         return "NeoForge";
@@ -38,8 +44,8 @@ public class NeoForgePlatformHelper implements IPlatformHelper {
     }
 
     @Override
-    public boolean hasPermission(Entity player, String node, boolean defaultValue) {
-        return defaultValue;
+    public boolean hasUsePermission(ServerPlayer player) {
+        return PermissionAPI.getPermission(player, USE);
     }
 }
 *///?}

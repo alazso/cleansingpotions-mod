@@ -21,8 +21,7 @@ public class CleansingPotionItem extends CleansingItem {
 
     @Override
     public InteractionResult use(Level level, Player player, InteractionHand hand) {
-        if (player instanceof ServerPlayer serverPlayer
-            && !PermissionGate.allows(serverPlayer, "cleansingpotions.use")) {
+        if (player instanceof ServerPlayer serverPlayer && !PermissionGate.allowsUse(serverPlayer)) {
             CleansingMetrics.permissionDenied();
             sendRefusal(serverPlayer, Component.translatable("message.cleansingpotions.no_use"));
             // The client has already started the drink, and the server sends nothing back for a refused use.
