@@ -17,8 +17,13 @@ dashboards: `minecraft_version` was renamed to `game_version` in SDK 0.28.1, so 
 SDK still send the old key, and SDK 0.29.4 added a boolean `client` that separates client installs from
 servers.
 
-A context submits 30 seconds after it is ready, then every 30 minutes, and once more at shutdown. Gradle
-run tasks set `faststats.enabled=false`, so dev runs send nothing unless `-Pfaststats` is passed.
+A context submits 30 seconds after it is ready, then every 30 minutes, and once more at shutdown. The SDK
+runs the shutdown send itself on Fabric (`CLIENT_STOPPING`, `SERVER_STOPPING`) and on a NeoForge dedicated
+server (`ServerStoppingEvent`). A NeoForge client gets it from `NeoForgeFastStats`, at
+`GameShuttingDownEvent`. The send blocks the thread stopping the game: one metrics request, plus one error
+request when reports are pending. Each request times out after 3 seconds when the connection or the
+response headers stall, and that timeout does not cover a stalled name lookup or a stalled response body.
+Gradle run tasks set `faststats.enabled=false`, so dev runs send nothing unless `-Pfaststats` is passed.
 
 **Error reports are not automatic.** FastStats captures an error on its own only when one kills a
 thread, and the Fabric and NeoForge platform modules register nothing else (the Paper

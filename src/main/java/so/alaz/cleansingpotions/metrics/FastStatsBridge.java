@@ -102,6 +102,18 @@ public final class FastStatsBridge {
     }
 
     /**
+     * Shuts the context down, which sends one last batch and ends its traffic. Does nothing after
+     * {@link #stop}, which has already ended traffic without that batch, and repeating the call sends
+     * nothing. The send blocks the calling thread.
+     */
+    public static synchronized void sendFinalBatch() {
+        FastStatsContext current = context;
+        if (current != null) {
+            current.shutdown();
+        }
+    }
+
+    /**
      * Whether a tracked error will reach FastStats. False when no context exists, on the SDK's first
      * run, or when the owner opted out in config/faststats/config.properties. The SDK builds its error
      * service in all of those cases, so {@code errorTrackerService()} being present says nothing.
