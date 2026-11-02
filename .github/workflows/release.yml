@@ -97,6 +97,19 @@ jobs:
             exit 1
           fi
 
+      - name: Check the tag is this commit
+        if: steps.published.outputs.skip != 'true' && (github.event_name == 'push' || inputs.dry_run != true)
+        run: |
+          set -euo pipefail
+          TAG="${{ steps.version.outputs.tag }}"
+          # The last line names the commit an annotated tag points at. It is empty when the tag does not exist.
+          TAG_SHA="$(git ls-remote origin "refs/tags/${TAG}" "refs/tags/${TAG}^{}" | tail -n 1 | cut -f1)"
+          HEAD_SHA="$(git rev-parse HEAD)"
+          if [ -n "$TAG_SHA" ] && [ "$TAG_SHA" != "$HEAD_SHA" ]; then
+            echo "Tag $TAG is at $TAG_SHA but this run builds $HEAD_SHA. Run from the tag, or move the tag." >&2
+            exit 1
+          fi
+
       - name: Set up JDK 25
         if: steps.published.outputs.skip != 'true'
         uses: actions/setup-java@v6
