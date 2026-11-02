@@ -4,6 +4,7 @@ package so.alaz.cleansingpotions;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.fabricmc.fabric.api.resource.conditions.v1.ResourceConditions;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import so.alaz.cleansingpotions.brew.FabricBrewingCondition;
@@ -13,6 +14,7 @@ import so.alaz.cleansingpotions.entity.ModEntities;
 import so.alaz.cleansingpotions.item.ModComponents;
 import so.alaz.cleansingpotions.item.ModItems;
 import so.alaz.cleansingpotions.metrics.FabricFastStats;
+import so.alaz.cleansingpotions.platform.FabricPlatformHelper;
 
 import java.util.ServiceConfigurationError;
 
@@ -36,6 +38,12 @@ public class CleansingPotionsFabric implements ModInitializer {
         ResourceConditions.register(FabricBrewingCondition.TYPE);
 
         CleansingPotions.init();
+
+        if (CleansingConfig.get().permissionsEnabled
+            && !FabricLoader.getInstance().isModLoaded(FabricPlatformHelper.PERMISSIONS_MOD_ID)) {
+            Constants.LOG.warn("permissionsEnabled is on, but the gate has no effect without Fabric Permissions API ({}).",
+                FabricPlatformHelper.PERMISSIONS_MOD_ID);
+        }
 
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
             CleansingCommand.register(dispatcher));
