@@ -61,6 +61,8 @@ The `/cleanse` command (or the full `/cleansingpotions`) is limited to operators
 * `/cleanse give <cleansing|soothing|purging> [regular|splash|lingering] [players]` hands out any potion.
 * `/cleanse reload` rereads the config file, and on 26.3 also reloads data packs so the recipe toggles
   apply. If the file cannot be read it says so, and the previous settings stay.
+* `/cleanse testerror` queues an intentional test error with FastStats, for operators checking that error
+  reporting works. If FastStats is not sending error reports, it says so and queues nothing.
 
 ## Configuration
 
