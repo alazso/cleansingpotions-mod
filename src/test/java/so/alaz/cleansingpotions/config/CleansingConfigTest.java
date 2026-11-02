@@ -18,7 +18,7 @@ class CleansingConfigTest {
     // Matches the Gson that ConfigManager builds.
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 
-    /** The shape of a 0.2.0 file, with the per-potion blocks that later versions no longer read. */
+    /** The shape of a 0.2.0 file. Its per-potion blocks match no {@link CleansingConfig} field. */
     private static final String OLD_FILE = """
         {
           "splashEnabled": false,
@@ -100,7 +100,7 @@ class CleansingConfigTest {
         assertThat(cfg.splashEnabled).isFalse();
         assertThat(cfg.radius).isEqualTo(7.5);
         assertThat(cfg.cooldownSeconds).isEqualTo(12);
-        // A value the old file does not name keeps its default.
+        // A value the file does not name keeps its default.
         assertThat(cfg.lingeringEnabled).isTrue();
 
         String saved = GSON.toJson(cfg);

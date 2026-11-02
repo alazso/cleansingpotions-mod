@@ -44,7 +44,7 @@ public final class ConfigManager {
                 loadSucceeded = true;
                 return true;
             }
-            // Decodes with replacement: Files.readString throws on a file saved in another encoding.
+            // Decodes with replacement, so a file saved in another encoding still loads.
             text = new String(Files.readAllBytes(target), StandardCharsets.UTF_8);
             CleansingConfig cfg = GSON.fromJson(text, CleansingConfig.class);
             if (cfg == null) {

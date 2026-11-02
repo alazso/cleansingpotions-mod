@@ -42,7 +42,7 @@ public class FabricPlatformHelper implements IPlatformHelper {
             return (boolean) permissions.getMethod("check", Entity.class, String.class, boolean.class)
                 .invoke(null, player, USE_NODE, true);
         } catch (Throwable reflectionFailed) {
-            // The permissions mod is installed but its API no longer matches, so every check returns the default.
+            // The permissions mod is installed but its API does not match, so every check returns the default.
             ErrorReporter.report("permissions:fabric-permissions-api", reflectionFailed);
             return true;
         }

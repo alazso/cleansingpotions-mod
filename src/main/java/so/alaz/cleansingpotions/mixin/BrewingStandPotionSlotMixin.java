@@ -1,7 +1,7 @@
 package so.alaz.cleansingpotions.mixin;
 
 // Before 26.3 vanilla hardcodes the items a bottle slot accepts. NeoForge routes this check through
-// PotionBrewing.isInput instead, so this mixin is Fabric only.
+// PotionBrewing.isInput, so this mixin is Fabric only.
 //? if fabric && <26.3 {
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
