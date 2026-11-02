@@ -20,9 +20,13 @@ public final class CleansingPotions {
         Constants.LOG.info("CleansingPotions initialized.");
     }
 
-    public static void reload() {
-        ConfigManager.load();
-        CleansingMetrics.configReloaded();
+    /** Rereads the config file. Returns false if that failed, in which case the previous values stay. */
+    public static boolean reload() {
+        boolean loaded = ConfigManager.load();
+        if (loaded) {
+            CleansingMetrics.configReloaded();
+        }
+        return loaded;
     }
 
     public static CooldownService cooldowns() {

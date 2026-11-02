@@ -63,8 +63,12 @@ public final class CleansingCommand {
     }
 
     private static int reload(CommandContext<CommandSourceStack> ctx) {
-        CleansingPotions.reload();
+        boolean reloaded = CleansingPotions.reload();
         CleansingMetrics.commandExecuted();
+        if (!reloaded) {
+            ctx.getSource().sendFailure(Component.translatable("command.cleansingpotions.reload_failed"));
+            return 0;
+        }
         ctx.getSource().sendSuccess(() -> Component.translatable("command.cleansingpotions.reloaded"), true);
         return 1;
     }

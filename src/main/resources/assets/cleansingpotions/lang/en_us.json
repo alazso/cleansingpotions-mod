@@ -16,6 +16,7 @@
   "potion.cleansingpotions.purging": "Potion of Purging",
 
   "command.cleansingpotions.reloaded": "Configuration reloaded.",
+  "command.cleansingpotions.reload_failed": "Could not read the config, so the previous settings stay active. See the log.",
   "command.cleansingpotions.given": "Gave a %s to %s.",
   "command.cleansingpotions.given_many": "Gave a %s to %s players.",
   "command.cleansingpotions.unknown_potion": "Unknown potion '%s'. Use cleansing, soothing, or purging.",
