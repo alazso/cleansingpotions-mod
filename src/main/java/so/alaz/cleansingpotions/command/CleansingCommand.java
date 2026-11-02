@@ -126,7 +126,7 @@ public final class CleansingCommand {
             }
         }
         CleansingMetrics.commandExecuted();
-        Component label = Component.translatable("potion.cleansingpotions." + mode.potionName());
+        Component label = MilkItemFactory.create(variant, mode).getItemName();
         if (targets.size() == 1) {
             ServerPlayer only = targets.iterator().next();
             ctx.getSource().sendSuccess(() -> Component.translatable(

@@ -15,10 +15,6 @@
   "item.cleansingpotions.soothing.desc": "Clears harmful effects.",
   "item.cleansingpotions.purging.desc": "Clears beneficial effects.",
 
-  "potion.cleansingpotions.cleansing": "Potion of Cleansing",
-  "potion.cleansingpotions.soothing": "Potion of Soothing",
-  "potion.cleansingpotions.purging": "Potion of Purging",
-
   "command.cleansingpotions.reloaded": "Configuration reloaded.",
   "command.cleansingpotions.reload_failed": "Could not read the config, so the previous settings stay active. See the log.",
   "command.cleansingpotions.given": "Gave a %s to %s.",
