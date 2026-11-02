@@ -10,7 +10,8 @@
       "so.alaz.cleansingpotions.gametest.MigrationGameTest",
       "so.alaz.cleansingpotions.gametest.CloudGameTest",
       "so.alaz.cleansingpotions.gametest.ConfigGateGameTest",
-      "so.alaz.cleansingpotions.gametest.DispenserGameTest"
+      "so.alaz.cleansingpotions.gametest.DispenserGameTest",
+      "so.alaz.cleansingpotions.gametest.AreaReachGameTest"
     ]
   },
   "depends": {

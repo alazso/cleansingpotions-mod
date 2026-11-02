@@ -8,6 +8,7 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.core.CleansePolicy;
@@ -51,15 +52,17 @@ public final class EffectCleanser {
     }
 
     /**
-     * Cleanses every living entity within {@code radius} of the point.
+     * Cleanses every living entity within {@code radius} of the point. The distance is measured to the
+     * entity's bounding box.
      *
      * @return how many of them lost at least one effect
      */
     public int cleanseArea(Level level, double x, double y, double z, double radius, CleanseMode mode) {
         AABB box = new AABB(x - radius, y - radius, z - radius, x + radius, y + radius, z + radius);
+        Vec3 point = new Vec3(x, y, z);
         int affected = 0;
         for (LivingEntity entity : level.getEntitiesOfClass(LivingEntity.class, box)) {
-            if (entity.distanceToSqr(x, y, z) <= radius * radius && cleanse(entity, mode) > 0) {
+            if (entity.getBoundingBox().distanceToSqr(point) <= radius * radius && cleanse(entity, mode) > 0) {
                 affected++;
             }
         }
