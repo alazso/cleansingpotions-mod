@@ -6,6 +6,7 @@ import dev.faststats.FastStatsContext;
 import dev.faststats.Metrics;
 import dev.faststats.SimpleContext;
 import dev.faststats.data.Metric;
+import so.alaz.cleansingpotions.Constants;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 
 import java.util.function.Function;
@@ -14,6 +15,7 @@ public final class FastStatsBridge {
 
     static final String PROJECT_TOKEN = "321f21c8899fa729330e9508a4b7fe34";
 
+    private static volatile ErrorTracker errorTracker;
     private static volatile FastStatsContext context;
 
     private FastStatsBridge() {
@@ -69,8 +71,34 @@ public final class FastStatsBridge {
             tracker.detachErrorContext();
             throw failure;
         }
+        errorTracker = tracker;
         CleansingMetrics.backendActive(true);
         ErrorReporter.flushPending();
+    }
+
+    /**
+     * Ends all FastStats traffic for this process without a final send. A stopped context cannot
+     * restart, because shutdown closes its executor, so turning metrics back on needs a game restart.
+     * Callers run after the context is ready: a dedicated server starts it at SERVER_STARTED, before
+     * any command can run. Thread-safe: the reload command and the config screen run on different
+     * threads.
+     */
+    public static synchronized void stop() {
+        FastStatsContext current = context;
+        if (current == null) {
+            return;
+        }
+        context = null;
+        CleansingMetrics.backendActive(false);
+        // SimpleContext.shutdown sends one last batch unless this flag is already false.
+        try {
+            ((SimpleContext) current).submissionActive = false;
+        } catch (LinkageError fieldGone) {
+            // The field is undocumented, and another mod can nest a newer FastStats without it.
+            Constants.LOG.warn("FastStats may send one last batch while stopping ({})", fieldGone.toString());
+        }
+        current.shutdown();
+        errorTracker.detachErrorContext();
     }
 
     /**

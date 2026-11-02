@@ -3,6 +3,7 @@ package so.alaz.cleansingpotions.config;
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import so.alaz.cleansingpotions.CleansingPotions;
 
 public final class CleansingConfigScreen {
 
@@ -83,7 +84,10 @@ public final class CleansingConfigScreen {
         misc.addEntry(entry.startTextDescription(Component.literal(
             "§7Effect force-lists and per-potion name/lore are edited in config/cleansingpotions.json. Potion colours are fixed and come from the resource pack.")).build());
 
-        builder.setSavingRunnable(ConfigManager::save);
+        builder.setSavingRunnable(() -> {
+            ConfigManager.save();
+            CleansingPotions.applyMetricsToggle();
+        });
         return builder.build();
     }
 }
