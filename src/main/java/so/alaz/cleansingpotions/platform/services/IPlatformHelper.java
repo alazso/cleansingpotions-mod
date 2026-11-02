@@ -10,10 +10,6 @@ public interface IPlatformHelper {
 
     String getModVersion();
 
-    boolean isModLoaded(String modId);
-
-    boolean isDevelopmentEnvironment();
-
     Path getConfigDir();
 
     /** Whether the loader's permission system grants {@code cleansingpotions.use}, which defaults to allowed. */

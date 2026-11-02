@@ -28,10 +28,6 @@ public final class CleansePolicy {
         return mode.removes(disposition);
     }
 
-    public CleanseMode mode() {
-        return mode;
-    }
-
     private static Set<String> normalize(Collection<String> ids) {
         Set<String> out = new HashSet<>();
         if (ids != null) {

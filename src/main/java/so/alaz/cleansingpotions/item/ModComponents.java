@@ -13,10 +13,10 @@ public final class ModComponents {
 
     public static final Identifier CLEANSE_MODE_ID = CleansingPotions.id("cleanse_mode");
 
-    public static final Codec<CleanseMode> MODE_CODEC =
+    private static final Codec<CleanseMode> MODE_CODEC =
         Codec.STRING.xmap(CleanseMode::fromTag, CleanseMode::tag);
 
-    public static final StreamCodec<ByteBuf, CleanseMode> MODE_STREAM_CODEC =
+    private static final StreamCodec<ByteBuf, CleanseMode> MODE_STREAM_CODEC =
         ByteBufCodecs.STRING_UTF8.map(CleanseMode::fromTag, CleanseMode::tag);
 
     public static final DataComponentType<CleanseMode> CLEANSE_MODE =

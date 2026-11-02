@@ -21,7 +21,7 @@ import java.util.Map;
  */
 public final class ModItems {
 
-    public record Entry(MilkVariant variant, CleanseMode mode, ResourceKey<Item> key, Item item) {
+    public record Entry(ResourceKey<Item> key, Item item) {
     }
 
     private static final List<Entry> ENTRIES = new ArrayList<>();
@@ -29,7 +29,7 @@ public final class ModItems {
         new EnumMap<>(MilkVariant.class);
 
     /** Registry path, such as {@code soothing_splash_potion}. */
-    public static String path(MilkVariant variant, CleanseMode mode) {
+    private static String path(MilkVariant variant, CleanseMode mode) {
         String base = mode.potionName();
         return switch (variant) {
             case REGULAR -> base + "_potion";
@@ -51,7 +51,7 @@ public final class ModItems {
                     ? new CleansingPotionItem(drinkable(properties), mode)
                     : new CleansingThrowItem(properties, variant, mode);
                 byMode.put(mode, item);
-                ENTRIES.add(new Entry(variant, mode, key, item));
+                ENTRIES.add(new Entry(key, item));
             }
             BY_VARIANT.put(variant, byMode);
         }
