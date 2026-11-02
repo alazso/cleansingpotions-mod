@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
 import so.alaz.cleansingpotions.Constants;
+import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 import so.alaz.cleansingpotions.metrics.ErrorReporter;
 import so.alaz.cleansingpotions.platform.Services;
 
@@ -30,7 +31,7 @@ public final class ConfigManager {
      *
      * <p>A failed load leaves the file as it is and keeps the values in effect. Until a load has
      * succeeded those values are the defaults, except that metrics are on only if the file's text holds
-     * {@code "metrics": true}.
+     * {@code "metrics": true}. That text check applies only while FastStats is not running.
      *
      * @return false if the file could not be read or parsed
      */
@@ -55,15 +56,23 @@ public final class ConfigManager {
             loadSucceeded = true;
             return true;
         } catch (Exception e) {
-            if (!loadSucceeded) {
-                // ErrorReporter consults this value, so it is set before the report.
-                CleansingConfig.get().metrics = text != null && METRICS_ON.matcher(text).find();
-            }
+            // ErrorReporter consults this value, so it is set before the report.
+            applyMetricsFromText(text);
             Constants.LOG.error("Failed to load CleansingPotions config", e);
             // On the first load this runs before the metrics backend exists, so ErrorReporter holds
             // the report.
             ErrorReporter.report("config:load", e);
             return false;
+        }
+    }
+
+    /**
+     * Sets metrics from the text of a file that failed to load, null if it could not be read. Does
+     * nothing once a load has succeeded or while FastStats is running.
+     */
+    static void applyMetricsFromText(String text) {
+        if (!loadSucceeded && !CleansingMetrics.backendActive()) {
+            CleansingConfig.get().metrics = text != null && METRICS_ON.matcher(text).find();
         }
     }
 
