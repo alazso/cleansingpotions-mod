@@ -17,7 +17,6 @@ base { archivesName = "${property("mod_id")}-neoforge" }
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
-    withSourcesJar()
 }
 
 repositories {

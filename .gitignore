@@ -23,7 +23,6 @@ build
 
 # secrets (local token files; never commit)
 *.env
-.modrinth.env
 
 # other
 eclipse

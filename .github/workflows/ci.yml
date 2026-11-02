@@ -47,7 +47,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: cleansingpotions-snapshot-${{ github.sha }}
-          path: |
-            versions/*/build/libs/cleansingpotions-*.jar
-            !versions/*/build/libs/*-sources.jar
+          path: versions/*/build/libs/cleansingpotions-*.jar
           if-no-files-found: error

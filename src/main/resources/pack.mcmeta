@@ -1,7 +1,6 @@
 {
   "pack": {
     "description": "CleansingPotions resources",
-    "pack_format": ${pack_format},
     "min_format": [${pack_format}, ${pack_format_minor}],
     "max_format": [${pack_format}, ${pack_format_minor}]
   }

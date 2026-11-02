@@ -18,7 +18,6 @@ base { archivesName = "${property("mod_id")}-fabric" }
 
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(25)
-    withSourcesJar()
 }
 
 repositories {

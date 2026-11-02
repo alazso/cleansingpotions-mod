@@ -118,7 +118,7 @@ jobs:
           set -euo pipefail
           STAGING="release-artifacts"
           mkdir -p "$STAGING"
-          find versions -path '*/build/libs/*.jar' ! -name '*-sources.jar' -exec cp {} "$STAGING/" \;
+          find versions -path '*/build/libs/*.jar' -exec cp {} "$STAGING/" \;
           ls -lh "$STAGING"
           JARS="$(find "$STAGING" -name '*.jar' | wc -l)"
           if [ "$JARS" -ne 4 ]; then
