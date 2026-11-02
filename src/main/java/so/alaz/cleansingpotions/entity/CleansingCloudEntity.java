@@ -6,6 +6,8 @@ import net.minecraft.world.entity.AreaEffectCloud;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.core.CleanseMode;
@@ -15,6 +17,7 @@ public class CleansingCloudEntity extends AreaEffectCloud {
     private static final int DURATION_TICKS = 600;
     private static final int WAIT_TICKS = 10;
     private static final int CLEANSE_INTERVAL_TICKS = 20;
+    private static final String MODE_KEY = "cleanse_mode";
 
     private CleanseMode mode = CleanseMode.ALL;
     private int sinceCleanse = 0;
@@ -39,6 +42,19 @@ public class CleansingCloudEntity extends AreaEffectCloud {
         setRadiusPerTick(-radius / (float) DURATION_TICKS);
         // Entity-effect particles need an opaque color, or they render fully transparent.
         setCustomParticle(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color));
+    }
+
+    @Override
+    protected void addAdditionalSaveData(ValueOutput output) {
+        super.addAdditionalSaveData(output);
+        output.putString(MODE_KEY, mode.tag());
+    }
+
+    /** Reads the saved mode. A missing, blank, or unknown value loads as {@link CleanseMode#ALL}. */
+    @Override
+    protected void readAdditionalSaveData(ValueInput input) {
+        super.readAdditionalSaveData(input);
+        mode = CleanseMode.fromConfig(input.getStringOr(MODE_KEY, ""), CleanseMode.ALL);
     }
 
     @Override

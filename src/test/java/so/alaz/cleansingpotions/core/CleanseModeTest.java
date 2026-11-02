@@ -38,6 +38,13 @@ class CleanseModeTest {
     }
 
     @Test
+    void tagReadsBackAsTheSameMode() {
+        for (CleanseMode mode : CleanseMode.values()) {
+            assertThat(CleanseMode.fromConfig(mode.tag(), CleanseMode.ALL)).isEqualTo(mode);
+        }
+    }
+
+    @Test
     void fromConfigFallsBackForBadInput() {
         assertThat(CleanseMode.fromConfig(null, CleanseMode.ALL)).isEqualTo(CleanseMode.ALL);
         assertThat(CleanseMode.fromConfig("   ", CleanseMode.ALL)).isEqualTo(CleanseMode.ALL);
