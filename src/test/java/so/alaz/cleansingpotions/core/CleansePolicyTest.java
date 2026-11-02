@@ -42,10 +42,10 @@ class CleansePolicyTest {
     }
 
     @Test
-    void effectIdsMatchCaseInsensitively() {
+    void listEntriesMatchInAnyCase() {
         CleansePolicy policy = new CleansePolicy(CleanseMode.NEGATIVE_ONLY,
             Set.of("MINECRAFT:BAD_OMEN"), Set.of());
-        assertThat(policy.shouldRemove("minecraft:bad_omen", HARMFUL)).isTrue();
+        assertThat(policy.shouldRemove("minecraft:bad_omen", NEUTRAL)).isTrue();
     }
 
     @Test

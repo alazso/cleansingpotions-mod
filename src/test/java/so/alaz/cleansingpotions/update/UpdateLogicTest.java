@@ -45,8 +45,11 @@ class UpdateLogicTest {
     void ignoresMarkersOnOlderOrEqualVersions() {
         List<RemoteVersion> remote = List.of(
             new RemoteVersion("0.1.3+x", "[@bug:critical] old fix"),
-            new RemoteVersion("0.2.0+x", "current"));
-        assertThat(UpdateLogic.evaluate("0.2.0", remote)).isEmpty();
+            new RemoteVersion("0.2.0+x", "[@bug:high] current"),
+            new RemoteVersion("0.2.1+x", "clean"));
+        var info = UpdateLogic.evaluate("0.2.0", remote);
+        assertThat(info).isPresent();
+        assertThat(info.get().bugLevel()).isNull();
     }
 
     @Test
@@ -63,10 +66,7 @@ class UpdateLogicTest {
 
     @Test
     void queryUrlDecodesToTheValuesItWasGiven() {
-        String query = UpdateLogic.queryUrl("neoforge", "26.3");
-        query = query.substring(query.indexOf('?') + 1);
-        assertThat(URLDecoder.decode(query, StandardCharsets.UTF_8))
-            .isEqualTo("loaders=[\"neoforge\"]&game_versions=[\"26.3\"]");
+        assertThat(decodedQuery("neoforge", "26.3")).isEqualTo("loaders=[\"neoforge\"]&game_versions=[\"26.3\"]");
     }
 
     private static String decodedQuery(String loader, String game) {

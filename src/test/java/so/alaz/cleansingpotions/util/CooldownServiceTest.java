@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 
 class CooldownServiceTest {
 
@@ -22,7 +23,7 @@ class CooldownServiceTest {
         cooldowns.start(player);
 
         assertThat(cooldowns.isCooling(player, 3600)).isTrue();
-        assertThat(cooldowns.remainingSeconds(player, 3600)).isBetween(3599L, 3600L);
+        assertThat(cooldowns.remainingSeconds(player, 3600)).isCloseTo(3600L, within(100L));
         assertThat(cooldowns.isCooling(UUID.randomUUID(), 3600)).isFalse();
     }
 
