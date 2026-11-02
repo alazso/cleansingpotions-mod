@@ -12,6 +12,7 @@ import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
+import net.neoforged.neoforge.client.event.ScreenEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
@@ -35,6 +36,7 @@ import so.alaz.cleansingpotions.entity.ModEntities;
 import so.alaz.cleansingpotions.item.ModComponents;
 import so.alaz.cleansingpotions.item.ModItems;
 import so.alaz.cleansingpotions.metrics.NeoForgeFastStats;
+import so.alaz.cleansingpotions.metrics.TelemetryButtonGuard;
 import so.alaz.cleansingpotions.platform.NeoForgePlatformHelper;
 import so.alaz.cleansingpotions.update.UpdateNotifier;
 
@@ -61,6 +63,8 @@ public class CleansingPotionsNeoForge {
             }
             NeoForge.EVENT_BUS.addListener(
                 (ClientPlayerNetworkEvent.LoggingIn event) -> UpdateNotifier.onJoin());
+            NeoForge.EVENT_BUS.addListener(
+                (ScreenEvent.Init.Post event) -> TelemetryButtonGuard.apply(event.getScreen(), event.getListenersList()));
         }
 
         if (CleansingConfig.get().metrics) {

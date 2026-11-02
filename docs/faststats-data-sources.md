@@ -57,10 +57,16 @@ install. A client gets the SDK's consent screen instead, because this mod calls 
 once at the title screen, on a fresh install and on one that already has that file, and Esc does not close
 it that time. This mod submits nothing from that client before it is answered. Closing it applies its
 choices at once to every FastStats context on that client and saves them in that file. Its boxes start
-ticked on a first run, so pressing Done unchanged starts submission during that run. The game's telemetry
-options screen always has a FastStats button that reopens it. `-Dfaststats.enabled=false`, which dev runs
-set, keeps it from opening. Our own `metrics` config option decides whether a context is created at all, so
-a boot with it off keeps this mod out of that screen.
+ticked on a first run, so pressing Done unchanged starts submission during that run.
+`-Dfaststats.enabled=false`, which dev runs set, keeps it from opening. Our own `metrics` config option
+decides whether a context is created at all, so a boot with it off keeps this mod out of that screen.
+
+The game's telemetry options screen has a FastStats button that reopens the consent screen. SDK 0.31.0's
+`ConsentScreen` constructor throws when no FastStats context is registered, which crashes the game, so
+`TelemetryButtonGuard` deactivates the button in that state: `metrics` off with no other FastStats mod on
+the install, or after `FastStatsBridge.stop` with none left. `OptionsScreen` disables its Telemetry Data
+button on an account that does not allow telemetry, which leaves that file as the way to change the answer
+there.
 
 **Reporting semantics.** A counter reports its total since the last accepted metrics submission. Reading
 one (`Counter.peek`) only records the value it returned, because FastStats also runs the suppliers when it
