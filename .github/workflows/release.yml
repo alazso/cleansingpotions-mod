@@ -69,7 +69,8 @@ jobs:
             exit 0
           fi
           ASSET_COUNT="$(gh release view "$TAG" --json assets -q '.assets | length')"
-          # One jar per Stonecutter node.
+          # One jar per Stonecutter node. Publish GitHub Release runs after every Modrinth and
+          # CurseForge publish succeeded, so four assets mean the release is fully published.
           if [ "$ASSET_COUNT" -ge 4 ]; then
             echo "Release $TAG already published; skipping."
             echo "skip=true" >> "$GITHUB_OUTPUT"
@@ -130,6 +131,13 @@ jobs:
           path: release-artifacts/*
           if-no-files-found: error
 
+      - name: Publish to Modrinth & CurseForge
+        if: steps.published.outputs.skip != 'true' && (github.event_name == 'push' || inputs.dry_run != true)
+        env:
+          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
+          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
+        run: ./gradlew chiseledPublish --continue --stacktrace
+
       - name: Publish GitHub Release
         if: steps.published.outputs.skip != 'true' && (github.event_name == 'push' || inputs.dry_run != true)
         env:
@@ -147,10 +155,3 @@ jobs:
           else
             gh release create "$TAG" --title "v${VERSION}" --generate-notes "$STAGING"/*
           fi
-
-      - name: Publish to Modrinth & CurseForge
-        if: steps.published.outputs.skip != 'true' && (github.event_name == 'push' || inputs.dry_run != true)
-        env:
-          MODRINTH_TOKEN: ${{ secrets.MODRINTH_TOKEN }}
-          CURSEFORGE_API_KEY: ${{ secrets.CURSEFORGE_API_KEY }}
-        run: ./gradlew chiseledPublish --stacktrace
