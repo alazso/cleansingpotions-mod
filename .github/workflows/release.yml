@@ -58,8 +58,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if [ "${{ inputs.force_publish }}" = "true" ]; then
-            echo "force_publish requested; not skipping."
+          if [ "${{ inputs.force_publish }}" = "true" ] || [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "force_publish or dry_run requested; not skipping."
             echo "skip=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
@@ -170,7 +170,7 @@ jobs:
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "$STAGING"/* --clobber
           elif [ -s release-notes.md ]; then
-            gh release create "$TAG" --title "v${VERSION}" --notes-file release-notes.md "$STAGING"/*
+            gh release create "$TAG" --target "$GITHUB_SHA" --title "v${VERSION}" --notes-file release-notes.md "$STAGING"/*
           else
-            gh release create "$TAG" --title "v${VERSION}" --generate-notes "$STAGING"/*
+            gh release create "$TAG" --target "$GITHUB_SHA" --title "v${VERSION}" --generate-notes "$STAGING"/*
           fi
