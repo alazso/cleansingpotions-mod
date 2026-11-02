@@ -2,10 +2,14 @@ package so.alaz.cleansingpotions.item;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.component.TooltipDisplay;
+import org.jspecify.annotations.Nullable;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
 import java.util.function.Consumer;
@@ -35,5 +39,10 @@ public abstract class CleansingItem extends Item {
                                 Consumer<Component> adder, TooltipFlag flag) {
         adder.accept(Component.translatable("item.cleansingpotions." + MilkItemFactory.modeOf(stack).potionName() + ".desc")
             .withStyle(ChatFormatting.GRAY));
+    }
+
+    @Override
+    public void inventoryTick(ItemStack stack, ServerLevel level, Entity owner, @Nullable EquipmentSlot slot) {
+        MilkItemFactory.migrateLegacy(stack, owner);
     }
 }
