@@ -1,5 +1,6 @@
 package so.alaz.cleansingpotions.brew;
 
+//? if <26.3 {
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
@@ -69,3 +70,4 @@ public final class CleansingBrewing {
     private CleansingBrewing() {
     }
 }
+//?}
