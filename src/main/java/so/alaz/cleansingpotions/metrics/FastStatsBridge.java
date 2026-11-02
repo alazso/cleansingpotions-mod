@@ -142,8 +142,8 @@ public final class FastStatsBridge {
 
     /**
      * Whether a tracked error will reach FastStats. False when no context exists, on the SDK's first
-     * run until a choice on its consent screen turns submission on, after the shutdown send, or when the
-     * owner opted out in config/faststats/config.properties. A context has an error service in all of
+     * run until its consent screen is closed with metrics or errors ticked, after the shutdown send, or
+     * when the owner opted out in config/faststats/config.properties. A context has an error service in all of
      * those cases, so {@code errorTrackerService()} being present says nothing.
      */
     public static boolean errorsWillSend() {

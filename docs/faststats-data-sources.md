@@ -56,7 +56,8 @@ gives an owner the chance to opt out in that file first. The file is shared by e
 install. A client has one exception, the SDK's consent screen. SDK 0.31.0 opens it by itself only when a
 mod asks for it with `requireConsent()`, and this mod does not, but the game's telemetry options screen
 always has a FastStats button that opens it. Closing that screen applies its choices at once to every
-FastStats context on that client, this one included, so on a first run it can start submission. Our own
+FastStats context on that client, this one included, so on a first run it can start submission. Its boxes
+start ticked on a first run, so closing it unchanged does that. Our own
 `metrics` config option decides whether a context is created at all, so a boot with it off keeps this mod
 out of that screen.
 
@@ -197,8 +198,8 @@ Separate FS feature from metrics; **not** a data source you define.
   when FastStats could not start (it is not loaded on this game version, for example), or after
   `FastStatsBridge.stop`. It needs error tracking on, which `enabled=false` or `submitErrors=false` in
   `config/faststats/config.properties` turns off, as does a choice on the FastStats consent screen. It also
-  needs submission active, which is false during the run that creates that file until a choice on that
-  screen turns it on, and after the shutdown send.
+  needs submission active, which is false during the run that creates that file until the consent screen
+  is closed with metrics or errors ticked, and after the shutdown send.
   With `metrics` off in the config, `/cleanse testerror` answers
   `command.cleansingpotions.testerror_disabled`. With it on while `errorsWillSend` is false, the command
   answers `command.cleansingpotions.testerror_inactive`, which names the first run, the opt-out in that

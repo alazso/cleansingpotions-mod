@@ -147,8 +147,9 @@ There are two ways to turn it off:
   for finer control.
 
 FastStats sends nothing during the run that creates that file, so you can opt out before anything is sent.
-The one exception is a player closing the FastStats screen in the game's telemetry options during that run,
-which applies the choices on that screen at once.
+The one exception is a player closing the FastStats consent screen during that run, which applies that
+screen's choices at once. Its boxes start ticked, so closing it unchanged starts sending. The game's
+telemetry options offer that screen, and another FastStats mod can open it at the title screen.
 If `config/cleansingpotions.json` cannot be parsed at game start, metrics stay off for that session unless
 the file's text holds `"metrics": true`.
 
