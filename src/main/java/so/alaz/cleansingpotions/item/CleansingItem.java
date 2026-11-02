@@ -1,5 +1,6 @@
 package so.alaz.cleansingpotions.item;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -30,14 +31,9 @@ public abstract class CleansingItem extends Item {
     }
 
     @Override
-    public Component getName(ItemStack stack) {
-        return MilkItemFactory.displayName(variant, MilkItemFactory.modeOf(stack));
-    }
-
-    @Override
     public void appendHoverText(ItemStack stack, TooltipContext context, TooltipDisplay display,
                                 Consumer<Component> adder, TooltipFlag flag) {
-        super.appendHoverText(stack, context, display, adder, flag);
-        MilkItemFactory.loreLines(MilkItemFactory.modeOf(stack)).forEach(adder);
+        adder.accept(Component.translatable("item.cleansingpotions." + MilkItemFactory.modeOf(stack).potionName() + ".desc")
+            .withStyle(ChatFormatting.GRAY));
     }
 }

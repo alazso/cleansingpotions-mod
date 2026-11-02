@@ -20,28 +20,6 @@ public final class CleansingConfig {
         instance = cfg;
     }
 
-    // Colour is deliberately not configurable: the item tint is picked by the model from the
-    // cleanse_mode component, and a resource pack cannot read runtime config. See CleanseMode#rgb.
-    public static final class Appearance {
-        public String name;
-        public List<String> lore;
-
-        public Appearance() {
-        }
-
-        public Appearance(String name, List<String> lore) {
-            this.name = name;
-            this.lore = new ArrayList<>(lore);
-        }
-    }
-
-    public Appearance cleansing = new Appearance("Potion of Cleansing",
-        List.of("Clears every potion effect."));
-    public Appearance soothing = new Appearance("Potion of Soothing",
-        List.of("Clears harmful effects."));
-    public Appearance purging = new Appearance("Potion of Purging",
-        List.of("Clears beneficial effects."));
-
     public boolean splashEnabled = true;
     public boolean lingeringEnabled = true;
 
@@ -87,14 +65,6 @@ public final class CleansingConfig {
 
     public CleansePolicy policy(CleanseMode mode) {
         return new CleansePolicy(mode, forceRemove, forceKeep);
-    }
-
-    public Appearance appearance(CleanseMode mode) {
-        return switch (mode) {
-            case ALL -> cleansing;
-            case NEGATIVE_ONLY -> soothing;
-            case POSITIVE_ONLY -> purging;
-        };
     }
 
     public boolean variantEnabled(MilkVariant variant) {

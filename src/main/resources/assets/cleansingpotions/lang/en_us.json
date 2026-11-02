@@ -1,15 +1,19 @@
 {
-  "item.cleansingpotions.cleansing_potion": "Cleansing Potion",
-  "item.cleansingpotions.cleansing_splash_potion": "Splash Cleansing Potion",
-  "item.cleansingpotions.cleansing_lingering_potion": "Lingering Cleansing Potion",
+  "item.cleansingpotions.cleansing_potion": "Potion of Cleansing",
+  "item.cleansingpotions.cleansing_splash_potion": "Splash Potion of Cleansing",
+  "item.cleansingpotions.cleansing_lingering_potion": "Lingering Potion of Cleansing",
 
-  "item.cleansingpotions.soothing_potion": "Soothing Potion",
-  "item.cleansingpotions.soothing_splash_potion": "Splash Soothing Potion",
-  "item.cleansingpotions.soothing_lingering_potion": "Lingering Soothing Potion",
+  "item.cleansingpotions.soothing_potion": "Potion of Soothing",
+  "item.cleansingpotions.soothing_splash_potion": "Splash Potion of Soothing",
+  "item.cleansingpotions.soothing_lingering_potion": "Lingering Potion of Soothing",
 
-  "item.cleansingpotions.purging_potion": "Purging Potion",
-  "item.cleansingpotions.purging_splash_potion": "Splash Purging Potion",
-  "item.cleansingpotions.purging_lingering_potion": "Lingering Purging Potion",
+  "item.cleansingpotions.purging_potion": "Potion of Purging",
+  "item.cleansingpotions.purging_splash_potion": "Splash Potion of Purging",
+  "item.cleansingpotions.purging_lingering_potion": "Lingering Potion of Purging",
+
+  "item.cleansingpotions.cleansing.desc": "Clears every potion effect.",
+  "item.cleansingpotions.soothing.desc": "Clears harmful effects.",
+  "item.cleansingpotions.purging.desc": "Clears beneficial effects.",
 
   "potion.cleansingpotions.cleansing": "Potion of Cleansing",
   "potion.cleansingpotions.soothing": "Potion of Soothing",
