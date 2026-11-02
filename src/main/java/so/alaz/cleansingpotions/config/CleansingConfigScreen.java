@@ -12,6 +12,9 @@ public final class CleansingConfigScreen {
     }
 
     public static Screen create(Screen parent) {
+        // A save writes every value over the file, so the screen starts from what the file holds now.
+        ConfigManager.load();
+        CleansingPotions.applyMetricsToggle();
         CleansingConfig cfg = CleansingConfig.get();
         CleansingConfig defaults = new CleansingConfig();
         ConfigBuilder builder = ConfigBuilder.create()

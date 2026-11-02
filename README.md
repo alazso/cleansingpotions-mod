@@ -107,7 +107,9 @@ The two force lists are edited in the file.
 | `checkForUpdates`, `metrics` | See [Metrics and the update check](#metrics-and-the-update-check). |
 
 A value outside its range is pulled back into range when the file loads. A file that cannot be parsed
-is left as it is, and the previous settings stay in effect (the defaults, at game start).
+is left as it is, and the previous settings stay in effect (the defaults, at game start). The config
+screen rereads the file each time it opens. If the file still cannot be parsed, saving from the screen
+first copies it to `config/cleansingpotions.json.bak`.
 
 Potion names and tooltips come from language files, so a resource pack can rename or translate them,
 and a language file also translates the config screen. Potion item colours are tints in

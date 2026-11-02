@@ -36,6 +36,7 @@ semantic versioning.
 - Saves write a temporary file and move it into place, so a failed write leaves the existing file intact.
 - A config file that cannot be read keeps the previous settings, and `/cleanse reload` reports that failure in place of claiming success. Plain `/reload` does not reread the file.
 - The config screen has reset buttons and limits the radius to 0.5 to 32, and its text is translatable. Without Cloth Config, Mod Menu shows no config button.
+- The config screen rereads the file each time it opens, so a save keeps hand edits. Saving over a file that cannot be parsed first copies it to `config/cleansingpotions.json.bak`.
 - The permission gate now works on NeoForge through the node `cleansingpotions.use`, which needs a mod that supplies a permission handler. On Fabric it needs the Fabric Permissions API, and the game logs a warning at startup when the gate is on without it.
 - The update check asks only for versions matching your loader and game version, and ignores anything that is not a release. On a Fabric patch release such as 26.3.1 it also matches versions for 26.3, because those jars load there.
 

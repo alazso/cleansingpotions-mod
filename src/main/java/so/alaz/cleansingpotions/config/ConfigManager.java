@@ -13,6 +13,7 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 public final class ConfigManager {
@@ -21,6 +22,7 @@ public final class ConfigManager {
     private static final Pattern METRICS_ON = Pattern.compile("\"metrics\"\\s*:\\s*true");
 
     private static boolean loadSucceeded;
+    private static boolean backupBeforeSave;
 
     private static Path file() {
         return Services.PLATFORM.getConfigDir().resolve("cleansingpotions.json");
@@ -36,13 +38,18 @@ public final class ConfigManager {
      * @return false if the file could not be read or parsed
      */
     public static synchronized boolean load() {
+        return load(ConfigManager::file);
+    }
+
+    static synchronized boolean load(Supplier<Path> location) {
         String text = null;
         try {
-            Path target = file();
+            Path target = location.get();
             if (Files.notExists(target)) {
                 CleansingConfig.set(new CleansingConfig());
-                save();
+                save(location);
                 loadSucceeded = true;
+                backupBeforeSave = false;
                 return true;
             }
             // Decodes with replacement, so a file saved in another encoding still loads.
@@ -54,8 +61,10 @@ public final class ConfigManager {
             cfg.sanitize();
             CleansingConfig.set(cfg);
             loadSucceeded = true;
+            backupBeforeSave = false;
             return true;
         } catch (Exception e) {
+            backupBeforeSave = true;
             // ErrorReporter consults this value, so it is set before the report.
             applyMetricsFromText(text);
             Constants.LOG.error("Failed to load CleansingPotions config", e);
@@ -76,14 +85,31 @@ public final class ConfigManager {
         }
     }
 
-    /** Sanitizes the values in effect and writes them. A failed write leaves the existing file intact. */
+    /**
+     * Sanitizes the values in effect and writes them. A failed write leaves the existing file intact.
+     *
+     * <p>The first save after a failed load copies the file to {@code cleansingpotions.json.bak} before
+     * replacing it. If that copy fails, the save stops and the file stays.
+     */
     public static synchronized void save() {
+        save(ConfigManager::file);
+    }
+
+    static synchronized void save(Supplier<Path> location) {
         try {
             CleansingConfig cfg = CleansingConfig.get();
             cfg.sanitize();
             String json = GSON.toJson(cfg);
-            Path target = file();
+            Path target = location.get();
             Files.createDirectories(target.getParent());
+            if (backupBeforeSave) {
+                if (Files.exists(target)) {
+                    Path backup = target.resolveSibling(target.getFileName() + ".bak");
+                    Files.copy(target, backup, StandardCopyOption.REPLACE_EXISTING);
+                    Constants.LOG.warn("Kept the config file that failed to load as {}", backup);
+                }
+                backupBeforeSave = false;
+            }
             Path tmp = target.resolveSibling(target.getFileName() + ".tmp");
             Files.writeString(tmp, json);
             try {
@@ -95,6 +121,11 @@ public final class ConfigManager {
             Constants.LOG.error("Failed to save CleansingPotions config", e);
             ErrorReporter.report("config:save", e);
         }
+    }
+
+    static synchronized void resetLoadState() {
+        loadSucceeded = false;
+        backupBeforeSave = false;
     }
 
     private ConfigManager() {
