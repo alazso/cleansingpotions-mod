@@ -18,7 +18,7 @@ public final class NeoForgeFastStats {
             .errorTrackerService(tracker)
             .create());
         // NeoForgeContext shuts itself down only on a dedicated server, at ServerStoppingEvent, so a client
-        // has no other final send. A repeated shutdown sends nothing.
+        // has no other final send. A shutdown after a finished send sends nothing.
         NeoForge.EVENT_BUS.addListener((GameShuttingDownEvent event) -> FastStatsBridge.sendFinalBatch());
     }
 
