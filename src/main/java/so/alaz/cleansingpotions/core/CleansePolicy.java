@@ -18,7 +18,7 @@ public final class CleansePolicy {
     }
 
     public boolean shouldRemove(String effectId, EffectDisposition disposition) {
-        String id = effectId == null ? "" : effectId.toLowerCase(Locale.ROOT);
+        String id = effectId.toLowerCase(Locale.ROOT);
         if (forceKeep.contains(id)) {
             return false;
         }

@@ -75,9 +75,7 @@ public final class CleansingMetrics {
 
     public static void effectRemoved(String effectId, EffectDisposition disposition) {
         EFFECTS_REMOVED.inc();
-        if (effectId != null && !effectId.isBlank()) {
-            bump(REMOVED_BY_TYPE, effectId.toLowerCase(Locale.ROOT));
-        }
+        bump(REMOVED_BY_TYPE, effectId.toLowerCase(Locale.ROOT));
         bump(REMOVED_BY_DISPOSITION, disposition.name().toLowerCase(Locale.ROOT));
     }
 

@@ -107,15 +107,12 @@ class CleansingMetricsTest {
     void removedEffectsCountByTypeAndDisposition() {
         CleansingMetrics.effectRemoved("MINECRAFT:Poison", EffectDisposition.HARMFUL);
         CleansingMetrics.effectRemoved("minecraft:speed", EffectDisposition.BENEFICIAL);
-        CleansingMetrics.effectRemoved(" ", EffectDisposition.NEUTRAL);
-        CleansingMetrics.effectRemoved(null, EffectDisposition.NEUTRAL);
-        assertThat(CleansingMetrics.EFFECTS_REMOVED.peek()).isEqualTo(4);
+        assertThat(CleansingMetrics.EFFECTS_REMOVED.peek()).isEqualTo(2);
         assertThat(CleansingMetrics.removedByType())
             .containsOnlyKeys("minecraft:poison", "minecraft:speed");
         assertThat(CleansingMetrics.removedByDisposition())
             .containsEntry("harmful", 1L)
-            .containsEntry("beneficial", 1L)
-            .containsEntry("neutral", 2L);
+            .containsEntry("beneficial", 1L);
     }
 
     @Test

@@ -15,9 +15,6 @@ public final class ModEntities {
     public static EntityType<CleansingCloudEntity> CLEANSING_CLOUD;
 
     public static void build() {
-        if (CLEANSING_POTION != null) {
-            return;
-        }
         CLEANSING_POTION = EntityType.Builder
             .<CleansingPotionEntity>of(CleansingPotionEntity::new, MobCategory.MISC)
             .noLootTable()

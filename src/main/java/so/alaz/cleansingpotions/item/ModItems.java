@@ -39,9 +39,6 @@ public final class ModItems {
     }
 
     public static void build() {
-        if (!ENTRIES.isEmpty()) {
-            return;
-        }
         for (MilkVariant variant : MilkVariant.values()) {
             Map<CleanseMode, Item> byMode = new EnumMap<>(CleanseMode.class);
             for (CleanseMode mode : CleanseMode.values()) {
