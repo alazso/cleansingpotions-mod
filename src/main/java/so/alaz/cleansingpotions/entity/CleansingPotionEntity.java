@@ -50,15 +50,16 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
         CleanseMode mode = MilkItemFactory.modeOf(stack);
         MilkVariant variant = MilkItemFactory.variantOf(stack);
         boolean lingering = variant == MilkVariant.LINGERING;
-        if (CleansingConfig.get().variantEnabled(variant)) {
+        CleansingConfig cfg = CleansingConfig.get();
+        if (cfg.variantEnabled(variant)) {
             int color = mode.rgb();
             if (lingering) {
-                spawnCloud(server, mode, color);
+                spawnCloud(server, mode, color, cfg.radius);
             } else {
-                applySplash(mode);
+                applySplash(mode, cfg);
             }
-            if (CleansingConfig.get().impactParticles) {
-                double area = (!lingering && CleansingConfig.get().onlyThrower) ? 1.0 : CleansingConfig.get().radius;
+            if (cfg.impactParticles) {
+                double area = (!lingering && cfg.onlyThrower) ? 1.0 : cfg.radius;
                 shatter(server, color, area);
             }
         }
@@ -75,8 +76,7 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
             getX(), getY() + 0.1, getZ(), count, radius * 0.5, 0.25, radius * 0.5, 0.0);
     }
 
-    private void applySplash(CleanseMode mode) {
-        CleansingConfig cfg = CleansingConfig.get();
+    private void applySplash(CleanseMode mode, CleansingConfig cfg) {
         if (cfg.onlyThrower) {
             int affected = 0;
             if (getOwner() instanceof LivingEntity shooter
@@ -90,13 +90,13 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
             CleansingPotions.cleanser().cleanseArea(level(), getX(), getY(), getZ(), cfg.radius, mode));
     }
 
-    private void spawnCloud(ServerLevel server, CleanseMode mode, int color) {
+    private void spawnCloud(ServerLevel server, CleanseMode mode, int color, double radius) {
         CleansingCloudEntity cloud = new CleansingCloudEntity(server, getX(), getY(), getZ());
         if (getOwner() instanceof LivingEntity shooter) {
             cloud.setOwner(shooter);
         }
         cloud.setMode(mode);
-        cloud.configure((float) CleansingConfig.get().radius, color);
+        cloud.configure((float) radius, color);
         server.addFreshEntity(cloud);
         CleansingMetrics.lingeringCloudSpawned();
     }
