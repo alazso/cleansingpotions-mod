@@ -1,6 +1,5 @@
 package so.alaz.cleansingpotions.metrics;
 
-//? if >=26.1.2 {
 import dev.faststats.Attributes;
 import dev.faststats.ErrorTracker;
 import dev.faststats.FastStatsContext;
@@ -8,9 +7,12 @@ import dev.faststats.Metrics;
 import dev.faststats.data.Metric;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 
+import java.util.function.Function;
+
 public final class FastStatsBridge {
 
-    private static volatile ErrorTracker errorTracker;
+    static final String PROJECT_TOKEN = "321f21c8899fa729330e9508a4b7fe34";
+
     private static volatile FastStatsContext context;
 
     private FastStatsBridge() {
@@ -56,12 +58,18 @@ public final class FastStatsBridge {
             .create();
     }
 
-    /** Remembers the loader's context, so commands can ask whether FastStats will actually send. */
-    public static <C extends FastStatsContext> C attach(C created) {
-        context = created;
+    /** Creates the context. Called by the loader's holder class, inside the entrypoint's guard. */
+    static void start(Function<ErrorTracker, FastStatsContext> factory) {
+        ErrorTracker tracker = ErrorTracker.contextAware();
+        try {
+            context = factory.apply(tracker);
+        } catch (Throwable failure) {
+            // ErrorTracker.contextAware installed the JVM default uncaught exception handler.
+            tracker.detachErrorContext();
+            throw failure;
+        }
         CleansingMetrics.backendActive(true);
         ErrorReporter.flushPending();
-        return created;
     }
 
     /**
@@ -74,24 +82,16 @@ public final class FastStatsBridge {
         return current != null && current.errorTrackerService().isPresent();
     }
 
-    // Requires "Error Tracking" enabled in the FastStats project Features.
-    public static ErrorTracker errorTracker() {
-        ErrorTracker tracker = errorTracker;
-        if (tracker == null) {
-            tracker = ErrorTracker.contextAware();
-            errorTracker = tracker;
-        }
-        return tracker;
-    }
-
     /**
-     * Reports an error this mod caught and recovered from.
+     * Reports an error this mod caught and recovered from. Requires "Error Tracking" enabled in the
+     * FastStats project Features.
      *
      * <p>FastStats captures errors on its own only when one kills a thread, and the mod platforms
      * register nothing else, so anything handled in a catch block reaches the dashboard only through
-     * here. Reports are deduplicated by the SDK and carry a count, so a hot path yields one entry
-     * per submission. Call {@link ErrorReporter#report} instead of this, which is safe when the
-     * nested FastStats mod is absent.
+     * here.
+     *
+     * <p>Must be called through {@link ErrorReporter#report}, which is safe when the nested FastStats
+     * mod is absent.
      */
     public static void report(String source, Throwable error) {
         track(error, true, Attributes.empty().put("source", source));
@@ -116,4 +116,3 @@ public final class FastStatsBridge {
             .attributes(attributes));
     }
 }
-//?}

@@ -6,18 +6,15 @@ import net.fabricmc.fabric.api.command.v2.CommandRegistrationCallback;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import so.alaz.cleansingpotions.command.CleansingCommand;
+import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.entity.ModEntities;
 import so.alaz.cleansingpotions.item.ModComponents;
 import so.alaz.cleansingpotions.item.ModItems;
+import so.alaz.cleansingpotions.metrics.FabricFastStats;
+
+import java.util.ServiceConfigurationError;
 
 public class CleansingPotionsFabric implements ModInitializer {
-
-    //? if >=26.1.2 {
-    // Holds the FastStats context alive. Declared as Object so no dev.faststats type is resolved
-    // outside the guarded block below.
-    @SuppressWarnings("unused")
-    private static Object metrics;
-    //?}
 
     @Override
     public void onInitialize() {
@@ -39,22 +36,16 @@ public class CleansingPotionsFabric implements ModInitializer {
         CommandRegistrationCallback.EVENT.register((dispatcher, registryAccess, environment) ->
             CleansingCommand.register(dispatcher));
 
-        //? if >=26.1.2 {
-        if (so.alaz.cleansingpotions.config.CleansingConfig.get().metrics) {
+        if (CleansingConfig.get().metrics) {
             try {
-                metrics = so.alaz.cleansingpotions.metrics.FastStatsBridge.attach(
-                    new dev.faststats.fabric.FabricContext.Factory("cleansingpotions", "321f21c8899fa729330e9508a4b7fe34")
-                        .metrics(so.alaz.cleansingpotions.metrics.FastStatsBridge::registerMetrics)
-                        .errorTrackerService(so.alaz.cleansingpotions.metrics.FastStatsBridge.errorTracker())
-                        .create());
-            } catch (LinkageError absent) {
+                FabricFastStats.start();
+            } catch (RuntimeException | LinkageError | ServiceConfigurationError failure) {
                 // The nested FastStats mod pins one exact Minecraft version, so a patch release can
-                // reject it. Run without metrics rather than failing mod init.
+                // reject it, and creating the context reads and writes config/faststats.
                 Constants.LOG.warn("FastStats is unavailable; continuing without metrics ({})",
-                    absent.toString());
+                    failure.toString());
             }
         }
-        //?}
     }
 }
 //?}

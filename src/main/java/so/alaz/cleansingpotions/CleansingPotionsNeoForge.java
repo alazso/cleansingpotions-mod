@@ -9,26 +9,25 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
+import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import so.alaz.cleansingpotions.command.CleansingCommand;
+import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.config.CleansingConfigScreen;
 import so.alaz.cleansingpotions.entity.ModEntities;
 import so.alaz.cleansingpotions.item.ModComponents;
 import so.alaz.cleansingpotions.item.ModItems;
+import so.alaz.cleansingpotions.metrics.NeoForgeFastStats;
+import so.alaz.cleansingpotions.update.UpdateNotifier;
+
+import java.util.ServiceConfigurationError;
 
 @Mod(Constants.MOD_ID)
 public class CleansingPotionsNeoForge {
-
-    //? if >=26.1.2 {
-    // Holds the FastStats context alive. Declared as Object so no dev.faststats type is resolved
-    // outside the guarded block below.
-    @SuppressWarnings("unused")
-    private Object metrics;
-    //?}
 
     public CleansingPotionsNeoForge(IEventBus modBus, ModContainer container, Dist dist) {
         // Items must be built in RegisterEvent: registries are frozen by constructor time on NeoForge.
@@ -43,26 +42,19 @@ public class CleansingPotionsNeoForge {
                     (mc, parent) -> CleansingConfigScreen.create(parent));
             }
             NeoForge.EVENT_BUS.addListener(
-                (net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingIn event) ->
-                    so.alaz.cleansingpotions.update.UpdateNotifier.onJoin());
+                (ClientPlayerNetworkEvent.LoggingIn event) -> UpdateNotifier.onJoin());
         }
 
-        //? if >=26.1.2 {
-        if (so.alaz.cleansingpotions.config.CleansingConfig.get().metrics) {
+        if (CleansingConfig.get().metrics) {
             try {
-                metrics = so.alaz.cleansingpotions.metrics.FastStatsBridge.attach(
-                    new dev.faststats.neoforge.NeoForgeContext.Factory("cleansingpotions", "321f21c8899fa729330e9508a4b7fe34")
-                        .metrics(so.alaz.cleansingpotions.metrics.FastStatsBridge::registerMetrics)
-                        .errorTrackerService(so.alaz.cleansingpotions.metrics.FastStatsBridge.errorTracker())
-                        .create());
-            } catch (LinkageError absent) {
+                NeoForgeFastStats.start();
+            } catch (RuntimeException | LinkageError | ServiceConfigurationError failure) {
                 // The nested FastStats mod pins one exact Minecraft version, so a patch release can
-                // reject it. Run without metrics rather than failing mod init.
+                // reject it, and creating the context reads and writes config/faststats.
                 Constants.LOG.warn("FastStats is unavailable; continuing without metrics ({})",
-                    absent.toString());
+                    failure.toString());
             }
         }
-        //?}
     }
 
     private void onRegister(RegisterEvent event) {

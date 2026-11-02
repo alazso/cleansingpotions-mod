@@ -43,7 +43,7 @@ public final class ErrorReporter {
         deliver(source, error);
     }
 
-    /** Called once the FastStats context exists, from {@link FastStatsBridge#attach}. */
+    /** Called once the FastStats context exists, from {@link FastStatsBridge#start}. */
     static void flushPending() {
         Pending next;
         while (true) {
