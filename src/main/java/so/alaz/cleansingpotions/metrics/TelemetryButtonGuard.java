@@ -9,7 +9,8 @@ import net.minecraft.client.gui.screens.telemetry.TelemetryInfoScreen;
 import java.util.List;
 
 // Client only. SDK 0.31.0 adds a FastStats button to the telemetry screen, and the ConsentScreen
-// constructor that button calls throws when no FastStats context is registered, which crashes the game.
+// constructor that button calls throws when no FastStats context is registered, so a press opens nothing
+// and the game logs an error.
 public final class TelemetryButtonGuard {
 
     /**
