@@ -2,12 +2,12 @@ package so.alaz.cleansingpotions.item;
 
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.Consumables;
-import so.alaz.cleansingpotions.Constants;
+import net.minecraft.world.level.block.DispenserBlock;
+import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
 import java.util.ArrayList;
@@ -16,26 +16,21 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * The nine cleansing potion items: one per (variant, mode).
- *
- * <p>26.3 brewing recipes match on item id and cannot read a data component, so a single item
- * carrying the mode in {@code cleanse_mode} makes "gunpowder turns a Purging potion into a Purging
- * splash potion" inexpressible. Giving each combination its own item keeps brewing, recipe viewers,
- * and the model tints all working from the same identity.
- *
- * <p>The three Cleansing ids keep their original names, so stacks from earlier versions survive.
+ * The nine cleansing potion items, one per variant and mode. 26.3 brewing recipe inputs match an item and its
+ * potion contents, not a custom component, so the mode is part of the item's identity. The three Cleansing ids
+ * must not change: legacy stacks use them.
  */
 public final class ModItems {
 
-    public record Entry(MilkVariant variant, CleanseMode mode, ResourceKey<Item> key, Item item) {
+    public record Entry(ResourceKey<Item> key, Item item) {
     }
 
     private static final List<Entry> ENTRIES = new ArrayList<>();
     private static final Map<MilkVariant, Map<CleanseMode, Item>> BY_VARIANT =
         new EnumMap<>(MilkVariant.class);
 
-    /** e.g. {@code soothing_splash_potion}. Cleansing keeps the pre-0.3.0 ids. */
-    public static String path(MilkVariant variant, CleanseMode mode) {
+    /** Registry path, such as {@code soothing_splash_potion}. */
+    private static String path(MilkVariant variant, CleanseMode mode) {
         String base = mode.potionName();
         return switch (variant) {
             case REGULAR -> base + "_potion";
@@ -45,9 +40,6 @@ public final class ModItems {
     }
 
     public static void build() {
-        if (!ENTRIES.isEmpty()) {
-            return;
-        }
         for (MilkVariant variant : MilkVariant.values()) {
             Map<CleanseMode, Item> byMode = new EnumMap<>(CleanseMode.class);
             for (CleanseMode mode : CleanseMode.values()) {
@@ -57,22 +49,32 @@ public final class ModItems {
                     ? new CleansingPotionItem(drinkable(properties), mode)
                     : new CleansingThrowItem(properties, variant, mode);
                 byMode.put(mode, item);
-                ENTRIES.add(new Entry(variant, mode, key, item));
+                ENTRIES.add(new Entry(key, item));
             }
             BY_VARIANT.put(variant, byMode);
         }
     }
 
     /**
-     * Makes an item drink exactly like a vanilla potion. Since 1.21.2 the drinking animation and
-     * duration, the gulping sounds, the closing gulp, the use stat, and the consume_item advancement
-     * trigger all come from the CONSUMABLE component, and the empty bottle from USE_REMAINDER. An
-     * item that only overrides its use animation looks right but drinks in silence.
+     * Applies the CONSUMABLE and USE_REMAINDER components vanilla potions use, which supply the drinking
+     * animation, sounds, stat, advancement trigger, and empty bottle.
      */
     private static Item.Properties drinkable(Item.Properties properties) {
         return properties
             .component(DataComponents.CONSUMABLE, Consumables.DEFAULT_DRINK)
             .usingConvertsTo(Items.GLASS_BOTTLE);
+    }
+
+    /**
+     * Makes dispensers throw the splash and lingering potions. Requires {@link #build} first, and must run
+     * on the main thread: {@link DispenserBlock#DISPENSER_REGISTRY} is not thread-safe.
+     */
+    public static void registerDispenserBehaviors() {
+        for (Entry entry : ENTRIES) {
+            if (entry.item() instanceof CleansingThrowItem) {
+                DispenserBlock.registerProjectileBehavior(entry.item());
+            }
+        }
     }
 
     /** Every item with its registry key, for the loader-specific registration calls. */
@@ -85,8 +87,7 @@ public final class ModItems {
     }
 
     private static ResourceKey<Item> key(String name) {
-        return ResourceKey.create(Registries.ITEM,
-            Identifier.fromNamespaceAndPath(Constants.MOD_ID, name));
+        return ResourceKey.create(Registries.ITEM, CleansingPotions.id(name));
     }
 
     private ModItems() {

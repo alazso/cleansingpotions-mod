@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "cleansingpotions-gametest",
+  "version": "1.0.0",
+  "name": "CleansingPotions GameTests",
+  "environment": "*",
+  "entrypoints": {
+    "fabric-gametest": [
+      "so.alaz.cleansingpotions.gametest.BrewingGameTest",
+      "so.alaz.cleansingpotions.gametest.MigrationGameTest",
+      "so.alaz.cleansingpotions.gametest.CloudGameTest",
+      "so.alaz.cleansingpotions.gametest.ConfigGateGameTest",
+      "so.alaz.cleansingpotions.gametest.DispenserGameTest",
+      "so.alaz.cleansingpotions.gametest.AreaReachGameTest",
+      "so.alaz.cleansingpotions.gametest.PlayerGameTest"
+    ]
+  },
+  "depends": {
+    "cleansingpotions": "*",
+    "fabric-gametest-api-v1": "*"
+  }
+}

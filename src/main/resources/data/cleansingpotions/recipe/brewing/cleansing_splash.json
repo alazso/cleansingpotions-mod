@@ -1,4 +1,16 @@
 {
+  "fabric:load_conditions": [
+    {
+      "condition": "cleansingpotions:brewing",
+      "variant": "splash"
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "cleansingpotions:brewing",
+      "variant": "splash"
+    }
+  ],
   "type": "minecraft:brewing",
   "input": {
     "item": "cleansingpotions:cleansing_potion"

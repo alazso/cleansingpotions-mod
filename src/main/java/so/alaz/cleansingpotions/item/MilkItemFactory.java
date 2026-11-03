@@ -1,31 +1,30 @@
 package so.alaz.cleansingpotions.item;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.Style;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
 
-import java.util.List;
-
 /**
- * Builds cleansing potion stacks, and supplies the display name and lore the item classes render.
- *
- * <p>A stack carries no components at all: the mode is the item's identity (see {@link ModItems})
- * and name, lore, and tint are derived from it at display time. That keeps a stack built here
- * identical to one produced by a data pack recipe, which can only set static components, and means
- * a config edit restyles potions already in an inventory instead of only newly brewed ones.
+ * Builds cleansing potion stacks and reads their mode and variant. A stack it builds has no cleanse_mode component:
+ * its mode and variant come from the item.
  */
 public final class MilkItemFactory {
+
+    // The style of a generated custom name on a legacy stack. An anvil rename has an empty style.
+    private static final Style LEGACY_NAME_STYLE = Style.EMPTY.withItalic(false).withColor(ChatFormatting.WHITE);
 
     public static ItemStack create(MilkVariant variant, CleanseMode mode) {
         return new ItemStack(ModItems.get(variant, mode));
     }
 
     public static CleanseMode modeOf(ItemStack stack) {
-        // Stacks from before 0.3.0 carried the mode in a cleanse_mode component on a single item
-        // id. Honour it where present so an existing Soothing or Purging potion keeps working;
-        // such a stack renders with the Cleansing tint, since the model picks tint by item.
+        // A legacy cleanse_mode component overrides the item's mode until the stack is migrated.
         CleanseMode legacy = stack.get(ModComponents.CLEANSE_MODE);
         if (legacy != null) {
             return legacy;
@@ -37,25 +36,30 @@ public final class MilkItemFactory {
         return stack.getItem() instanceof CleansingItem item ? item.variant() : MilkVariant.REGULAR;
     }
 
-    public static Component displayName(MilkVariant variant, CleanseMode mode) {
-        String prefix = switch (variant) {
-            case REGULAR -> "";
-            case SPLASH -> "Splash ";
-            case LINGERING -> "Lingering ";
-        };
-        return Component.literal(prefix + CleansingConfig.get().appearance(mode).name)
-            .withStyle(style -> style.withItalic(false).withColor(ChatFormatting.WHITE));
-    }
-
-    public static List<Component> loreLines(CleanseMode mode) {
-        List<String> lines = CleansingConfig.get().appearance(mode).lore;
-        if (lines == null || lines.isEmpty()) {
-            return List.of();
+    /**
+     * Replaces a legacy stack in a player's inventory with its per-mode item. The new stack keeps the count,
+     * unrelated components, and any custom name the player gave it. A stack being drunk stays as it is until the
+     * drink ends, because changing the item in hand cancels the drink.
+     */
+    public static void migrateLegacy(ItemStack stack, Entity owner) {
+        if (!stack.has(ModComponents.CLEANSE_MODE) || !(owner instanceof Player player) || player.getUseItem() == stack) {
+            return;
         }
-        return lines.stream()
-            .map(line -> (Component) Component.literal(line)
-                .withStyle(style -> style.withItalic(false).withColor(ChatFormatting.GRAY)))
-            .toList();
+        ItemStack migrated = stack.transmuteCopy(ModItems.get(variantOf(stack), modeOf(stack)));
+        migrated.remove(ModComponents.CLEANSE_MODE);
+        migrated.remove(DataComponents.LORE);
+        migrated.remove(DataComponents.CUSTOM_MODEL_DATA);
+        Component name = migrated.get(DataComponents.CUSTOM_NAME);
+        if (name != null && LEGACY_NAME_STYLE.equals(name.getStyle())) {
+            migrated.remove(DataComponents.CUSTOM_NAME);
+        }
+        Inventory inventory = player.getInventory();
+        for (int i = 0; i < inventory.getContainerSize(); i++) {
+            if (inventory.getItem(i) == stack) {
+                inventory.setItem(i, migrated);
+                return;
+            }
+        }
     }
 
     private MilkItemFactory() {

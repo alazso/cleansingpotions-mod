@@ -6,22 +6,17 @@ plugins {
 val mcVersion = project.name.substringBeforeLast("-")
 fun dep(key: String): String = property("${key}_$mcVersion") as String
 
-// 26.x breaks ABI between drops and NeoForge has no intermediary cushion, so each patch is its
-// own jar: scope the dependency range and the published game versions to this node's exact patch.
-val nextMc = mcVersion.split(".").let { "${it[0]}.${it[1].toInt() + 1}" }
-val neoMcRange = "[$mcVersion,$nextMc)"
-val neoGameVersions = listOf(mcVersion)
+// The nested FastStats mod requires this exact Minecraft version and FML treats a missing required
+// dependency as fatal, so a wider range here could never load.
+val neoMcRange = "[$mcVersion]"
 
-// The 1.21.x-era replacement rules are gone with those nodes; see build.fabric-m.gradle.kts.
-
-version = "${property("version")}+$mcVersion"
+val modVersion = property("version").toString()
+version = "$modVersion+$mcVersion"
 group = property("mod_group")!!
 base { archivesName = "${property("mod_id")}-neoforge" }
 
 java {
-    // 26.x runs on Java 25.
     toolchain.languageVersion = JavaLanguageVersion.of(25)
-    withSourcesJar()
 }
 
 repositories {
@@ -38,19 +33,19 @@ sourceSets {
 }
 
 dependencies {
-    // Cloth Config powers the in-game config screen, shared with Fabric.
     implementation("me.shedaniel.cloth:cloth-config-neoforge:${dep("cloth")}")
-    // FastStats metrics and error tracking. Since SDK 0.29 the modded artifact is a mod in its own
-    // right (id "faststats") and ships jar-in-jar instead of being merged into our classes.
-    // gson is provided by Minecraft; drop FastStats's gson pin so it never shadows Minecraft's.
+    // The FastStats artifact is a mod (id "faststats") and ships jar-in-jar. Minecraft provides gson,
+    // so FastStats's pin is excluded.
     implementation("dev.faststats.metrics:neoforge:${dep("faststats_neoforge")}") {
         exclude(group = "com.google.code.gson", module = "gson")
     }
     jarJar("dev.faststats.metrics:neoforge:${dep("faststats_neoforge")}")
 
-    // Pure-core unit tests (no Minecraft types).
-    testImplementation("org.junit.jupiter:junit-jupiter:5.11.4")
-    testImplementation("org.assertj:assertj-core:3.27.3")
+    testImplementation("org.junit.jupiter:junit-jupiter:6.1.3")
+    testImplementation("org.assertj:assertj-core:3.27.7")
+    // This test classpath has no Minecraft, so it does not get Minecraft's gson or slf4j.
+    testImplementation("com.google.code.gson:gson:2.14.0")
+    testRuntimeOnly("org.slf4j:slf4j-api:2.0.17")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
@@ -59,13 +54,11 @@ tasks.test {
 }
 
 neoForge {
-    // 26.x is unobfuscated, so there are no mappings and no parchment block.
     version = dep("neoforge")
     runs {
         register("client") { client() }
         register("server") { server() }
-        // Dev runs never report to FastStats, so testing does not show up as real servers on the
-        // dashboard. Pass -Pfaststats to a run task to exercise the integration anyway.
+        // Run tasks disable FastStats unless -Pfaststats is passed.
         configureEach {
             if (!providers.gradleProperty("faststats").isPresent) {
                 systemProperty("faststats.enabled", "false")
@@ -79,12 +72,16 @@ neoForge {
     }
 }
 
-// 26.3 made brewing data driven and deleted PotionBrewing; see build.fabric-m.gradle.kts.
-val brewingIsDataDriven = mcVersion.split(".")
-    .let { it[0].toInt() > 26 || (it[0].toInt() == 26 && it[1].toInt() >= 3) }
+// The ModDevGradle run task does not forward stdin, which a dev server's console commands need.
+tasks.withType<JavaExec>().matching { it.name == "runServer" }.configureEach {
+    standardInput = System.`in`
+}
+
+// PotionBrewing does not exist from 26.3. Those nodes ship JSON brewing recipes and no mixin.
+val brewingIsDataDriven = stonecutter.current.parsed >= "26.3"
 
 val resourceProps = mapOf(
-    "version" to property("version").toString(),
+    "version" to project.version.toString(),
     "minecraft_version_range" to neoMcRange,
     "neoforge_loader_version_range" to "[4,)",
     "pack_format" to dep("pack_format"),
@@ -92,15 +89,26 @@ val resourceProps = mapOf(
 )
 tasks.processResources {
     inputs.properties(resourceProps)
-    if (!brewingIsDataDriven) {
-        // 26.2: the minecraft:brewing recipe type does not exist yet; the mixin covers brewing.
+    if (brewingIsDataDriven) {
+        exclude("cleansingpotions.mixins.json")
+    } else {
+        // 26.2 has no minecraft:brewing recipe type, and loading these files logs errors.
         exclude("data/cleansingpotions/recipe/brewing/**")
+        // The BrewingStand mixin classes exist only on Fabric.
+        filesMatching("cleansingpotions.mixins.json") {
+            filter { line -> if (line.contains("BrewingStand")) null else line }
+        }
     }
     filesMatching(listOf("META-INF/neoforge.mods.toml", "pack.mcmeta")) {
         expand(resourceProps)
     }
-    filesMatching("cleansingpotions.mixins.json") {
-        expand(mapOf("mixin_compat_level" to "JAVA_25"))
+    if (brewingIsDataDriven) {
+        // Removes the [[mixins]] table, because these jars ship no mixin config.
+        filesMatching("META-INF/neoforge.mods.toml") {
+            filter { line ->
+                if (line == "[[mixins]]" || line.contains("cleansingpotions.mixins.json")) null else line
+            }
+        }
     }
 }
 
@@ -108,22 +116,25 @@ publishMods {
     file = tasks.named<org.gradle.api.tasks.bundling.AbstractArchiveTask>("jar").flatMap { it.archiveFile }
     type = me.modmuss50.mpp.ReleaseType.STABLE
     modLoaders.add("neoforge")
-    displayName = "CleansingPotions ${property("version")} (NeoForge $mcVersion)"
-    version = project.version.toString()
+    displayName = "CleansingPotions $modVersion (NeoForge $mcVersion)"
+    version = "$modVersion+neoforge-$mcVersion"
     changelog = providers.environmentVariable("RELEASE_CHANGELOG")
+        .filter { it.isNotBlank() }
         .orElse("See https://github.com/alazso/cleansingpotions-mod/blob/main/CHANGELOG.md")
     dryRun = providers.environmentVariable("MODRINTH_TOKEN").getOrNull() == null
 
     modrinth {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = property("modrinth_id").toString()
-        minecraftVersions.addAll(neoGameVersions)
+        minecraftVersions.add(mcVersion)
         optional("cloth-config")
     }
     curseforge {
         accessToken = providers.environmentVariable("CURSEFORGE_API_KEY")
         projectId = property("curseforge_id").toString()
-        minecraftVersions.addAll(neoGameVersions)
+        minecraftVersions.add(mcVersion)
+        client = true
+        server = true
         optional { slug = "cloth-config" }
     }
 }

@@ -42,9 +42,26 @@ class CleansePolicyTest {
     }
 
     @Test
-    void effectIdsMatchCaseInsensitively() {
+    void listEntriesMatchInAnyCase() {
         CleansePolicy policy = new CleansePolicy(CleanseMode.NEGATIVE_ONLY,
             Set.of("MINECRAFT:BAD_OMEN"), Set.of());
-        assertThat(policy.shouldRemove("minecraft:bad_omen", HARMFUL)).isTrue();
+        assertThat(policy.shouldRemove("minecraft:bad_omen", NEUTRAL)).isTrue();
+    }
+
+    @Test
+    void entryWithoutANamespaceMeansMinecraft() {
+        CleansePolicy policy = new CleansePolicy(CleanseMode.ALL, Set.of(), Set.of(" Night_Vision "));
+        assertThat(policy.shouldRemove("minecraft:night_vision", BENEFICIAL)).isFalse();
+        assertThat(policy.shouldRemove("othermod:night_vision", BENEFICIAL)).isTrue();
+
+        CleansePolicy positive = new CleansePolicy(CleanseMode.POSITIVE_ONLY, Set.of("bad_omen"), Set.of());
+        assertThat(positive.shouldRemove("minecraft:bad_omen", NEUTRAL)).isTrue();
+    }
+
+    @Test
+    void entryWithANamespaceKeepsIt() {
+        CleansePolicy policy = new CleansePolicy(CleanseMode.ALL, Set.of(), Set.of("othermod:night_vision"));
+        assertThat(policy.shouldRemove("othermod:night_vision", BENEFICIAL)).isFalse();
+        assertThat(policy.shouldRemove("minecraft:night_vision", BENEFICIAL)).isTrue();
     }
 }

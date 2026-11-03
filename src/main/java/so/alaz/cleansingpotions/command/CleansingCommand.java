@@ -12,7 +12,11 @@ import net.minecraft.commands.Commands;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
+//? if >=26.3 {
+/*import net.minecraft.server.commands.ReloadCommand;
+*///?}
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
@@ -20,21 +24,22 @@ import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.item.MilkItemFactory;
 import so.alaz.cleansingpotions.item.MilkVariant;
 import so.alaz.cleansingpotions.metrics.CleansingMetrics;
+import so.alaz.cleansingpotions.metrics.FastStatsBridge;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Predicate;
 
 public final class CleansingCommand {
 
-    private static final SuggestionProvider<CommandSourceStack> POTIONS =
-        (ctx, builder) -> SharedSuggestionProvider.suggest(List.of("cleansing", "soothing", "purging"), builder);
-    private static final SuggestionProvider<CommandSourceStack> VARIANTS =
-        (ctx, builder) -> SharedSuggestionProvider.suggest(List.of("regular", "splash", "lingering"), builder);
+    private static final SuggestionProvider<CommandSourceStack> POTIONS = (ctx, builder) ->
+        SharedSuggestionProvider.suggest(Arrays.stream(CleanseMode.values()).map(CleanseMode::potionName), builder);
+    private static final SuggestionProvider<CommandSourceStack> VARIANTS = (ctx, builder) ->
+        SharedSuggestionProvider.suggest(Arrays.stream(MilkVariant.values()).map(MilkVariant::tag), builder);
 
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
         LiteralArgumentBuilder<CommandSourceStack> root = Commands.literal("cleansingpotions")
-            .requires(adminCheck())
+            .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
             .then(Commands.literal("reload")
                 .executes(CleansingCommand::reload))
             .then(Commands.literal("testerror")
@@ -50,52 +55,44 @@ public final class CleansingCommand {
                             .executes(ctx -> give(ctx, variantArg(ctx), EntityArgument.getPlayers(ctx, "targets")))))));
         LiteralCommandNode<CommandSourceStack> node = dispatcher.register(root);
         dispatcher.register(Commands.literal("cleanse")
-            .requires(adminCheck())
+            .requires(Commands.hasPermission(Commands.LEVEL_GAMEMASTERS))
             .redirect(node));
     }
 
-    private static Predicate<CommandSourceStack> adminCheck() {
-        //? if <1.21.11 {
-        /*return source -> source.hasPermission(2);
-        *///?} else {
-        return Commands.<CommandSourceStack>hasPermission(Commands.LEVEL_GAMEMASTERS);
-        //?}
-    }
-
     private static int reload(CommandContext<CommandSourceStack> ctx) {
-        CleansingPotions.reload();
+        boolean reloaded = CleansingPotions.reload();
         CleansingMetrics.commandExecuted();
+        if (!reloaded) {
+            ctx.getSource().sendFailure(Component.translatable("command.cleansingpotions.reload_failed"));
+            return 0;
+        }
+        //? if >=26.3 {
+        /*// The recipe load conditions read the config only during a data reload.
+        ReloadCommand.reloadPacks(ctx.getSource().getServer().getPackRepository().getSelectedIds(), ctx.getSource());
+        *///?}
         ctx.getSource().sendSuccess(() -> Component.translatable("command.cleansingpotions.reloaded"), true);
         return 1;
     }
 
-    // Fires an intentional error to verify FastStats error tracking (26.x only).
+    // Reports an intentional error, to verify FastStats error tracking end to end.
     private static int testError(CommandContext<CommandSourceStack> ctx) {
         if (!CleansingConfig.get().metrics) {
             ctx.getSource().sendFailure(
                 Component.translatable("command.cleansingpotions.testerror_disabled"));
             return 0;
         }
-        //? if >=26.1.2 {
-        // FastStats sends nothing on its first run or when the server owner opted out, so say that
-        // instead of claiming a report went out. The backend check comes first, because it resolves
-        // no dev.faststats type and the nested FastStats mod can be absent.
-        if (!CleansingMetrics.backendActive()
-            || !so.alaz.cleansingpotions.metrics.FastStatsBridge.errorsWillSend()) {
+        // backendActive resolves no dev.faststats type, so it must run before errorsWillSend: the nested
+        // FastStats mod can be absent.
+        if (!CleansingMetrics.backendActive() || !FastStatsBridge.errorsWillSend()) {
             ctx.getSource().sendFailure(
                 Component.translatable("command.cleansingpotions.testerror_inactive"));
             return 0;
         }
-        so.alaz.cleansingpotions.metrics.FastStatsBridge.reportTestError("command:testerror");
+        FastStatsBridge.reportTestError("command:testerror");
         CleansingMetrics.commandExecuted();
         ctx.getSource().sendSuccess(
             () -> Component.translatable("command.cleansingpotions.testerror"), true);
         return 1;
-        //?} else {
-        /*ctx.getSource().sendFailure(
-            Component.translatable("command.cleansingpotions.testerror_unsupported"));
-        return 0;
-        *///?}
     }
 
     private static MilkVariant variantArg(CommandContext<CommandSourceStack> ctx) {
@@ -120,17 +117,23 @@ public final class CleansingCommand {
         for (ServerPlayer target : targets) {
             ItemStack item = MilkItemFactory.create(variant, mode);
             if (!target.getInventory().add(item)) {
-                // 26.3 dropped Player.drop(ItemStack, boolean); ServerPlayer.drop now takes a
-                // Prediction, and a command-issued drop is never client-predicted.
                 //? if >=26.3 {
-                /*target.drop(item, false, net.minecraft.util.Prediction.SERVER_ONLY);
+                /*ItemEntity dropped = target.createItemStackToDrop(item, false, false);
                 *///?} else {
-                target.drop(item, false);
+                ItemEntity dropped = target.drop(item, false);
                 //?}
+                // As vanilla /give does: the target can take it at once, and nobody else can.
+                if (dropped != null) {
+                    dropped.setNoPickUpDelay();
+                    dropped.setTarget(target.getUUID());
+                    //? if >=26.3 {
+                    /*dropped.level().addFreshEntity(dropped);
+                    *///?}
+                }
             }
         }
         CleansingMetrics.commandExecuted();
-        Component label = Component.translatable("potion.cleansingpotions." + mode.potionName());
+        Component label = MilkItemFactory.create(variant, mode).getItemName();
         if (targets.size() == 1) {
             ServerPlayer only = targets.iterator().next();
             ctx.getSource().sendSuccess(() -> Component.translatable(

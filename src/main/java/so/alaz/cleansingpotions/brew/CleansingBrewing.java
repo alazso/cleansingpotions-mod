@@ -1,10 +1,11 @@
 package so.alaz.cleansingpotions.brew;
 
-import net.minecraft.core.Holder;
+//? if <26.3 {
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionContents;
+import net.minecraft.world.item.alchemy.Potions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
 import so.alaz.cleansingpotions.item.CleansingItem;
@@ -13,12 +14,23 @@ import so.alaz.cleansingpotions.item.MilkVariant;
 
 public final class CleansingBrewing {
 
+    // Vanilla mixes already make fermented spider eye, gunpowder, and dragon breath ingredients.
     public static boolean isIngredient(ItemStack reagent) {
-        return reagent.is(Items.MILK_BUCKET)
-            || reagent.is(Items.HONEY_BOTTLE)
-            || reagent.is(Items.FERMENTED_SPIDER_EYE)
-            || reagent.is(Items.GUNPOWDER)
-            || reagent.is(Items.DRAGON_BREATH);
+        return CleansingConfig.get().brewingEnabled
+            && (reagent.is(Items.MILK_BUCKET) || reagent.is(Items.HONEY_BOTTLE));
+    }
+
+    // True when a brew switched on in the config takes this potion. No brew takes a lingering potion.
+    public static boolean isBrewingInput(ItemStack stack) {
+        if (!(stack.getItem() instanceof CleansingItem item)) {
+            return false;
+        }
+        CleansingConfig cfg = CleansingConfig.get();
+        return switch (item.variant()) {
+            case REGULAR -> cfg.brewingAllowed(isPlainCleansing(stack) ? MilkVariant.REGULAR : MilkVariant.SPLASH);
+            case SPLASH -> cfg.brewingAllowed(MilkVariant.LINGERING);
+            case LINGERING -> false;
+        };
     }
 
     public static ItemStack mix(ItemStack input, ItemStack reagent) {
@@ -53,12 +65,7 @@ public final class CleansingBrewing {
             return false;
         }
         PotionContents contents = stack.get(DataComponents.POTION_CONTENTS);
-        // Compare by registry name rather than Potions.WATER: that field's type differs between
-        // 26.1.2 and 26.2, so a direct reference crashes with NoSuchFieldError on the other patch.
-        return contents != null && contents.potion()
-            .map(Holder::getRegisteredName)
-            .map("minecraft:water"::equals)
-            .orElse(false);
+        return contents != null && contents.is(Potions.WATER);
     }
 
     private static boolean isPlainCleansing(ItemStack stack) {
@@ -69,3 +76,4 @@ public final class CleansingBrewing {
     private CleansingBrewing() {
     }
 }
+//?}

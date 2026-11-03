@@ -16,23 +16,20 @@ public enum CleanseMode {
         };
     }
 
-    public static CleanseMode fromConfig(String raw, CleanseMode fallback) {
-        if (raw == null || raw.isBlank()) {
-            return fallback;
-        }
-        try {
-            return valueOf(raw.trim().toUpperCase(Locale.ROOT).replace('-', '_'));
-        } catch (IllegalArgumentException ex) {
-            return fallback;
-        }
-    }
-
     public String tag() {
         return name().toLowerCase(Locale.ROOT);
     }
 
+    /** Reads a value from {@link #tag()}, ignoring case. A null, blank, or unknown value reads as {@link #ALL}. */
     public static CleanseMode fromTag(String raw) {
-        return fromConfig(raw, null);
+        if (raw == null) {
+            return ALL;
+        }
+        try {
+            return valueOf(raw.trim().toUpperCase(Locale.ROOT));
+        } catch (IllegalArgumentException ex) {
+            return ALL;
+        }
     }
 
     public String potionName() {
@@ -43,12 +40,7 @@ public enum CleanseMode {
         };
     }
 
-    /**
-     * The potion's colour, as 0xRRGGBB. Fixed rather than configurable: the item tint is chosen by
-     * the model from the cleanse_mode component (assets/cleansingpotions/items/*.json), and a
-     * resource pack cannot read a runtime config value. These constants and the tints in those
-     * model files must stay in step. Splash and cloud particles read the same value from here.
-     */
+    /** The potion colour as 0xRRGGBB. Must match the constant tints in assets/cleansingpotions/items/*.json. */
     public int rgb() {
         return switch (this) {
             case ALL -> 0xFFFFFF;
@@ -58,10 +50,7 @@ public enum CleanseMode {
     }
 
     public static CleanseMode fromPotionName(String name) {
-        if (name == null) {
-            return null;
-        }
-        return switch (name.trim().toLowerCase(Locale.ROOT)) {
+        return switch (name.toLowerCase(Locale.ROOT)) {
             case "cleansing" -> ALL;
             case "soothing" -> NEGATIVE_ONLY;
             case "purging" -> POSITIVE_ONLY;

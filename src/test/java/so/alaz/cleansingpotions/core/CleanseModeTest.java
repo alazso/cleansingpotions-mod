@@ -31,17 +31,24 @@ class CleanseModeTest {
     }
 
     @Test
-    void fromConfigParsesKnownValues() {
-        assertThat(CleanseMode.fromConfig("ALL", CleanseMode.NEGATIVE_ONLY)).isEqualTo(CleanseMode.ALL);
-        assertThat(CleanseMode.fromConfig("negative_only", CleanseMode.ALL)).isEqualTo(CleanseMode.NEGATIVE_ONLY);
-        assertThat(CleanseMode.fromConfig("Positive-Only", CleanseMode.ALL)).isEqualTo(CleanseMode.POSITIVE_ONLY);
+    void fromTagParsesKnownValues() {
+        assertThat(CleanseMode.fromTag("ALL")).isEqualTo(CleanseMode.ALL);
+        assertThat(CleanseMode.fromTag("negative_only")).isEqualTo(CleanseMode.NEGATIVE_ONLY);
+        assertThat(CleanseMode.fromTag(" Positive_Only ")).isEqualTo(CleanseMode.POSITIVE_ONLY);
     }
 
     @Test
-    void fromConfigFallsBackForBadInput() {
-        assertThat(CleanseMode.fromConfig(null, CleanseMode.ALL)).isEqualTo(CleanseMode.ALL);
-        assertThat(CleanseMode.fromConfig("   ", CleanseMode.ALL)).isEqualTo(CleanseMode.ALL);
-        assertThat(CleanseMode.fromConfig("sideways", CleanseMode.POSITIVE_ONLY)).isEqualTo(CleanseMode.POSITIVE_ONLY);
+    void tagReadsBackAsTheSameMode() {
+        for (CleanseMode mode : CleanseMode.values()) {
+            assertThat(CleanseMode.fromTag(mode.tag())).isEqualTo(mode);
+        }
+    }
+
+    @Test
+    void fromTagReadsBadInputAsAll() {
+        assertThat(CleanseMode.fromTag(null)).isEqualTo(CleanseMode.ALL);
+        assertThat(CleanseMode.fromTag("   ")).isEqualTo(CleanseMode.ALL);
+        assertThat(CleanseMode.fromTag("sideways")).isEqualTo(CleanseMode.ALL);
     }
 
     @Test
