@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "cleansingpotions:brewing",
+      "variant": "splash"
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "cleansingpotions:brewing",
+      "variant": "splash"
+    }
+  ],
+  "type": "minecraft:brewing",
+  "input": {
+    "item": "cleansingpotions:soothing_potion"
+  },
+  "reagent": {
+    "item": "minecraft:gunpowder"
+  },
+  "output": {
+    "id": "cleansingpotions:soothing_splash_potion"
+  }
+}

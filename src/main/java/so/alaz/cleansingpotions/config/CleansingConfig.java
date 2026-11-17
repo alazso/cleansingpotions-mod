@@ -6,6 +6,7 @@ import so.alaz.cleansingpotions.item.MilkVariant;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public final class CleansingConfig {
 
@@ -18,28 +19,6 @@ public final class CleansingConfig {
     public static void set(CleansingConfig cfg) {
         instance = cfg;
     }
-
-    public static final class Appearance {
-        public String name;
-        public String color;
-        public List<String> lore;
-
-        public Appearance() {
-        }
-
-        public Appearance(String name, String color, List<String> lore) {
-            this.name = name;
-            this.color = color;
-            this.lore = new ArrayList<>(lore);
-        }
-    }
-
-    public Appearance cleansing = new Appearance("Potion of Cleansing", "#FFFFFF",
-        List.of("Clears every potion effect."));
-    public Appearance soothing = new Appearance("Potion of Soothing", "#E8A33B",
-        List.of("Clears harmful effects."));
-    public Appearance purging = new Appearance("Potion of Purging", "#7E57A8",
-        List.of("Clears beneficial effects."));
 
     public boolean splashEnabled = true;
     public boolean lingeringEnabled = true;
@@ -63,20 +42,29 @@ public final class CleansingConfig {
 
     public boolean metrics = true;
 
+    /**
+     * Brings every value into its supported range. Radius stays within 0.5 to 32, because a vanilla area
+     * effect cloud clamps its radius to 32 and discards itself below 0.5, and a non-finite radius becomes
+     * the default. Cooldown stays within 0 to 3600 seconds. Both force lists end up non-null and hold no
+     * null entries.
+     */
+    public void sanitize() {
+        radius = Double.isFinite(radius) ? Math.clamp(radius, 0.5, 32.0) : 4.0;
+        cooldownSeconds = Math.clamp(cooldownSeconds, 0L, 3600L);
+        forceRemove = cleaned(forceRemove);
+        forceKeep = cleaned(forceKeep);
+    }
+
+    private static List<String> cleaned(List<String> ids) {
+        List<String> out = new ArrayList<>();
+        if (ids != null) {
+            ids.stream().filter(Objects::nonNull).forEach(out::add);
+        }
+        return out;
+    }
+
     public CleansePolicy policy(CleanseMode mode) {
         return new CleansePolicy(mode, forceRemove, forceKeep);
-    }
-
-    public Appearance appearance(CleanseMode mode) {
-        return switch (mode) {
-            case ALL -> cleansing;
-            case NEGATIVE_ONLY -> soothing;
-            case POSITIVE_ONLY -> purging;
-        };
-    }
-
-    public int color(CleanseMode mode) {
-        return parseColor(appearance(mode).color, defaultColor(mode));
     }
 
     public boolean variantEnabled(MilkVariant variant) {
@@ -87,23 +75,8 @@ public final class CleansingConfig {
         };
     }
 
-    private static int defaultColor(CleanseMode mode) {
-        return switch (mode) {
-            case ALL -> 0xFFFFFF;
-            case NEGATIVE_ONLY -> 0xE8A33B;
-            case POSITIVE_ONLY -> 0x7E57A8;
-        };
+    public boolean brewingAllowed(MilkVariant variant) {
+        return brewingEnabled && variantEnabled(variant);
     }
 
-    private static int parseColor(String hex, int fallback) {
-        if (hex == null || hex.isBlank()) {
-            return fallback;
-        }
-        try {
-            String value = hex.trim().startsWith("#") ? hex.trim().substring(1) : hex.trim();
-            return Integer.parseInt(value, 16) & 0xFFFFFF;
-        } catch (RuntimeException ex) {
-            return fallback;
-        }
-    }
 }

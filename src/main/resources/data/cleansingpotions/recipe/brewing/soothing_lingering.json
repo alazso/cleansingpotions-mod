@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "cleansingpotions:brewing",
+      "variant": "lingering"
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "cleansingpotions:brewing",
+      "variant": "lingering"
+    }
+  ],
+  "type": "minecraft:brewing",
+  "input": {
+    "item": "cleansingpotions:soothing_splash_potion"
+  },
+  "reagent": {
+    "item": "minecraft:dragon_breath"
+  },
+  "output": {
+    "id": "cleansingpotions:soothing_lingering_potion"
+  }
+}

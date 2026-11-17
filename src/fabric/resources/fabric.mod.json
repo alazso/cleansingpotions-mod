@@ -6,7 +6,9 @@
   "description": "Milk-brewed potions that cleanse status effects: drink, splash, or lingering.",
   "authors": ["Alazso"],
   "contact": {
-    "sources": "https://github.com/alazso/cleansingpotions"
+    "homepage": "https://modrinth.com/mod/cleansingpotions-mod",
+    "sources": "https://github.com/alazso/cleansingpotions-mod",
+    "issues": "https://github.com/alazso/cleansingpotions-mod/issues"
   },
   "license": "MIT",
   "environment": "*",
@@ -25,6 +27,10 @@
     "fabricloader": ">=${fabric_loader_version}",
     "fabric-api": "*",
     "minecraft": "${fabric_minecraft_version_range}"
+  },
+  "suggests": {
+    "cloth-config": "*",
+    "modmenu": "*"
   },
   "mixins": [
     "cleansingpotions.mixins.json"

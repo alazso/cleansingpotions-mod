@@ -7,17 +7,16 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
+import net.minecraft.world.entity.projectile.throwableitemprojectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.HitResult;
 import so.alaz.cleansingpotions.CleansingPotions;
 import so.alaz.cleansingpotions.config.CleansingConfig;
 import so.alaz.cleansingpotions.core.CleanseMode;
+import so.alaz.cleansingpotions.item.MilkItemFactory;
 import so.alaz.cleansingpotions.item.MilkVariant;
-import so.alaz.cleansingpotions.item.ModComponents;
 import so.alaz.cleansingpotions.item.ModItems;
 import so.alaz.cleansingpotions.metrics.CleansingMetrics;
 
@@ -31,9 +30,13 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
         super(ModEntities.CLEANSING_POTION, thrower, level, stack);
     }
 
+    public CleansingPotionEntity(Level level, double x, double y, double z, ItemStack stack) {
+        super(ModEntities.CLEANSING_POTION, x, y, z, level, stack);
+    }
+
     @Override
     protected Item getDefaultItem() {
-        return ModItems.SPLASH;
+        return ModItems.get(MilkVariant.SPLASH, CleanseMode.ALL);
     }
 
     @Override
@@ -48,18 +51,19 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
             return;
         }
         ItemStack stack = getItem();
-        CleanseMode mode = stack.getOrDefault(ModComponents.CLEANSE_MODE, CleanseMode.ALL);
-        boolean lingering = stack.is(ModItems.LINGERING);
-        MilkVariant variant = lingering ? MilkVariant.LINGERING : MilkVariant.SPLASH;
-        if (CleansingConfig.get().variantEnabled(variant)) {
-            int color = CleansingConfig.get().color(mode);
+        CleanseMode mode = MilkItemFactory.modeOf(stack);
+        MilkVariant variant = MilkItemFactory.variantOf(stack);
+        boolean lingering = variant == MilkVariant.LINGERING;
+        CleansingConfig cfg = CleansingConfig.get();
+        if (cfg.variantEnabled(variant)) {
+            int color = mode.rgb();
             if (lingering) {
-                spawnCloud(server, mode, color);
+                spawnCloud(server, mode, color, cfg.radius);
             } else {
-                applySplash(mode);
+                applySplash(mode, cfg);
             }
-            if (CleansingConfig.get().impactParticles) {
-                double area = (!lingering && CleansingConfig.get().onlyThrower) ? 1.0 : CleansingConfig.get().radius;
+            if (cfg.impactParticles) {
+                double area = (!lingering && cfg.onlyThrower) ? 1.0 : cfg.radius;
                 shatter(server, color, area);
             }
         }
@@ -69,15 +73,13 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
     }
 
     private void shatter(ServerLevel server, int color, double radius) {
-        // Spread the burst across the cleanse radius so the splash reads as big as the area it
-        // affects, instead of a tight puff at the point of impact.
+        // Spreads the burst across the cleanse radius.
         int count = (int) Math.min(200, Math.max(50, radius * radius * 5));
         server.sendParticles(ColorParticleOption.create(ParticleTypes.ENTITY_EFFECT, 0xFF000000 | color),
             getX(), getY() + 0.1, getZ(), count, radius * 0.5, 0.25, radius * 0.5, 0.0);
     }
 
-    private void applySplash(CleanseMode mode) {
-        CleansingConfig cfg = CleansingConfig.get();
+    private void applySplash(CleanseMode mode, CleansingConfig cfg) {
         if (cfg.onlyThrower) {
             int affected = 0;
             if (getOwner() instanceof LivingEntity shooter
@@ -87,25 +89,17 @@ public class CleansingPotionEntity extends ThrowableItemProjectile {
             CleansingMetrics.throwAffected(affected);
             return;
         }
-        double r = cfg.radius;
-        AABB box = new AABB(getX() - r, getY() - r, getZ() - r, getX() + r, getY() + r, getZ() + r);
-        int affected = 0;
-        for (LivingEntity entity : level().getEntitiesOfClass(LivingEntity.class, box)) {
-            if (entity.distanceToSqr(this) <= r * r
-                && CleansingPotions.cleanser().cleanse(entity, mode) > 0) {
-                affected++;
-            }
-        }
-        CleansingMetrics.throwAffected(affected);
+        CleansingMetrics.throwAffected(
+            CleansingPotions.cleanser().cleanseArea(level(), getX(), getY(), getZ(), cfg.radius, mode));
     }
 
-    private void spawnCloud(ServerLevel server, CleanseMode mode, int color) {
+    private void spawnCloud(ServerLevel server, CleanseMode mode, int color, double radius) {
         CleansingCloudEntity cloud = new CleansingCloudEntity(server, getX(), getY(), getZ());
         if (getOwner() instanceof LivingEntity shooter) {
             cloud.setOwner(shooter);
         }
         cloud.setMode(mode);
-        cloud.configure((float) CleansingConfig.get().radius, color);
+        cloud.configure((float) radius, color);
         server.addFreshEntity(cloud);
         CleansingMetrics.lingeringCloudSpawned();
     }

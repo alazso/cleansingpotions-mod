@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "cleansingpotions:brewing",
+      "variant": "splash"
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "cleansingpotions:brewing",
+      "variant": "splash"
+    }
+  ],
+  "type": "minecraft:brewing",
+  "input": {
+    "item": "cleansingpotions:purging_potion"
+  },
+  "reagent": {
+    "item": "minecraft:gunpowder"
+  },
+  "output": {
+    "id": "cleansingpotions:purging_splash_potion"
+  }
+}

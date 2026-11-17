@@ -10,8 +10,8 @@ public final class Services {
         return new FabricPlatformHelper();
         //?}
         //? neoforge {
-        /*return new NeoForgePlatformHelper();*/
-        //?}
+        /*return new NeoForgePlatformHelper();
+        *///?}
     }
 
     private Services() {

@@ -1,8 +1,10 @@
 package so.alaz.cleansingpotions.config;
 
 import me.shedaniel.clothconfig2.api.ConfigBuilder;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
+import so.alaz.cleansingpotions.CleansingPotions;
 
 public final class CleansingConfigScreen {
 
@@ -10,58 +12,82 @@ public final class CleansingConfigScreen {
     }
 
     public static Screen create(Screen parent) {
+        // A save writes every value over the file, so the screen starts from what the file holds now.
+        ConfigManager.load();
+        CleansingPotions.applyMetricsToggle();
         CleansingConfig cfg = CleansingConfig.get();
+        CleansingConfig defaults = new CleansingConfig();
         ConfigBuilder builder = ConfigBuilder.create()
             .setParentScreen(parent)
-            .setTitle(Component.literal("CleansingPotions"));
+            .setTitle(Component.translatable("config.cleansingpotions.title"));
         var entry = builder.entryBuilder();
 
-        var cleanse = builder.getOrCreateCategory(Component.literal("Cleanse"));
-        cleanse.addEntry(entry.startBooleanToggle(Component.literal("Only Thrower"), cfg.onlyThrower)
-            .setTooltip(Component.literal("A thrown splash cleanses only the thrower instead of an area."))
-            .setSaveConsumer(v -> cfg.onlyThrower = v).build());
-        cleanse.addEntry(entry.startDoubleField(Component.literal("Radius"), cfg.radius)
-            .setTooltip(Component.literal("Area-of-effect radius in blocks for splash and lingering."))
-            .setMin(0.0).setMax(64.0).setSaveConsumer(v -> cfg.radius = v).build());
+        var cleanse = builder.getOrCreateCategory(Component.translatable("config.cleansingpotions.category.cleanse"));
+        cleanse.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.only_thrower"), cfg.onlyThrower)
+            .setTooltip(Component.translatable("config.cleansingpotions.only_thrower.tooltip"))
+            .setDefaultValue(defaults.onlyThrower)
+            .setSaveConsumer(v -> CleansingConfig.get().onlyThrower = v).build());
+        cleanse.addEntry(entry.startDoubleField(Component.translatable("config.cleansingpotions.radius"), cfg.radius)
+            .setTooltip(Component.translatable("config.cleansingpotions.radius.tooltip"))
+            .setMin(0.5).setMax(32.0).setDefaultValue(defaults.radius)
+            .setSaveConsumer(v -> CleansingConfig.get().radius = v).build());
 
-        var cooldown = builder.getOrCreateCategory(Component.literal("Cooldown"));
-        cooldown.addEntry(entry.startBooleanToggle(Component.literal("Cooldown Enabled"), cfg.cooldownEnabled)
-            .setSaveConsumer(v -> cfg.cooldownEnabled = v).build());
-        cooldown.addEntry(entry.startLongField(Component.literal("Cooldown Seconds"), cfg.cooldownSeconds)
-            .setMin(0L).setMax(3600L).setSaveConsumer(v -> cfg.cooldownSeconds = v).build());
+        var cooldown = builder.getOrCreateCategory(Component.translatable("config.cleansingpotions.category.cooldown"));
+        cooldown.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.cooldown_enabled"), cfg.cooldownEnabled)
+            .setDefaultValue(defaults.cooldownEnabled)
+            .setSaveConsumer(v -> CleansingConfig.get().cooldownEnabled = v).build());
+        cooldown.addEntry(entry.startLongField(Component.translatable("config.cleansingpotions.cooldown_seconds"), cfg.cooldownSeconds)
+            .setMin(0L).setMax(3600L).setDefaultValue(defaults.cooldownSeconds)
+            .setSaveConsumer(v -> CleansingConfig.get().cooldownSeconds = v).build());
 
-        var recipes = builder.getOrCreateCategory(Component.literal("Recipes"));
-        recipes.addEntry(entry.startTextDescription(
-            Component.literal("§7Recipe toggles take effect on game load, not on /cleanse reload.")).build());
-        recipes.addEntry(entry.startBooleanToggle(Component.literal("Brewing Enabled"), cfg.brewingEnabled)
-            .setSaveConsumer(v -> cfg.brewingEnabled = v).build());
-        recipes.addEntry(entry.startBooleanToggle(Component.literal("Splash Enabled"), cfg.splashEnabled)
-            .setSaveConsumer(v -> cfg.splashEnabled = v).build());
-        recipes.addEntry(entry.startBooleanToggle(Component.literal("Lingering Enabled"), cfg.lingeringEnabled)
-            .setSaveConsumer(v -> cfg.lingeringEnabled = v).build());
+        var recipes = builder.getOrCreateCategory(Component.translatable("config.cleansingpotions.category.recipes"));
+        //? if >=26.3 {
+        /*recipes.addEntry(entry.startTextDescription(
+            Component.translatable("config.cleansingpotions.recipes.note").withStyle(ChatFormatting.GRAY)).build());
+        *///?}
+        recipes.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.brewing_enabled"), cfg.brewingEnabled)
+            .setTooltip(Component.translatable("config.cleansingpotions.brewing_enabled.tooltip"))
+            .setDefaultValue(defaults.brewingEnabled)
+            .setSaveConsumer(v -> CleansingConfig.get().brewingEnabled = v).build());
+        recipes.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.splash_enabled"), cfg.splashEnabled)
+            .setTooltip(Component.translatable("config.cleansingpotions.splash_enabled.tooltip"))
+            .setDefaultValue(defaults.splashEnabled)
+            .setSaveConsumer(v -> CleansingConfig.get().splashEnabled = v).build());
+        recipes.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.lingering_enabled"), cfg.lingeringEnabled)
+            .setTooltip(Component.translatable("config.cleansingpotions.lingering_enabled.tooltip"))
+            .setDefaultValue(defaults.lingeringEnabled)
+            .setSaveConsumer(v -> CleansingConfig.get().lingeringEnabled = v).build());
 
-        var effects = builder.getOrCreateCategory(Component.literal("Effects"));
-        effects.addEntry(entry.startBooleanToggle(Component.literal("Cleanse Feedback"), cfg.cleanseFeedback)
-            .setTooltip(Component.literal("Sparkle particles and a chime when an entity is cleansed."))
-            .setSaveConsumer(v -> cfg.cleanseFeedback = v).build());
-        effects.addEntry(entry.startBooleanToggle(Component.literal("Impact Particles"), cfg.impactParticles)
-            .setTooltip(Component.literal("Shatter particles when a splash or lingering potion lands."))
-            .setSaveConsumer(v -> cfg.impactParticles = v).build());
+        var effects = builder.getOrCreateCategory(Component.translatable("config.cleansingpotions.category.effects"));
+        effects.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.cleanse_feedback"), cfg.cleanseFeedback)
+            .setTooltip(Component.translatable("config.cleansingpotions.cleanse_feedback.tooltip"))
+            .setDefaultValue(defaults.cleanseFeedback)
+            .setSaveConsumer(v -> CleansingConfig.get().cleanseFeedback = v).build());
+        effects.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.impact_particles"), cfg.impactParticles)
+            .setTooltip(Component.translatable("config.cleansingpotions.impact_particles.tooltip"))
+            .setDefaultValue(defaults.impactParticles)
+            .setSaveConsumer(v -> CleansingConfig.get().impactParticles = v).build());
 
-        var misc = builder.getOrCreateCategory(Component.literal("Misc"));
-        misc.addEntry(entry.startBooleanToggle(Component.literal("Permissions Enabled"), cfg.permissionsEnabled)
-            .setTooltip(Component.literal("Server-only gate; never affects singleplayer."))
-            .setSaveConsumer(v -> cfg.permissionsEnabled = v).build());
-        misc.addEntry(entry.startBooleanToggle(Component.literal("Check For Updates"), cfg.checkForUpdates)
-            .setTooltip(Component.literal("Toast on join when a newer version is available (anonymous Modrinth check)."))
-            .setSaveConsumer(v -> cfg.checkForUpdates = v).build());
-        misc.addEntry(entry.startBooleanToggle(Component.literal("Metrics"), cfg.metrics)
-            .setTooltip(Component.literal("Anonymous usage metrics via FastStats (26.x only)."))
-            .setSaveConsumer(v -> cfg.metrics = v).build());
-        misc.addEntry(entry.startTextDescription(Component.literal(
-            "§7Effect force-lists and per-potion name/color/lore are edited in config/cleansingpotions.json.")).build());
+        var misc = builder.getOrCreateCategory(Component.translatable("config.cleansingpotions.category.misc"));
+        misc.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.permissions_enabled"), cfg.permissionsEnabled)
+            .setTooltip(Component.translatable("config.cleansingpotions.permissions_enabled.tooltip"))
+            .setDefaultValue(defaults.permissionsEnabled)
+            .setSaveConsumer(v -> CleansingConfig.get().permissionsEnabled = v).build());
+        misc.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.check_for_updates"), cfg.checkForUpdates)
+            .setTooltip(Component.translatable("config.cleansingpotions.check_for_updates.tooltip"))
+            .setDefaultValue(defaults.checkForUpdates)
+            .setSaveConsumer(v -> CleansingConfig.get().checkForUpdates = v).build());
+        misc.addEntry(entry.startBooleanToggle(Component.translatable("config.cleansingpotions.metrics"), cfg.metrics)
+            .setTooltip(Component.translatable("config.cleansingpotions.metrics.tooltip"))
+            .setDefaultValue(defaults.metrics)
+            .setSaveConsumer(v -> CleansingConfig.get().metrics = v).build());
+        misc.addEntry(entry.startTextDescription(
+            Component.translatable("config.cleansingpotions.misc.note").withStyle(ChatFormatting.GRAY)).build());
 
-        builder.setSavingRunnable(ConfigManager::save);
+        builder.setSavingRunnable(() -> {
+            ConfigManager.save();
+            CleansingPotions.applyMetricsToggle();
+        });
         return builder.build();
     }
 }

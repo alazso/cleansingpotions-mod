@@ -13,9 +13,6 @@ public enum MilkVariant {
     }
 
     public static MilkVariant fromTag(String raw) {
-        if (raw == null || raw.isBlank()) {
-            return null;
-        }
         try {
             return valueOf(raw.trim().toUpperCase(Locale.ROOT));
         } catch (IllegalArgumentException ex) {

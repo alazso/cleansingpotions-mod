@@ -4,9 +4,8 @@
     "model": "cleansingpotions:item/cleansing_potion",
     "tints": [
       {
-        "type": "minecraft:custom_model_data",
-        "index": 0,
-        "default": 16777215
+        "type": "minecraft:constant",
+        "value": 16777215
       }
     ]
   }

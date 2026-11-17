@@ -15,31 +15,37 @@ concurrency:
 
 jobs:
   build:
-    name: Build all versions (Java 21 + 25)
+    name: Build all versions (Java 25)
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
-      - name: Set up JDK 21 and 25
+      - name: Set up JDK 25
         uses: actions/setup-java@v6
         with:
           distribution: temurin
-          java-version: |
-            21
-            25
+          java-version: "25"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v6
 
       - name: Build every version and loader
-        run: ./gradlew chiseledBuild --stacktrace
+        run: ./gradlew chiseledBuild --continue --stacktrace
+
+      - name: Upload GameTest results
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: gametest-results-${{ github.sha }}
+          path: |
+            versions/*/build/reports/gametest/*.xml
+            versions/*/build/run/gameTest/logs/latest.log
+          if-no-files-found: ignore
 
       - name: Upload jars (snapshot)
         uses: actions/upload-artifact@v7
         with:
           name: cleansingpotions-snapshot-${{ github.sha }}
-          path: |
-            versions/*/build/libs/cleansingpotions-*.jar
-            !versions/*/build/libs/*-sources.jar
+          path: versions/*/build/libs/cleansingpotions-*.jar
           if-no-files-found: error

@@ -18,27 +18,21 @@ public final class CleansePolicy {
     }
 
     public boolean shouldRemove(String effectId, EffectDisposition disposition) {
-        String id = effectId == null ? "" : effectId.toLowerCase(Locale.ROOT);
-        if (forceKeep.contains(id)) {
+        if (forceKeep.contains(effectId)) {
             return false;
         }
-        if (forceRemove.contains(id)) {
+        if (forceRemove.contains(effectId)) {
             return true;
         }
         return mode.removes(disposition);
     }
 
-    public CleanseMode mode() {
-        return mode;
-    }
-
     private static Set<String> normalize(Collection<String> ids) {
         Set<String> out = new HashSet<>();
-        if (ids != null) {
-            for (String id : ids) {
-                if (id != null && !id.isBlank()) {
-                    out.add(id.trim().toLowerCase(Locale.ROOT));
-                }
+        for (String id : ids) {
+            if (!id.isBlank()) {
+                String entry = id.trim().toLowerCase(Locale.ROOT);
+                out.add(entry.indexOf(':') < 0 ? "minecraft:" + entry : entry);
             }
         }
         return Set.copyOf(out);

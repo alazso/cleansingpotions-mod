@@ -1,0 +1,27 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "cleansingpotions:brewing",
+      "variant": "regular"
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "cleansingpotions:brewing",
+      "variant": "regular"
+    }
+  ],
+  "type": "minecraft:brewing",
+  "input": {
+    "item": "minecraft:potion",
+    "potion_contents": {
+      "potions": "minecraft:water"
+    }
+  },
+  "reagent": {
+    "item": "minecraft:milk_bucket"
+  },
+  "output": {
+    "id": "cleansingpotions:cleansing_potion"
+  }
+}

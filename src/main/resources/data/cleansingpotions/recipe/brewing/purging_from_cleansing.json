@@ -1,0 +1,24 @@
+{
+  "fabric:load_conditions": [
+    {
+      "condition": "cleansingpotions:brewing",
+      "variant": "regular"
+    }
+  ],
+  "neoforge:conditions": [
+    {
+      "type": "cleansingpotions:brewing",
+      "variant": "regular"
+    }
+  ],
+  "type": "minecraft:brewing",
+  "input": {
+    "item": "cleansingpotions:cleansing_potion"
+  },
+  "reagent": {
+    "item": "minecraft:fermented_spider_eye"
+  },
+  "output": {
+    "id": "cleansingpotions:purging_potion"
+  }
+}
