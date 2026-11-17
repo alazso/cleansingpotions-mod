@@ -119,7 +119,7 @@ jobs:
 
       - name: Set up Gradle
         if: steps.published.outputs.skip != 'true'
-        uses: gradle/actions/setup-gradle@v6
+        uses: gradle/actions/setup-gradle@v6.2.0
 
       - name: Build every version and loader
         if: steps.published.outputs.skip != 'true'
